@@ -2,6 +2,7 @@
 # Installs the pre-commit hook (hooks are not versioned by git, so re-run after cloning).
 cat > .git/hooks/pre-commit <<'HOOK'
 #!/usr/bin/env bash
+export PATH="$PWD/.tools/node/bin:$PATH"
 scripts/check-secrets.sh || exit 1
 if [ -f package.json ] && [ -d node_modules ]; then
   npm run -s lint && npm run -s test || exit 1
