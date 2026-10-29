@@ -66,7 +66,7 @@ export function mergeAttempt(draft: GuideShape, rawLog: AttemptLog, opts: MergeO
       ...step,
       requires: tags.length ? tags : step.requires,
       observed: true,
-      ...(hasMinutes ? { estimate: `${Math.round(minutes * 10) / 10} min (measured in one walkthrough)` } : {}),
+      ...(hasMinutes ? { estimate: `${Math.round(minutes * 10) / 10} min (approximate, one walkthrough)` } : {}),
       evidence: { label: "tested", sourceIds: step.evidence.sourceIds, testNote: `Observed in a signed-in walkthrough on ${log.date}: ${usable[0].observation}`, observationRef: usable[0].id },
     };
   });

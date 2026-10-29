@@ -1,0 +1,98 @@
+{
+  "performedBy": "owner_with_claude_code",
+  "date": "2026-10-29",
+  "accountType": "free",
+  "browserProfile": "separate",
+  "steps": [
+    {
+      "id": "gm-1",
+      "guideStepOrder": 1,
+      "action": "Opened the Google Cloud console (owner already signed in) and tried to create a project",
+      "observation": "Cloud showed 'access blocked' and required 2-step verification before any project could be created. The owner enabled it; after that the new-project form opened.",
+      "outcome": "stopped_human_required",
+      "tags": [
+        "login_or_account",
+        "two_factor"
+      ]
+    },
+    {
+      "id": "gm-2",
+      "guideStepOrder": 1,
+      "action": "Created a throwaway project named oauthpath-test-20261029 (no organization)",
+      "observation": "Created with no terms, billing or free-trial prompt. The console stayed on the owner's older project until switched by project ID.",
+      "outcome": "completed",
+      "tags": [
+        "config_check"
+      ]
+    },
+    {
+      "id": "gm-3",
+      "guideStepOrder": 2,
+      "action": "Opened Google Auth Platform > Get started and typed the app name",
+      "observation": "Four-part wizard: App information, Audience, Contact information, Finish. Support and contact emails must be real addresses, so the owner finished it; the agent did not see the last screen.",
+      "outcome": "stopped_human_required",
+      "tags": [
+        "config_check",
+        "legal_acceptance"
+      ]
+    },
+    {
+      "id": "gm-4",
+      "guideStepOrder": 3,
+      "action": "Read the Audience page",
+      "observation": "Audience is External, status Testing, cap of 100 users counted over the app's lifetime. Publish is disabled until Branding is complete. Adding test users needs a real email, so none were added.",
+      "outcome": "completed",
+      "tags": [
+        "config_check"
+      ],
+      "minutes": 1
+    },
+    {
+      "id": "gm-5",
+      "guideStepOrder": 3,
+      "action": "Opened Data Access > Add or remove scopes and declared gmail.readonly through the pasted-scopes box, then saved",
+      "observation": "The picker lists only scopes of enabled APIs, so Gmail scopes were absent. After pasting, the console filed gmail.readonly under 'restricted scopes'. The saved scope persisted after a reload.",
+      "outcome": "differs_from_docs",
+      "tags": [
+        "config_check"
+      ],
+      "minutes": 6
+    },
+    {
+      "id": "gm-6",
+      "guideStepOrder": 4,
+      "action": "Opened Clients > Create OAuth client ID",
+      "observation": "The form opens with an Application type selector. No client was created, to avoid showing a secret.",
+      "outcome": "stopped_human_required",
+      "tags": [
+        "config_check"
+      ],
+      "minutes": 1
+    },
+    {
+      "id": "gm-7",
+      "action": "Cleanup: the owner shut down the test project; the agent confirmed the console's notice",
+      "observation": "The console said the project 'is shut down and scheduled to be deleted'. Google keeps it for a recovery period before deletion. No client or secret was ever created.",
+      "outcome": "completed",
+      "tags": []
+    }
+  ],
+  "stoppedAt": "the OAuth client creation step (guide step 4): no client or secret was created; steps 5 to 10 were not attempted",
+  "stoppedBecause": [
+    "two_factor"
+  ],
+  "corrections": [
+    {
+      "docClaim": "A Google Cloud account and a Google Cloud project.",
+      "observed": "A Google account with 2-step verification turned on was needed before Cloud would create a project: the console showed 'access blocked' until it was enabled."
+    },
+    {
+      "docClaim": "The sources do not say which individual Gmail scopes are classified as restricted. Check Google's OAuth API verification FAQ scope list for the exact scopes you plan to request.",
+      "observed": "In the console, gmail.readonly was listed under 'restricted scopes' when declared on 2026-10-29. The scope picker only lists scopes of enabled APIs, so scopes may need to be pasted."
+    }
+  ],
+  "cleanup": {
+    "appsDeleted": true,
+    "secretsRemoved": true
+  }
+}

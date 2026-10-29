@@ -8,8 +8,8 @@
   "pipelineVersion": "0.3.0",
   "modelUsed": "anthropic/claude-sonnet-5.5",
   "complete": true,
-  "attemptLevel": "L2",
-  "attemptLevelReason": "Gate probed: 4 page(s) requested read-only on 2026-10-29; public path followed for 1 page(s) (dead end). No account was used.",
+  "attemptLevel": "L3",
+  "attemptLevelReason": "Signed-in walkthrough on 2026-10-29 (free account, separate browser profile) stopped at the OAuth client creation step (guide step 4): no client or secret was created; steps 5 to 10 were not attempted, because a human is needed for: two_factor.",
   "probe": [
     {
       "url": "https://support.google.com/cloud/answer/7454865?hl=en",
@@ -142,6 +142,104 @@
       "No registration endpoint is listed, so manual console registration is likely still needed."
     ]
   },
+  "attempt": {
+    "performedBy": "owner_with_claude_code",
+    "date": "2026-10-29",
+    "accountType": "free",
+    "browserProfile": "separate",
+    "steps": [
+      {
+        "id": "gm-1",
+        "guideStepOrder": 1,
+        "action": "Opened the Google Cloud console (owner already signed in) and tried to create a project",
+        "observation": "Cloud showed 'access blocked' and required 2-step verification before any project could be created. The owner enabled it; after that the new-project form opened.",
+        "outcome": "stopped_human_required",
+        "tags": [
+          "login_or_account",
+          "two_factor"
+        ]
+      },
+      {
+        "id": "gm-2",
+        "guideStepOrder": 1,
+        "action": "Created a throwaway project named oauthpath-test-20261029 (no organization)",
+        "observation": "Created with no terms, billing or free-trial prompt. The console stayed on the owner's older project until switched by project ID.",
+        "outcome": "completed",
+        "tags": [
+          "config_check"
+        ]
+      },
+      {
+        "id": "gm-3",
+        "guideStepOrder": 2,
+        "action": "Opened Google Auth Platform > Get started and typed the app name",
+        "observation": "Four-part wizard: App information, Audience, Contact information, Finish. Support and contact emails must be real addresses, so the owner finished it; the agent did not see the last screen.",
+        "outcome": "stopped_human_required",
+        "tags": [
+          "config_check",
+          "legal_acceptance"
+        ]
+      },
+      {
+        "id": "gm-4",
+        "guideStepOrder": 3,
+        "action": "Read the Audience page",
+        "observation": "Audience is External, status Testing, cap of 100 users counted over the app's lifetime. Publish is disabled until Branding is complete. Adding test users needs a real email, so none were added.",
+        "outcome": "completed",
+        "tags": [
+          "config_check"
+        ],
+        "minutes": 1
+      },
+      {
+        "id": "gm-5",
+        "guideStepOrder": 3,
+        "action": "Opened Data Access > Add or remove scopes and declared gmail.readonly through the pasted-scopes box, then saved",
+        "observation": "The picker lists only scopes of enabled APIs, so Gmail scopes were absent. After pasting, the console filed gmail.readonly under 'restricted scopes'. The saved scope persisted after a reload.",
+        "outcome": "differs_from_docs",
+        "tags": [
+          "config_check"
+        ],
+        "minutes": 6
+      },
+      {
+        "id": "gm-6",
+        "guideStepOrder": 4,
+        "action": "Opened Clients > Create OAuth client ID",
+        "observation": "The form opens with an Application type selector. No client was created, to avoid showing a secret.",
+        "outcome": "stopped_human_required",
+        "tags": [
+          "config_check"
+        ],
+        "minutes": 1
+      },
+      {
+        "id": "gm-7",
+        "action": "Cleanup: the owner shut down the test project; the agent confirmed the console's notice",
+        "observation": "The console said the project 'is shut down and scheduled to be deleted'. Google keeps it for a recovery period before deletion. No client or secret was ever created.",
+        "outcome": "completed",
+        "tags": []
+      }
+    ],
+    "stoppedAt": "the OAuth client creation step (guide step 4): no client or secret was created; steps 5 to 10 were not attempted",
+    "stoppedBecause": [
+      "two_factor"
+    ],
+    "corrections": [
+      {
+        "docClaim": "A Google Cloud account and a Google Cloud project.",
+        "observed": "A Google account with 2-step verification turned on was needed before Cloud would create a project: the console showed 'access blocked' until it was enabled."
+      },
+      {
+        "docClaim": "The sources do not say which individual Gmail scopes are classified as restricted. Check Google's OAuth API verification FAQ scope list for the exact scopes you plan to request.",
+        "observed": "In the console, gmail.readonly was listed under 'restricted scopes' when declared on 2026-10-29. The scope picker only lists scopes of enabled APIs, so scopes may need to be pasted."
+      }
+    ],
+    "cleanup": {
+      "appsDeleted": true,
+      "secretsRemoved": true
+    }
+  },
   "verdict": {
     "difficulty": "hard",
     "difficultyReason": "A third-party security assessment is required. This holds whatever the unknown details turn out to be.",
@@ -234,13 +332,15 @@
   },
   "requirements": [
     {
-      "text": "A Google Cloud account and a Google Cloud project.",
+      "text": "A Google account with 2-step verification turned on was needed before Cloud would create a project: the console showed 'access blocked' until it was enabled. (Docs said: A Google Cloud account and a Google Cloud project.)",
       "evidence": {
-        "label": "documented",
+        "label": "tested",
         "sourceIds": [
           "s6",
           "s10"
-        ]
+        ],
+        "testNote": "Observed in a signed-in walkthrough on 2026-10-29; this corrects the documentation.",
+        "observationRef": "gm-5"
       }
     },
     {
@@ -306,6 +406,7 @@
       "url": "https://support.google.com/cloud/answer/15549257?hl=en",
       "requires": [
         "login_or_account",
+        "two_factor",
         "config_check"
       ],
       "actor": "you",
@@ -318,8 +419,8 @@
           "s6",
           "s10"
         ],
-        "testNote": "Only reachability was observed: a read-only GET of this page on 2026-10-29 was classified \"public\" (host support.google.com).",
-        "observationRef": "https://support.google.com/cloud/answer/15549257?hl=en"
+        "testNote": "Observed in a signed-in walkthrough on 2026-10-29: Cloud showed 'access blocked' and required 2-step verification before any project could be created. The owner enabled it; after that the new-project form opened.",
+        "observationRef": "gm-1"
       }
     },
     {
@@ -341,19 +442,18 @@
           "s11",
           "s10"
         ],
-        "testNote": "Only reachability was observed: a read-only GET of this page on 2026-10-29 was classified \"public\" (host developers.google.com).",
-        "observationRef": "https://developers.google.com/workspace/guides/configure-oauth-consent"
+        "testNote": "Observed in a signed-in walkthrough on 2026-10-29: Four-part wizard: App information, Audience, Contact information, Finish. Support and contact emails must be real addresses, so the owner finished it; the agent did not see the last screen.",
+        "observationRef": "gm-3"
       }
     },
     {
       "order": 3,
       "title": "Add test users and declare Gmail scopes",
-      "estimate": "15–45 minutes",
+      "estimate": "7 min (approximate, one walkthrough)",
       "detail": "For an External app, add test users under Audience. Under Data Access, add the scopes the agent needs (read and send). Keep them minimal and identical to what your code requests, or users see the unverified-app screen.",
       "url": "https://developers.google.com/workspace/guides/configure-oauth-consent",
       "requires": [
-        "config_check",
-        "docs_reading"
+        "config_check"
       ],
       "actor": "agent",
       "agentPrep": "List the exact Gmail scopes needed per feature and the reason for each.",
@@ -364,14 +464,14 @@
           "s11",
           "s9"
         ],
-        "testNote": "Only reachability was observed: a read-only GET of this page on 2026-10-29 was classified \"public\" (host developers.google.com).",
-        "observationRef": "https://developers.google.com/workspace/guides/configure-oauth-consent"
+        "testNote": "Observed in a signed-in walkthrough on 2026-10-29: Audience is External, status Testing, cap of 100 users counted over the app's lifetime. Publish is disabled until Branding is complete. Adding test users needs a real email, so none were added.",
+        "observationRef": "gm-4"
       }
     },
     {
       "order": 4,
       "title": "Create a Web application OAuth client",
-      "estimate": "15–30 minutes",
+      "estimate": "1 min (approximate, one walkthrough)",
       "detail": "On the Clients page choose CREATE CLIENT and select Web application. Add your redirect URIs and origins. The client secret is shown only once after creation, so store it in a secret manager.",
       "url": "https://support.google.com/cloud/answer/15549257?hl=en",
       "requires": [
@@ -386,8 +486,8 @@
           "s10",
           "s6"
         ],
-        "testNote": "Only reachability was observed: a read-only GET of this page on 2026-10-29 was classified \"public\" (host support.google.com).",
-        "observationRef": "https://support.google.com/cloud/answer/15549257?hl=en"
+        "testNote": "Observed in a signed-in walkthrough on 2026-10-29: The form opens with an Application type selector. No client was created, to avoid showing a secret.",
+        "observationRef": "gm-6"
       }
     },
     {
@@ -570,10 +670,12 @@
       }
     },
     {
-      "text": "The sources do not say which individual Gmail scopes are classified as restricted. Check Google's OAuth API verification FAQ scope list for the exact scopes you plan to request.",
+      "text": "In the console, gmail.readonly was listed under 'restricted scopes' when declared on 2026-10-29. The scope picker only lists scopes of enabled APIs, so scopes may need to be pasted. (Docs said: The sources do not say which individual Gmail scopes are classified as restricted. Check Google's OAuth API verification FAQ scope list for the exact scopes you plan to request.)",
       "evidence": {
-        "label": "unverified",
-        "sourceIds": []
+        "label": "tested",
+        "sourceIds": [],
+        "testNote": "Observed in a signed-in walkthrough on 2026-10-29; this corrects the documentation.",
+        "observationRef": "gm-5"
       }
     },
     {
@@ -636,8 +738,8 @@
             "s6",
             "s10"
           ],
-          "testNote": "Only reachability was observed: a read-only GET of this page on 2026-10-29 was classified \"public\" (host support.google.com).",
-          "observationRef": "https://support.google.com/cloud/answer/15549257?hl=en"
+          "testNote": "Observed in a signed-in walkthrough on 2026-10-29: Cloud showed 'access blocked' and required 2-step verification before any project could be created. The owner enabled it; after that the new-project form opened.",
+          "observationRef": "gm-1"
         }
       },
       {
@@ -648,8 +750,8 @@
             "s11",
             "s10"
           ],
-          "testNote": "Only reachability was observed: a read-only GET of this page on 2026-10-29 was classified \"public\" (host developers.google.com).",
-          "observationRef": "https://developers.google.com/workspace/guides/configure-oauth-consent"
+          "testNote": "Observed in a signed-in walkthrough on 2026-10-29: Four-part wizard: App information, Audience, Contact information, Finish. Support and contact emails must be real addresses, so the owner finished it; the agent did not see the last screen.",
+          "observationRef": "gm-3"
         }
       },
       {
@@ -660,8 +762,8 @@
             "s11",
             "s9"
           ],
-          "testNote": "Only reachability was observed: a read-only GET of this page on 2026-10-29 was classified \"public\" (host developers.google.com).",
-          "observationRef": "https://developers.google.com/workspace/guides/configure-oauth-consent"
+          "testNote": "Observed in a signed-in walkthrough on 2026-10-29: Audience is External, status Testing, cap of 100 users counted over the app's lifetime. Publish is disabled until Branding is complete. Adding test users needs a real email, so none were added.",
+          "observationRef": "gm-4"
         }
       },
       {
@@ -672,8 +774,8 @@
             "s10",
             "s6"
           ],
-          "testNote": "Only reachability was observed: a read-only GET of this page on 2026-10-29 was classified \"public\" (host support.google.com).",
-          "observationRef": "https://support.google.com/cloud/answer/15549257?hl=en"
+          "testNote": "Observed in a signed-in walkthrough on 2026-10-29: The form opens with an Application type selector. No client was created, to avoid showing a secret.",
+          "observationRef": "gm-6"
         }
       },
       {
@@ -722,15 +824,15 @@
     ],
     "youMustDo": [
       {
-        "text": "Step 1: Sign in and create or select a Google Cloud project (needs: login_or_account)",
+        "text": "Step 1: Sign in and create or select a Google Cloud project (needs: login_or_account, two_factor)",
         "evidence": {
           "label": "tested",
           "sourceIds": [
             "s6",
             "s10"
           ],
-          "testNote": "Only reachability was observed: a read-only GET of this page on 2026-10-29 was classified \"public\" (host support.google.com).",
-          "observationRef": "https://support.google.com/cloud/answer/15549257?hl=en"
+          "testNote": "Observed in a signed-in walkthrough on 2026-10-29: Cloud showed 'access blocked' and required 2-step verification before any project could be created. The owner enabled it; after that the new-project form opened.",
+          "observationRef": "gm-1"
         }
       },
       {
@@ -741,8 +843,8 @@
             "s11",
             "s10"
           ],
-          "testNote": "Only reachability was observed: a read-only GET of this page on 2026-10-29 was classified \"public\" (host developers.google.com).",
-          "observationRef": "https://developers.google.com/workspace/guides/configure-oauth-consent"
+          "testNote": "Observed in a signed-in walkthrough on 2026-10-29: Four-part wizard: App information, Audience, Contact information, Finish. Support and contact emails must be real addresses, so the owner finished it; the agent did not see the last screen.",
+          "observationRef": "gm-3"
         }
       },
       {
@@ -800,10 +902,15 @@
       "Weakly supported (self-check): The security assessment applies because the agent stores or transmits restricted Gmail data via servers. -> Plan the assessment early, minim",
       "Weakly supported (self-check): The app is unverified, so users see a warning screen and the app is capped at 100 new users. -> Request verification as soon as the consent ",
       "Not observed: anything beyond the end of the public path (dead end at https://support.google.com/cloud/answer/15549257?hl=en).",
-      "No account was used: steps after the first sign-in are inferred from documentation, not observed.",
-      "Research gap (not found): rate_limits"
+      "Research gap (not found): rate_limits",
+      "Steps 5, 6, 7, 8, 9, 10 were not walked through (the walkthrough stopped at the OAuth client creation step (guide step 4): no client or secret was created; steps 5 to 10 were not attempted); they stay as documented, not observed."
     ]
   },
+  "changelog": [
+    "2026-10-29: signed-in walkthrough merged (level L3).",
+    "2026-10-29: corrected \"A Google Cloud account and a Google Cloud project.\" to \"A Google account with 2-step verification turned on was needed before Cloud woul\" after the walkthrough.",
+    "2026-10-29: corrected \"The sources do not say which individual Gmail scopes are classified as restricte\" to \"In the console, gmail.readonly was listed under 'restricted scopes' when declare\" after the walkthrough."
+  ],
   "sources": [
     {
       "id": "s1",

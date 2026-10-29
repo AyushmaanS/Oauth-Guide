@@ -392,7 +392,7 @@
     {
       "order": 2,
       "title": "Sign in to GitHub and verify the account email",
-      "estimate": "1 min (measured in one walkthrough)",
+      "estimate": "1 min (approximate, one walkthrough)",
       "detail": "Sign in to the account that will own the app. Users must have a verified email before they can authorize an OAuth app.",
       "requires": [
         "login_or_account"
@@ -411,7 +411,7 @@
     {
       "order": 3,
       "title": "Register the OAuth app",
-      "estimate": "3 min (measured in one walkthrough)",
+      "estimate": "3 min (approximate, one walkthrough)",
       "detail": "Open the new-application page and fill in the form. Most fields are free-form; set the Authorization callback URL carefully to a URL you own. The app gets a unique Client ID and Client Secret.",
       "requires": [
         "config_check"
@@ -431,7 +431,7 @@
     {
       "order": 4,
       "title": "Store the Client ID and Client Secret securely",
-      "estimate": "1 min (measured in one walkthrough)",
+      "estimate": "1 min (approximate, one walkthrough)",
       "detail": "Keep them in environment variables or a secret store. The secret is used to exchange the code for an access token; do not leak it from web apps.",
       "requires": [
         "config_check"
