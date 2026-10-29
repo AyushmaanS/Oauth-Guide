@@ -10,13 +10,13 @@ export interface RubricResult {
  * Rules are evaluated top to bottom, first match wins (draft: docs/RUBRIC-DRAFT.md).
  */
 export function computeDifficulty(f: Factors): RubricResult {
-  // 1. Gated: access itself needs a contract, a paid/business account, or a legal entity.
+  // 1. Gated: access itself needs a legal entity, a contract, or a paid/business account.
+  if (f.businessEntityRequired === "yes")
+    return { difficulty: "gated", reason: "A registered business entity is required for this use case." };
   if (f.reviewDepth === "partnership_contract")
     return { difficulty: "gated", reason: "Access requires a partnership or contract with the provider." };
   if (f.registrationFriction === "paid_or_business_account")
     return { difficulty: "gated", reason: "A paid or business account is required to register at all." };
-  if (f.businessEntityRequired === "yes")
-    return { difficulty: "gated", reason: "A registered business entity is required for this use case." };
 
   // 2. Hard: security assessment, sensitive-scope manual review, or review waits measured in weeks.
   if (f.reviewDepth === "security_assessment")
@@ -27,8 +27,15 @@ export function computeDifficulty(f: Factors): RubricResult {
     return { difficulty: "hard", reason: "Required review takes weeks." };
 
   // 3. Moderate: some review for public use, or several special requirements.
-  if (f.reviewRequired === "for_public_use" || f.reviewRequired === "for_sensitive_scopes" || f.reviewRequired === "always")
-    return { difficulty: "moderate", reason: "A review is required, with a wait measured in days." };
+  if (f.reviewRequired === "for_public_use" || f.reviewRequired === "for_sensitive_scopes" || f.reviewRequired === "always") {
+    // A review whose depth AND wait are both unknown cannot be labelled: never guess from missing facts.
+    if (f.reviewDepth === "unknown" && f.waitMagnitude === "unknown")
+      return { difficulty: "unknown", reason: "A review is required, but the sources do not establish its depth or wait." };
+    return {
+      difficulty: "moderate",
+      reason: f.waitMagnitude === "unknown" ? "A review is required; its wait is not established by the sources." : `A review is required, with a wait measured in ${f.waitMagnitude === "none" ? "minutes" : f.waitMagnitude}.`,
+    };
+  }
   if (f.specialRequirements.length >= 3)
     return { difficulty: "moderate", reason: `${f.specialRequirements.length} special requirements must be met.` };
 

@@ -1,0 +1,937 @@
+{
+  "schemaVersion": 1,
+  "slug": "gmail",
+  "appName": "Gmail",
+  "providerSite": "google.com",
+  "mode": "library",
+  "generatedAt": "2026-10-29T08:10:34.155Z",
+  "pipelineVersion": "0.3.0",
+  "modelUsed": "anthropic/claude-sonnet-5.5",
+  "complete": true,
+  "attemptLevel": "L1",
+  "attemptLevelReason": "Documentation read and synthesized. Nothing was observed directly yet (no probe, trace or walkthrough).",
+  "probe": [],
+  "verdict": {
+    "difficulty": "hard",
+    "difficultyReason": "A third-party security assessment is required.",
+    "useCase": "an agent that reads and sends a customer's Gmail (external users, Gmail restricted scopes, server-side storage of user data)",
+    "timeToCredentials": {
+      "basis": "No source gives a time for creating a project and OAuth client, so no numbers are given. The documented process is a short console flow.",
+      "evidence": {
+        "label": "unverified",
+        "sourceIds": []
+      }
+    },
+    "timeToProduction": {
+      "basis": "Google says verification 'might require several months' (s11); a community post reports almost 3 months (s12). Neither gives a firm range, so no numbers are given. The security assessment duration is not stated.",
+      "evidence": {
+        "label": "unverified",
+        "sourceIds": [
+          "s11",
+          "s12"
+        ]
+      }
+    },
+    "humanEffortHours": {
+      "basis": "No source states how many hours of human work are needed, so no numbers are given.",
+      "evidence": {
+        "label": "unverified",
+        "sourceIds": []
+      }
+    },
+    "summary": "To read and send customers' Gmail you must register your own Google OAuth app, and Gmail read/send scopes are restricted. That means Google verification and an annual third-party security assessment if you store the data on servers. Credentials are quick to get; production approval is the long part.",
+    "biggestLaunchRisk": "Restricted-scope verification plus the annual third-party security assessment: Google says verification can take several months, and one community post reports almost 3 months. Until it is done, your app is capped at 100 new users.",
+    "factors": {
+      "registrationFriction": "account_needed",
+      "reviewRequired": "for_sensitive_scopes",
+      "reviewDepth": "security_assessment",
+      "docsQuality": "clear",
+      "waitBasis": "reported",
+      "waitMagnitude": "weeks",
+      "businessEntityRequired": "unknown",
+      "specialRequirements": [
+        "privacy policy URL",
+        "verified domain / authorized domain with publicly accessible app homepage",
+        "scopes justification",
+        "separate production Google Cloud project",
+        "annual third-party security assessment (if restricted scope data is stored or transmitted on servers)"
+      ]
+    }
+  },
+  "managedVsOwn": {
+    "composioManaged": "yes",
+    "managedCovers": [
+      {
+        "text": "Composio's directory lists Gmail under Composio-managed OAuth apps, so a shared managed OAuth app is available as an alternative to registering your own.",
+        "evidence": {
+          "label": "documented",
+          "sourceIds": [
+            "s13"
+          ]
+        }
+      },
+      {
+        "text": "Whether managed OAuth is enough for prototyping an agent against test Gmail accounts is not detailed in the sources; Composio's directory only supports the managed-status statement.",
+        "evidence": {
+          "label": "unverified",
+          "sourceIds": [
+            "s13"
+          ]
+        }
+      }
+    ],
+    "youNeedOwnWhen": [
+      {
+        "text": "You want your own brand (app name, logo, privacy policy and terms links) on the Google consent screen. That is configured on your own project and subject to brand verification.",
+        "evidence": {
+          "label": "documented",
+          "sourceIds": [
+            "s1",
+            "s8"
+          ]
+        }
+      },
+      {
+        "text": "You launch to external users with restricted Gmail scopes and store or transmit that data on servers: the verification and security assessment attach to your own production project.",
+        "evidence": {
+          "label": "documented",
+          "sourceIds": [
+            "s10",
+            "s8"
+          ]
+        }
+      },
+      {
+        "text": "Whether a managed shared app can satisfy Google's restricted-scope requirements for your use case is not answered by the provided sources.",
+        "evidence": {
+          "label": "unverified",
+          "sourceIds": []
+        }
+      }
+    ],
+    "source": "https://docs.composio.dev/toolkits/managed-auth.md"
+  },
+  "requirements": [
+    {
+      "text": "A Google Cloud project, and registering your app with Google Auth before you can create an OAuth client.",
+      "evidence": {
+        "label": "documented",
+        "sourceIds": [
+          "s6",
+          "s9"
+        ]
+      }
+    },
+    {
+      "text": "Gmail API enabled in the API Library before its scopes can be added to the consent screen.",
+      "evidence": {
+        "label": "documented",
+        "sourceIds": [
+          "s4",
+          "s6"
+        ]
+      }
+    },
+    {
+      "text": "External user type: the app starts in testing mode, available only to listed test users.",
+      "evidence": {
+        "label": "documented",
+        "sourceIds": [
+          "s6"
+        ]
+      }
+    },
+    {
+      "text": "A separate production Google Cloud project; Google's OAuth policies require separate projects for testing and production.",
+      "evidence": {
+        "label": "documented",
+        "sourceIds": [
+          "s8",
+          "s6"
+        ]
+      }
+    },
+    {
+      "text": "A website on a verified domain with publicly accessible app and privacy policy information.",
+      "evidence": {
+        "label": "documented",
+        "sourceIds": [
+          "s7"
+        ]
+      }
+    },
+    {
+      "text": "Consent screen details: app name, optional logo, support email, privacy policy and terms of service links.",
+      "evidence": {
+        "label": "documented",
+        "sourceIds": [
+          "s1"
+        ]
+      }
+    },
+    {
+      "text": "Scopes justification and a contact email in the verification submission.",
+      "evidence": {
+        "label": "documented",
+        "sourceIds": [
+          "s4"
+        ]
+      }
+    },
+    {
+      "text": "Verification for sensitive or restricted scopes unless an exception applies (personal use, internal use, development/testing).",
+      "evidence": {
+        "label": "documented",
+        "sourceIds": [
+          "s10"
+        ]
+      }
+    },
+    {
+      "text": "Annual security assessment by a Google-approved third party if you access restricted data from or through a third-party server.",
+      "evidence": {
+        "label": "documented",
+        "sourceIds": [
+          "s10"
+        ]
+      }
+    },
+    {
+      "text": "Production OAuth clients must not contain test redirect URIs or JavaScript origins available only to your team.",
+      "evidence": {
+        "label": "documented",
+        "sourceIds": [
+          "s8"
+        ]
+      }
+    },
+    {
+      "text": "A registered legal business entity is not stated as required in the sources.",
+      "evidence": {
+        "label": "unverified",
+        "sourceIds": []
+      }
+    }
+  ],
+  "steps": [
+    {
+      "order": 1,
+      "title": "Sign in and create or select a Google Cloud project",
+      "estimate": "Not stated in sources",
+      "detail": "Sign in with a Google account and create a Google Cloud project for development. Your app needs a project to access Google OAuth APIs.",
+      "url": "https://support.google.com/cloud/answer/13461325?hl=en",
+      "requires": [
+        "login_or_account",
+        "config_check"
+      ],
+      "actor": "you",
+      "agentPrep": "List who should be project owners/editors so Google can reach the right contacts.",
+      "observed": false,
+      "evidence": {
+        "label": "documented",
+        "sourceIds": [
+          "s6",
+          "s8"
+        ]
+      }
+    },
+    {
+      "order": 2,
+      "title": "Enable the Gmail API",
+      "estimate": "Not stated in sources",
+      "detail": "Open the API Library, find Gmail API and click Enable. If prompted, enable billing and accept the API's Terms of Service. This must happen before Gmail scopes can be added.",
+      "url": "https://support.google.com/cloud/answer/13461325?hl=en",
+      "requires": [
+        "config_check",
+        "legal_acceptance"
+      ],
+      "actor": "you",
+      "observed": false,
+      "evidence": {
+        "label": "documented",
+        "sourceIds": [
+          "s6",
+          "s4"
+        ]
+      }
+    },
+    {
+      "order": 3,
+      "title": "Register the app and configure the consent screen (External)",
+      "estimate": "Not stated in sources",
+      "detail": "Register the app with Google Auth and set user type to External. Add app name, support email, optional logo, and privacy policy and terms links. The app starts in testing mode with listed test users.",
+      "url": "https://support.google.com/cloud/answer/13461325?hl=en",
+      "requires": [
+        "config_check",
+        "text_drafting"
+      ],
+      "actor": "agent",
+      "agentPrep": "Draft app name, description, support email text, privacy policy and terms content.",
+      "observed": false,
+      "evidence": {
+        "label": "documented",
+        "sourceIds": [
+          "s6",
+          "s9",
+          "s1"
+        ]
+      }
+    },
+    {
+      "order": 4,
+      "title": "Create the OAuth client and store the secret",
+      "estimate": "Not stated in sources",
+      "detail": "On the Google Auth Platform Clients page, click Create Client, choose the application type (a web application for a server-side agent) and create it. The client secret is shown only once, so store it securely.",
+      "url": "https://support.google.com/cloud/answer/15549257?hl=en",
+      "requires": [
+        "config_check"
+      ],
+      "actor": "agent",
+      "observed": false,
+      "evidence": {
+        "label": "documented",
+        "sourceIds": [
+          "s9",
+          "s3"
+        ]
+      }
+    },
+    {
+      "order": 5,
+      "title": "Build and test with listed test users",
+      "estimate": "Not stated in sources",
+      "detail": "Implement the OAuth flow requesting only the narrowest Gmail scopes needed to read and send. Use the testing project with test users. Request scopes in code that exactly match those on the consent screen.",
+      "requires": [
+        "code_writing",
+        "docs_reading"
+      ],
+      "actor": "agent",
+      "agentPrep": "Map each agent feature (read, send) to the minimum Gmail scope.",
+      "observed": false,
+      "evidence": {
+        "label": "documented",
+        "sourceIds": [
+          "s6",
+          "s11"
+        ]
+      }
+    },
+    {
+      "order": 6,
+      "title": "Prepare a verified domain, public homepage and privacy policy",
+      "estimate": "Not stated in sources",
+      "detail": "Verification needs a website on a verified domain with publicly accessible app and privacy policy information, and the domain listed as an authorized domain.",
+      "requires": [
+        "config_check",
+        "text_drafting"
+      ],
+      "actor": "agent",
+      "agentPrep": "Draft the homepage copy and privacy policy, including how restricted Gmail data is stored and used.",
+      "observed": false,
+      "evidence": {
+        "label": "documented",
+        "sourceIds": [
+          "s7",
+          "s1"
+        ]
+      }
+    },
+    {
+      "order": 7,
+      "title": "Create and configure a separate production project",
+      "estimate": "Not stated in sources",
+      "detail": "Create a separate production Google Cloud project with its own OAuth client, with no test-only redirect URIs or origins. Repeat the API enablement and consent screen configuration there, and select all Gmail scopes you use.",
+      "url": "https://developers.google.com/identity/protocols/oauth2/production-readiness/policy-compliance",
+      "requires": [
+        "config_check"
+      ],
+      "actor": "agent",
+      "observed": false,
+      "evidence": {
+        "label": "documented",
+        "sourceIds": [
+          "s8",
+          "s6",
+          "s4"
+        ]
+      }
+    },
+    {
+      "order": 8,
+      "title": "Submit brand verification",
+      "estimate": "Minutes automated; manual review 2-3 business days",
+      "detail": "Click Verify Branding for the production app. Automated checks usually take minutes; if no automatic result, manual review usually takes 2-3 business days.",
+      "url": "https://developers.google.com/identity/protocols/oauth2/production-readiness/brand-verification",
+      "requires": [
+        "manual_submission",
+        "provider_review_wait"
+      ],
+      "actor": "provider_wait",
+      "observed": false,
+      "evidence": {
+        "label": "documented",
+        "sourceIds": [
+          "s1"
+        ]
+      }
+    },
+    {
+      "order": 9,
+      "title": "Submit the app for restricted-scope verification",
+      "estimate": "Not stated in sources",
+      "detail": "On the consent screen page click Submit for verification. Add the scopes justification, a contact email and any other helpful information, then submit.",
+      "url": "https://support.google.com/googleapi/answer/6158849?hl=en",
+      "requires": [
+        "manual_submission",
+        "text_drafting"
+      ],
+      "actor": "you",
+      "agentPrep": "Draft the justification for each Gmail scope and the explanation of server-side data handling.",
+      "observed": false,
+      "evidence": {
+        "label": "documented",
+        "sourceIds": [
+          "s4",
+          "s10"
+        ]
+      }
+    },
+    {
+      "order": 10,
+      "title": "Wait for Google's verification review",
+      "estimate": "Several months per Google; no firm range",
+      "detail": "Google says verification can take several months depending on data sensitivity; one community post reports almost 3 months. You can keep building and testing meanwhile. Until verified, the unverified app screen shows and new users are capped at 100.",
+      "url": "https://support.google.com/cloud/answer/7454865?hl=en",
+      "requires": [
+        "provider_review_wait"
+      ],
+      "actor": "provider_wait",
+      "observed": false,
+      "evidence": {
+        "label": "documented",
+        "sourceIds": [
+          "s11",
+          "s12"
+        ]
+      }
+    },
+    {
+      "order": 11,
+      "title": "Complete the third-party security assessment",
+      "estimate": "Not stated in sources",
+      "detail": "If you store or transmit restricted-scope data on servers, a Google-approved third party must perform a security assessment, and it recurs annually. Cost and duration are not stated in the sources.",
+      "url": "https://developers.google.com/identity/protocols/oauth2/production-readiness/restricted-scope-verification",
+      "requires": [
+        "manual_submission",
+        "provider_review_wait"
+      ],
+      "actor": "provider_wait",
+      "agentPrep": "Gather architecture, data-storage and security-control documentation for the assessor.",
+      "observed": false,
+      "evidence": {
+        "label": "documented",
+        "sourceIds": [
+          "s10"
+        ]
+      }
+    },
+    {
+      "order": 12,
+      "title": "Publish and confirm scopes match",
+      "estimate": "Not stated in sources",
+      "detail": "After approval, confirm the scopes requested in code match the consent screen exactly. Otherwise users still see the unverified app screen.",
+      "requires": [
+        "config_check",
+        "code_writing"
+      ],
+      "actor": "agent",
+      "observed": false,
+      "evidence": {
+        "label": "documented",
+        "sourceIds": [
+          "s11"
+        ]
+      }
+    }
+  ],
+  "scopesAndNuances": [
+    {
+      "text": "Apps requesting sensitive or restricted scopes must complete verification unless an exception applies (personal use, development/testing, internal use, and others).",
+      "evidence": {
+        "label": "documented",
+        "sourceIds": [
+          "s10"
+        ]
+      }
+    },
+    {
+      "text": "Restricted-scope apps must meet additional requirements and submit to extra reviews, which include a possible security assessment.",
+      "evidence": {
+        "label": "documented",
+        "sourceIds": [
+          "s10"
+        ]
+      }
+    },
+    {
+      "text": "Apps accessing restricted data from or through a third-party server must undergo an annual security assessment by a Google-approved third party.",
+      "evidence": {
+        "label": "documented",
+        "sourceIds": [
+          "s10"
+        ]
+      }
+    },
+    {
+      "text": "Unverified apps using sensitive/restricted scopes show an unverified app screen and are limited to 100 new users until verified.",
+      "evidence": {
+        "label": "documented",
+        "sourceIds": [
+          "s11"
+        ]
+      }
+    },
+    {
+      "text": "Request the narrowest scopes needed; this is a stated requirement.",
+      "evidence": {
+        "label": "documented",
+        "sourceIds": [
+          "s6"
+        ]
+      }
+    },
+    {
+      "text": "Brand verification applies to External, published apps that show a logo or display name on the consent screen.",
+      "evidence": {
+        "label": "documented",
+        "sourceIds": [
+          "s1"
+        ]
+      }
+    },
+    {
+      "text": "The Setting up OAuth 2.0 help page is marked as no longer up to date; Google points to the Manage OAuth Clients article instead.",
+      "evidence": {
+        "label": "documented",
+        "sourceIds": [
+          "s4"
+        ]
+      }
+    },
+    {
+      "text": "Exactly which Gmail scopes are restricted versus sensitive is not listed in the provided text; Google points to its OAuth verification FAQ for the current list.",
+      "evidence": {
+        "label": "unverified",
+        "sourceIds": [
+          "s10"
+        ]
+      }
+    }
+  ],
+  "blockers": [
+    {
+      "problem": "Verification is pending or incomplete, so users see an unverified app screen and new users are capped at 100.",
+      "fix": "Submit the production project for verification with scopes justification, keep the scopes in code identical to the consent screen, and plan for a long wait.",
+      "contact": "Google OAuth verification team via the verification submission",
+      "evidence": {
+        "label": "documented",
+        "sourceIds": [
+          "s11",
+          "s4"
+        ]
+      }
+    },
+    {
+      "problem": "Verification takes months; a community post reports almost 3 months of waiting for Gmail API approval.",
+      "fix": "Submit early and keep building and testing in the meantime. Avoid launch dates that depend on approval.",
+      "evidence": {
+        "label": "reported",
+        "sourceIds": [
+          "s12",
+          "s11"
+        ]
+      }
+    },
+    {
+      "problem": "Server-side storage of restricted Gmail data triggers an annual third-party security assessment.",
+      "fix": "Plan for the assessment early with a Google-approved assessor. Minimizing stored data may reduce scope, but the sources do not say it removes the requirement.",
+      "evidence": {
+        "label": "documented",
+        "sourceIds": [
+          "s10"
+        ]
+      }
+    },
+    {
+      "problem": "Domain or privacy policy fails verification: no verified domain or publicly accessible app and privacy policy information.",
+      "fix": "Host a public homepage and privacy policy on a verified, authorized domain before submitting.",
+      "evidence": {
+        "label": "documented",
+        "sourceIds": [
+          "s7"
+        ]
+      }
+    }
+  ],
+  "handoff": {
+    "agentCanDo": [
+      {
+        "text": "Step 1 (prep): List who should be project owners/editors so Google can reach the right contacts.",
+        "evidence": {
+          "label": "documented",
+          "sourceIds": [
+            "s6",
+            "s8"
+          ]
+        }
+      },
+      {
+        "text": "Step 3: Register the app and configure the consent screen (External)",
+        "evidence": {
+          "label": "documented",
+          "sourceIds": [
+            "s6",
+            "s9",
+            "s1"
+          ]
+        }
+      },
+      {
+        "text": "Step 4: Create the OAuth client and store the secret",
+        "evidence": {
+          "label": "documented",
+          "sourceIds": [
+            "s9",
+            "s3"
+          ]
+        }
+      },
+      {
+        "text": "Step 5: Build and test with listed test users",
+        "evidence": {
+          "label": "documented",
+          "sourceIds": [
+            "s6",
+            "s11"
+          ]
+        }
+      },
+      {
+        "text": "Step 6: Prepare a verified domain, public homepage and privacy policy",
+        "evidence": {
+          "label": "documented",
+          "sourceIds": [
+            "s7",
+            "s1"
+          ]
+        }
+      },
+      {
+        "text": "Step 7: Create and configure a separate production project",
+        "evidence": {
+          "label": "documented",
+          "sourceIds": [
+            "s8",
+            "s6",
+            "s4"
+          ]
+        }
+      },
+      {
+        "text": "Step 9 (prep): Draft the justification for each Gmail scope and the explanation of server-side data handling.",
+        "evidence": {
+          "label": "documented",
+          "sourceIds": [
+            "s4",
+            "s10"
+          ]
+        }
+      },
+      {
+        "text": "Step 12: Publish and confirm scopes match",
+        "evidence": {
+          "label": "documented",
+          "sourceIds": [
+            "s11"
+          ]
+        }
+      }
+    ],
+    "youMustDo": [
+      {
+        "text": "Step 1: Sign in and create or select a Google Cloud project (needs: login_or_account)",
+        "evidence": {
+          "label": "documented",
+          "sourceIds": [
+            "s6",
+            "s8"
+          ]
+        }
+      },
+      {
+        "text": "Step 2: Enable the Gmail API (needs: legal_acceptance)",
+        "evidence": {
+          "label": "documented",
+          "sourceIds": [
+            "s6",
+            "s4"
+          ]
+        }
+      },
+      {
+        "text": "Step 9: Submit the app for restricted-scope verification (needs: manual_submission)",
+        "evidence": {
+          "label": "documented",
+          "sourceIds": [
+            "s4",
+            "s10"
+          ]
+        }
+      }
+    ],
+    "providerWait": [
+      {
+        "text": "Step 8: Submit brand verification",
+        "evidence": {
+          "label": "documented",
+          "sourceIds": [
+            "s1"
+          ]
+        }
+      },
+      {
+        "text": "Step 10: Wait for Google's verification review",
+        "evidence": {
+          "label": "documented",
+          "sourceIds": [
+            "s11",
+            "s12"
+          ]
+        }
+      },
+      {
+        "text": "Step 11: Complete the third-party security assessment",
+        "evidence": {
+          "label": "documented",
+          "sourceIds": [
+            "s10"
+          ]
+        }
+      }
+    ]
+  },
+  "tested": {
+    "unverified": [
+      "How long creating the project and OAuth client takes.",
+      "A firm duration for restricted-scope verification beyond 'several months'; the Stack Overflow detail was not available, only its title.",
+      "Cost and duration of the third-party security assessment.",
+      "Whether a registered legal business entity is required.",
+      "Which exact Gmail scopes your read and send features need, and whether each is restricted.",
+      "Whether Composio-managed OAuth can serve real external users with restricted Gmail scopes.",
+      "Weakly supported (self-check): External user type: the app starts in testing mode, available only to listed test users.",
+      "Weakly supported (self-check): Consent screen details: app name, optional logo, support email, privacy policy and terms of service links.",
+      "Weakly supported (self-check): Scopes justification and a contact email in the verification submission.",
+      "Weakly supported (self-check): Unverified apps using sensitive/restricted scopes show an unverified app screen and are limited to 100 new users until verified.",
+      "Weakly supported (self-check): You want your own brand (app name, logo, privacy policy and terms links) on the Google consent screen. That is configured on your own projec",
+      "Weakly supported (self-check): Register the app and configure the consent screen (External). Register the app with Google Auth and set user type to External. Add app name,",
+      "Weakly supported (self-check): Submit the app for restricted-scope verification. On the consent screen page click Submit for verification. Add the scopes justification, a ",
+      "Weakly supported (self-check): Wait for Google's verification review. Google says verification can take several months depending on data sensitivity; one community post re",
+      "Weakly supported (self-check): Verification is pending or incomplete, so users see an unverified app screen and new users are capped at 100. -> Submit the production proje",
+      "Research gap (not found): rate_limits"
+    ]
+  },
+  "sources": [
+    {
+      "id": "s1",
+      "title": "Submit for brand verification  |  App verification to use Google Authorization APIs  |  Google for Developers",
+      "url": "https://developers.google.com/identity/protocols/oauth2/production-readiness/brand-verification",
+      "publisher": "official",
+      "retrievedAt": "2026-10-29"
+    },
+    {
+      "id": "s2",
+      "title": "App review process and requirements for the Google Workspace Marketplace  |  Google for Developers",
+      "url": "https://developers.google.com/workspace/marketplace/about-app-review",
+      "publisher": "official",
+      "retrievedAt": "2026-10-29"
+    },
+    {
+      "id": "s3",
+      "title": "Using OAuth 2.0 to Access Google APIs  |  Authorization  |  Google for Developers",
+      "url": "https://developers.google.com/identity/protocols/oauth2",
+      "publisher": "official",
+      "retrievedAt": "2026-10-29"
+    },
+    {
+      "id": "s4",
+      "title": "Setting up OAuth 2.0 - API Console Help",
+      "url": "https://support.google.com/googleapi/answer/6158849?hl=en",
+      "publisher": "official",
+      "retrievedAt": "2026-10-29"
+    },
+    {
+      "id": "s5",
+      "title": "Integrating Google Sign-In into your web app  |  Web guides  |  Google for Developers",
+      "url": "https://developers.google.com/identity/sign-in/web/sign-in",
+      "publisher": "official",
+      "retrievedAt": "2026-10-29"
+    },
+    {
+      "id": "s6",
+      "title": "Submitting your app for verification - Google Cloud Platform Console Help",
+      "url": "https://support.google.com/cloud/answer/13461325?hl=en",
+      "publisher": "official",
+      "retrievedAt": "2026-10-29"
+    },
+    {
+      "id": "s7",
+      "title": "OAuth Client Verification  |  Apps Script  |  Google for Developers",
+      "url": "https://developers.google.com/apps-script/guides/client-verification",
+      "publisher": "official",
+      "retrievedAt": "2026-10-29"
+    },
+    {
+      "id": "s8",
+      "title": "Comply with OAuth 2.0 policies  |  App verification to use Google Authorization APIs  |  Google for Developers",
+      "url": "https://developers.google.com/identity/protocols/oauth2/production-readiness/policy-compliance",
+      "publisher": "official",
+      "retrievedAt": "2026-10-29"
+    },
+    {
+      "id": "s9",
+      "title": "Manage OAuth Clients - Google Cloud Platform Console Help",
+      "url": "https://support.google.com/cloud/answer/15549257?hl=en",
+      "publisher": "official",
+      "retrievedAt": "2026-10-29"
+    },
+    {
+      "id": "s10",
+      "title": "Restricted scope verification  |  App verification to use Google Authorization APIs  |  Google for Developers",
+      "url": "https://developers.google.com/identity/protocols/oauth2/production-readiness/restricted-scope-verification",
+      "publisher": "official",
+      "retrievedAt": "2026-10-29"
+    },
+    {
+      "id": "s11",
+      "title": "Unverified apps - Google Cloud Platform Console Help",
+      "url": "https://support.google.com/cloud/answer/7454865?hl=en",
+      "publisher": "official",
+      "retrievedAt": "2026-10-29"
+    },
+    {
+      "id": "s12",
+      "title": "Gmail API Oauth Approval been waiting almost 3 months",
+      "url": "https://stackoverflow.com/questions/55784613/gmail-api-oauth-approval-been-waiting-almost-3-months",
+      "publisher": "community",
+      "retrievedAt": "2026-10-29"
+    },
+    {
+      "id": "s13",
+      "title": "Composio: Managed OAuth apps (directory)",
+      "url": "https://docs.composio.dev/toolkits/managed-auth.md",
+      "publisher": "official",
+      "retrievedAt": "2026-10-29"
+    }
+  ],
+  "research": {
+    "method": "fixed",
+    "actionsUsed": 13,
+    "pageReads": 15,
+    "seconds": 82,
+    "checklist": [
+      {
+        "item": "registration",
+        "status": "covered",
+        "sourceIds": [
+          "s3",
+          "s4",
+          "s5",
+          "s6",
+          "s8",
+          "s9"
+        ]
+      },
+      {
+        "item": "review_process",
+        "status": "covered",
+        "sourceIds": [
+          "s1",
+          "s2",
+          "s4",
+          "s5",
+          "s6",
+          "s7",
+          "s8",
+          "s10",
+          "s11",
+          "s12"
+        ]
+      },
+      {
+        "item": "scopes_restrictions",
+        "status": "covered",
+        "sourceIds": [
+          "s2",
+          "s3",
+          "s4",
+          "s5",
+          "s6",
+          "s7",
+          "s8",
+          "s10",
+          "s11"
+        ]
+      },
+      {
+        "item": "timing_evidence",
+        "status": "covered",
+        "sourceIds": [
+          "s1",
+          "s12"
+        ]
+      },
+      {
+        "item": "requirements",
+        "status": "covered",
+        "sourceIds": [
+          "s1",
+          "s2",
+          "s4",
+          "s6",
+          "s7",
+          "s8",
+          "s9",
+          "s10",
+          "s11",
+          "s12"
+        ]
+      },
+      {
+        "item": "rate_limits",
+        "status": "not_found",
+        "sourceIds": []
+      },
+      {
+        "item": "community_reports",
+        "status": "covered",
+        "sourceIds": [
+          "s12"
+        ]
+      },
+      {
+        "item": "composio_status",
+        "status": "covered",
+        "sourceIds": [
+          "s13"
+        ]
+      }
+    ]
+  },
+  "nextAction": "Create a Google Cloud project, enable the Gmail API, and start the consent screen, domain and privacy policy preparation, since verification is the slowest part.",
+  "warnings": [
+    "Skipped off-topic page: https://developers.google.com/workspace/gmail/api/reference/quota",
+    "Skipped off-topic page: https://stackoverflow.com/questions/70638732/error-message-you-cant-sign-in-to-this-app-because-it-doesnt-comply-with-goog",
+    "Skipped off-topic page: https://discuss.google.dev/t/oauth-verification-stuck-on-privacy-policy-phase-for-over-6-weeks/350271/10",
+    "Self-check: 0 claim(s) downgraded, 9 flagged as weak"
+  ]
+}

@@ -76,3 +76,25 @@ Owner approved: the attempt protocol; the library list (GitHub, Google/Gmail, Li
 - The fake fixture shows in development only (or `SHOW_FIXTURE=1`); production builds show only `content/guides/*.json`. An invalid library guide fails the build (tested with a deliberately broken file).
 - Dev-server note: the Browser pane's built-in launcher could not start Next (Turbopack could not find `node`). Running `npx next dev` from a shell with `.tools/node/bin` on PATH works; use that.
 - Not yet done in the UI (later sprints): Attempt Kit panel, progress panel, live generation, full /about.
+
+## D-011 Sprint 3 results (deep pipeline)
+Ran `npm run guide` on GitHub, Gmail and LinkedIn with MODEL_FAST/MODEL_DEEP as chosen in D-006 (about 1–2.5 minutes per app).
+Final labels (code-computed): **GitHub easy, Gmail hard, LinkedIn gated**, which match the Sprint 1 research notes. Early runs did not: see below.
+
+What went wrong first, and what fixed it:
+- Off-topic sources (a pull-request docs page, finance news, other providers' forum threads) → relevance filter (must mention OAuth; non-official pages must mention the app 3+ times).
+- Provider-hosted discussions and issue threads were classified `official`, so community posts could be labelled "Documented" → classifier now treats forum/discussion/issue/question paths and community-style hosts as community.
+- GitHub flipped between easy and moderate between runs: the model listed ordinary form fields (homepage URL, callback URL) as "special requirements" → prompt now says form fields do not count.
+- Gmail came out "moderate" because the sources never mentioned the security assessment → added a targeted search; and the rubric now returns **unknown** when a review is required but both its depth and wait are unknown (it used to say "wait measured in days", which was false).
+- LinkedIn reported "paid or business account" as the reason for Gated → rule order changed (business entity first) and the registration-friction factor is defined as only about creating the app.
+- LinkedIn factor extraction failed once (model returned claims in a different shape) and silently fell back to "unknown" → claims are now parsed leniently.
+- The model invented numbers in ranges ("1 hour", "14–90 days") while admitting no source → code strips numbers from any unverified range with no sources.
+- Composio directory alone counted as "sources read" → now requires at least one provider-side page.
+
+Known weaknesses (to address in Sprint 4/6):
+- Run-to-run variance in factors remains possible; it changes labels only through code rules. Re-run before trusting a label.
+- Retrieval misses things the notes found (for example Google's documented ~6 week restricted-scope review): the Gmail guide says "several months" from one source. The Sprint 6 verification must catch this.
+- Checklist "covered" means matching text was retrieved, not that claims are right.
+- Step links are dropped unless they match a fetched source URL, so many steps have no link.
+- Draft guides in `content/guides/` are **L1, unverified**; do not deploy them as "verified" library guides before Sprint 6.
+- Composio's own directory is treated as "official" so Composio-status can be Documented; the prompts restrict it to that statement only.

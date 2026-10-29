@@ -1,0 +1,634 @@
+{
+  "schemaVersion": 1,
+  "slug": "github",
+  "appName": "GitHub",
+  "providerSite": "github.com",
+  "mode": "library",
+  "generatedAt": "2026-10-29T08:09:46.732Z",
+  "pipelineVersion": "0.3.0",
+  "modelUsed": "anthropic/claude-sonnet-5.5",
+  "complete": true,
+  "attemptLevel": "L1",
+  "attemptLevelReason": "Documentation read and synthesized. Nothing was observed directly yet (no probe, trace or walkthrough).",
+  "probe": [],
+  "verdict": {
+    "difficulty": "easy",
+    "difficultyReason": "Credentials are available on a normal account with no required review.",
+    "useCase": "an agent that reads and writes a user's GitHub repositories, issues and pull requests through a self-registered OAuth app, using the `repo` scope",
+    "timeToCredentials": {
+      "basis": "No source gives a time figure. The registration is a single self-serve form with no review mentioned in the sources, but no duration is stated, so no numbers are given.",
+      "evidence": {
+        "label": "unverified",
+        "sourceIds": []
+      }
+    },
+    "timeToProduction": {
+      "none": true,
+      "evidence": {
+        "label": "documented",
+        "sourceIds": [
+          "s4"
+        ]
+      }
+    },
+    "humanEffortHours": {
+      "basis": "No source states how long registration takes. The documented steps are one form plus an account sign-in, but any hour figure would be an estimate, so none is given.",
+      "evidence": {
+        "label": "unverified",
+        "sourceIds": []
+      }
+    },
+    "summary": "Registering a GitHub OAuth app is a self-serve form in Developer settings with no review or approval mentioned in the sources. The `repo` scope works but is broad and cannot be limited to read-only for code. GitHub recommends a GitHub App instead.",
+    "biggestLaunchRisk": "The `repo` scope gives full read/write access to all of a user's repositories (it cannot be limited to read-only for code), and OAuth apps have lower rate limits that do not scale. Both can hurt trust and reliability at scale.",
+    "factors": {
+      "registrationFriction": "account_needed",
+      "reviewRequired": "none",
+      "reviewDepth": "none",
+      "docsQuality": "clear",
+      "waitBasis": "unknown",
+      "waitMagnitude": "none",
+      "businessEntityRequired": "no",
+      "specialRequirements": []
+    }
+  },
+  "managedVsOwn": {
+    "composioManaged": "yes",
+    "managedCovers": [
+      {
+        "text": "Composio's directory lists GitHub as having Composio-managed OAuth available, so a shared Composio-managed app may be usable for prototyping without registering your own.",
+        "evidence": {
+          "label": "documented",
+          "sourceIds": [
+            "s11"
+          ]
+        }
+      }
+    ],
+    "youNeedOwnWhen": [
+      {
+        "text": "You want your own app name, homepage and callback URLs shown to users on the GitHub authorization screen. The authorization page shows the app's developer contact information. Whether a managed app can customize this is not covered by the sources.",
+        "evidence": {
+          "label": "unverified",
+          "sourceIds": [
+            "s3"
+          ]
+        }
+      },
+      {
+        "text": "You need control over token settings (expiring tokens, device flow) and rate limits tied to your own app. These are configured on your own registered app. Rate limits are per OAuth app, and an app owned or approved by a GitHub Enterprise Cloud organization gets a higher 15,000/hour limit for members.",
+        "evidence": {
+          "label": "documented",
+          "sourceIds": [
+            "s4",
+            "s6",
+            "s7"
+          ]
+        }
+      },
+      {
+        "text": "Which exact scopes a Composio-managed GitHub app requests, and whether it offers the `repo` scope for your use case, is not stated in the sources. Confirm this before relying on it for production.",
+        "evidence": {
+          "label": "unverified",
+          "sourceIds": []
+        }
+      }
+    ],
+    "source": "https://docs.composio.dev/toolkits/managed-auth.md"
+  },
+  "requirements": [
+    {
+      "text": "A GitHub account. The app can be registered under a personal account or any organization you have administrative access to.",
+      "evidence": {
+        "label": "documented",
+        "sourceIds": [
+          "s4"
+        ]
+      }
+    },
+    {
+      "text": "App name, homepage URL, and at least one authorization callback URL (up to 10). The description is optional.",
+      "evidence": {
+        "label": "documented",
+        "sourceIds": [
+          "s4"
+        ]
+      }
+    },
+    {
+      "text": "Only use information you consider public in the app's details, and avoid sensitive data such as internal URLs.",
+      "evidence": {
+        "label": "documented",
+        "sourceIds": [
+          "s4"
+        ]
+      }
+    },
+    {
+      "text": "Each end user must have a verified primary email address to authorize the app. Otherwise the token request returns an `unverified_user_email` error.",
+      "evidence": {
+        "label": "documented",
+        "sourceIds": [
+          "s3",
+          "s9"
+        ]
+      }
+    },
+    {
+      "text": "No business verification or provider review is mentioned in the registration steps.",
+      "evidence": {
+        "label": "documented",
+        "sourceIds": [
+          "s4"
+        ]
+      }
+    },
+    {
+      "text": "A user or organization can own up to 100 OAuth apps.",
+      "evidence": {
+        "label": "documented",
+        "sourceIds": [
+          "s4"
+        ]
+      }
+    }
+  ],
+  "steps": [
+    {
+      "order": 1,
+      "title": "Sign in to GitHub and open Developer settings",
+      "estimate": "unverified",
+      "detail": "Click your profile picture, then Settings, then Developer settings, then OAuth apps. For an organization-owned app you need administrative access to that organization.",
+      "url": "https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/creating-an-oauth-app",
+      "requires": [
+        "login_or_account",
+        "docs_reading"
+      ],
+      "actor": "you",
+      "agentPrep": "Decide whether the app will be owned by a personal account or an organization, and confirm who has admin access.",
+      "observed": false,
+      "evidence": {
+        "label": "documented",
+        "sourceIds": [
+          "s4"
+        ]
+      }
+    },
+    {
+      "order": 2,
+      "title": "Fill in and register the OAuth app",
+      "estimate": "unverified",
+      "detail": "Click New OAuth App (or Register a new application). Enter the application name, homepage URL, optional description, and the callback URL (up to 10). Enable Device Flow only if you need it. Leave 'Expire user access tokens' on (the default) if your code supports refresh tokens. Click Register application.",
+      "url": "https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/creating-an-oauth-app",
+      "requires": [
+        "config_check"
+      ],
+      "actor": "agent",
+      "agentPrep": "Prepare the app name, homepage URL, description text, and the exact callback URLs, using only public information.",
+      "observed": false,
+      "evidence": {
+        "label": "documented",
+        "sourceIds": [
+          "s4"
+        ]
+      }
+    },
+    {
+      "order": 3,
+      "title": "Obtain the client ID and client secret and store them securely",
+      "estimate": "unverified",
+      "detail": "After registration, the app has a client_id and client_secret that your code passes when exchanging the code for a token. The sources show these are needed (an incorrect pair returns `incorrect_client_credentials`), but the exact UI location for them is not shown in the provided sources.",
+      "requires": [
+        "config_check"
+      ],
+      "actor": "agent",
+      "agentPrep": "Set up a secrets store or environment variables for the client ID and secret.",
+      "observed": false,
+      "evidence": {
+        "label": "documented",
+        "sourceIds": [
+          "s9"
+        ]
+      }
+    },
+    {
+      "order": 4,
+      "title": "Implement the authorization flow requesting the `repo` scope",
+      "estimate": "unverified",
+      "detail": "Use the web application flow (authorization code) or the device flow. The implicit grant is not supported. Request `repo` for read/write access to repositories. Handle expiring tokens (8-hour access token, refresh token expires after six months without use) and cache tokens rather than re-signing users in.",
+      "url": "https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/authorizing-oauth-apps",
+      "requires": [
+        "code_writing",
+        "docs_reading"
+      ],
+      "actor": "agent",
+      "agentPrep": "Draft the authorize and token-exchange code, the refresh-token handling, and error handling for `redirect_uri_mismatch`, `bad_verification_code` and `unverified_user_email`.",
+      "observed": false,
+      "evidence": {
+        "label": "documented",
+        "sourceIds": [
+          "s1",
+          "s2",
+          "s9"
+        ]
+      }
+    },
+    {
+      "order": 5,
+      "title": "Test with an authorizing user",
+      "estimate": "unverified",
+      "detail": "Have a user with a verified primary email authorize the app. Check the `X-OAuth-Scopes` response header to confirm the granted scopes. Remember a token cannot exceed the authorizing user's own permissions.",
+      "requires": [
+        "login_or_account",
+        "email_or_phone_verification",
+        "config_check"
+      ],
+      "actor": "you",
+      "agentPrep": "Write a test script that calls the API and logs the X-OAuth-Scopes and X-Accepted-OAuth-Scopes headers.",
+      "observed": false,
+      "evidence": {
+        "label": "documented",
+        "sourceIds": [
+          "s2",
+          "s3",
+          "s9"
+        ]
+      }
+    }
+  ],
+  "scopesAndNuances": [
+    {
+      "text": "`repo` grants full access to public and private repositories, including read and write access to code, commit statuses, repository invitations, collaborators, deployment statuses, and repository webhooks. It also grants access to manage some organization-owned resources (projects, invitations, team memberships, webhooks) and user-owned projects.",
+      "evidence": {
+        "label": "documented",
+        "sourceIds": [
+          "s2"
+        ]
+      }
+    },
+    {
+      "text": "Source code access cannot currently be scoped to read-only.",
+      "evidence": {
+        "label": "documented",
+        "sourceIds": [
+          "s3"
+        ]
+      }
+    },
+    {
+      "text": "A token cannot exceed the authorizing user's own permissions. For example, an `admin:org` scope does not give admin access unless the user is an organization owner.",
+      "evidence": {
+        "label": "documented",
+        "sourceIds": [
+          "s2",
+          "s3"
+        ]
+      }
+    },
+    {
+      "text": "Expiring user access tokens are enabled by default for new OAuth apps. Access tokens last eight hours, and refresh tokens expire after six months without use. You can also opt in per sign-in via the `offline_access` scope.",
+      "evidence": {
+        "label": "documented",
+        "sourceIds": [
+          "s1",
+          "s4"
+        ]
+      }
+    },
+    {
+      "text": "Token limits: ten tokens per user/application/scope combination and ten tokens created per hour. Hitting the hourly limit triggers a re-authorization prompt, and exceeding ten tokens revokes an existing one.",
+      "evidence": {
+        "label": "documented",
+        "sourceIds": [
+          "s3"
+        ]
+      }
+    },
+    {
+      "text": "OAuth apps are limited to 2,000 access token requests per hour. Exceeding it can cause temporary outages.",
+      "evidence": {
+        "label": "documented",
+        "sourceIds": [
+          "s7"
+        ]
+      }
+    },
+    {
+      "text": "API requests made through an OAuth app count toward the user's 5,000 requests per hour limit. A 15,000 limit applies for apps owned or approved by a GitHub Enterprise Cloud organization when the user is a member.",
+      "evidence": {
+        "label": "documented",
+        "sourceIds": [
+          "s6"
+        ]
+      }
+    },
+    {
+      "text": "GitHub recommends building a GitHub App instead, citing fine-grained permissions, short-lived tokens, per-repository user control, and rate limits that scale. A GitHub App can be registered under a personal account or an organization you own, and no review step is mentioned in the registration steps.",
+      "evidence": {
+        "label": "documented",
+        "sourceIds": [
+          "s1",
+          "s2",
+          "s4",
+          "s7",
+          "s10"
+        ]
+      }
+    }
+  ],
+  "blockers": [
+    {
+      "problem": "A user gets an `unverified_user_email` error when authorizing.",
+      "fix": "Prompt the user to verify the primary email address on their GitHub account, then retry the authorization.",
+      "evidence": {
+        "label": "documented",
+        "sourceIds": [
+          "s3",
+          "s9"
+        ]
+      }
+    },
+    {
+      "problem": "A `redirect_uri_mismatch` error occurs during token exchange.",
+      "fix": "Use a redirect_uri that matches one registered on the app, or omit the parameter to use the default registered callback.",
+      "evidence": {
+        "label": "documented",
+        "sourceIds": [
+          "s9"
+        ]
+      }
+    },
+    {
+      "problem": "Users are repeatedly shown a re-authorization prompt, or old tokens stop working.",
+      "fix": "Cache and reuse tokens instead of signing users in repeatedly. Stay within ten tokens per user/application/scope combination and ten per hour.",
+      "evidence": {
+        "label": "documented",
+        "sourceIds": [
+          "s3",
+          "s7"
+        ]
+      }
+    },
+    {
+      "problem": "Token requests fail because of the 2,000 per hour access token request limit.",
+      "fix": "Reduce token generation, cache tokens, and use refresh tokens. Consider a GitHub App, which has rate limits that scale.",
+      "evidence": {
+        "label": "documented",
+        "sourceIds": [
+          "s7"
+        ]
+      }
+    }
+  ],
+  "handoff": {
+    "agentCanDo": [
+      {
+        "text": "Step 1 (prep): Decide whether the app will be owned by a personal account or an organization, and confirm who has admin access.",
+        "evidence": {
+          "label": "documented",
+          "sourceIds": [
+            "s4"
+          ]
+        }
+      },
+      {
+        "text": "Step 2: Fill in and register the OAuth app",
+        "evidence": {
+          "label": "documented",
+          "sourceIds": [
+            "s4"
+          ]
+        }
+      },
+      {
+        "text": "Step 3: Obtain the client ID and client secret and store them securely",
+        "evidence": {
+          "label": "documented",
+          "sourceIds": [
+            "s9"
+          ]
+        }
+      },
+      {
+        "text": "Step 4: Implement the authorization flow requesting the `repo` scope",
+        "evidence": {
+          "label": "documented",
+          "sourceIds": [
+            "s1",
+            "s2",
+            "s9"
+          ]
+        }
+      },
+      {
+        "text": "Step 5 (prep): Write a test script that calls the API and logs the X-OAuth-Scopes and X-Accepted-OAuth-Scopes headers.",
+        "evidence": {
+          "label": "documented",
+          "sourceIds": [
+            "s2",
+            "s3",
+            "s9"
+          ]
+        }
+      }
+    ],
+    "youMustDo": [
+      {
+        "text": "Step 1: Sign in to GitHub and open Developer settings (needs: login_or_account)",
+        "evidence": {
+          "label": "documented",
+          "sourceIds": [
+            "s4"
+          ]
+        }
+      },
+      {
+        "text": "Step 5: Test with an authorizing user (needs: login_or_account, email_or_phone_verification)",
+        "evidence": {
+          "label": "documented",
+          "sourceIds": [
+            "s2",
+            "s3",
+            "s9"
+          ]
+        }
+      }
+    ],
+    "providerWait": []
+  },
+  "tested": {
+    "unverified": [
+      "No source states how long registration takes or how much human effort it needs.",
+      "Whether organizations with OAuth app access restrictions may require owner approval for the app was not covered in the provided sources.",
+      "Whether a Composio-managed GitHub app offers the `repo` scope or lets you customize branding is not covered.",
+      "Where exactly the client secret is generated and shown after registration was not shown in the provided sources.",
+      "Whether GitHub requires two-factor authentication to register an app was not covered by the sources.",
+      "Whether an agent that writes to repositories would be better served by a GitHub App's fine-grained permissions was not evaluated against this use case beyond GitHub's general recommendation.",
+      "Weakly supported (self-check): Expiring user access tokens are enabled by default for new OAuth apps. Access tokens last eight hours, and refresh tokens expire after six m",
+      "Weakly supported (self-check): Token limits: ten tokens per user/application/scope combination and ten tokens created per hour. Hitting the hourly limit triggers a re-auth",
+      "Weakly supported (self-check): You need control over token settings (expiring tokens, device flow) and rate limits tied to your own app. These are configured on your own r",
+      "Weakly supported (self-check): Token requests fail because of the 2,000 per hour access token request limit. -> Reduce token generation, cache tokens, and use refresh toke",
+      "Research gap (not found): timing_evidence",
+      "Research gap (not found): community_reports"
+    ]
+  },
+  "sources": [
+    {
+      "id": "s1",
+      "title": "Authorizing OAuth apps - GitHub Docs",
+      "url": "https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/authorizing-oauth-apps",
+      "publisher": "official",
+      "retrievedAt": "2026-10-29"
+    },
+    {
+      "id": "s2",
+      "title": "Scopes for OAuth apps - GitHub Docs",
+      "url": "https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/scopes-for-oauth-apps",
+      "publisher": "official",
+      "retrievedAt": "2026-10-29"
+    },
+    {
+      "id": "s3",
+      "title": "Authorizing OAuth apps - GitHub Docs",
+      "url": "https://docs.github.com/en/apps/oauth-apps/using-oauth-apps/authorizing-oauth-apps",
+      "publisher": "official",
+      "retrievedAt": "2026-10-29"
+    },
+    {
+      "id": "s4",
+      "title": "Creating an OAuth app - GitHub Docs",
+      "url": "https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/creating-an-oauth-app",
+      "publisher": "official",
+      "retrievedAt": "2026-10-29"
+    },
+    {
+      "id": "s5",
+      "title": "Reviewing your authorized OAuth apps - GitHub Docs",
+      "url": "https://docs.github.com/en/apps/oauth-apps/using-oauth-apps/reviewing-your-authorized-oauth-apps",
+      "publisher": "official",
+      "retrievedAt": "2026-10-29"
+    },
+    {
+      "id": "s6",
+      "title": "Rate limits for the REST API - GitHub Docs",
+      "url": "https://docs.github.com/rest/using-the-rest-api/rate-limits-for-the-rest-api",
+      "publisher": "official",
+      "retrievedAt": "2026-10-29"
+    },
+    {
+      "id": "s7",
+      "title": "Rate limits for OAuth apps - GitHub Docs",
+      "url": "https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/rate-limits-for-oauth-apps",
+      "publisher": "official",
+      "retrievedAt": "2026-10-29"
+    },
+    {
+      "id": "s8",
+      "title": "GitHub - useparagon/paragon-mcp · GitHub",
+      "url": "https://github.com/useparagon/paragon-mcp",
+      "publisher": "official",
+      "retrievedAt": "2026-10-29"
+    },
+    {
+      "id": "s9",
+      "title": "Troubleshooting OAuth app access token request errors - GitHub Docs",
+      "url": "https://docs.github.com/en/apps/oauth-apps/maintaining-oauth-apps/troubleshooting-oauth-app-access-token-request-errors",
+      "publisher": "official",
+      "retrievedAt": "2026-10-29"
+    },
+    {
+      "id": "s10",
+      "title": "Registering a GitHub App - GitHub Docs",
+      "url": "https://docs.github.com/en/apps/creating-github-apps/registering-a-github-app/registering-a-github-app",
+      "publisher": "official",
+      "retrievedAt": "2026-10-29"
+    },
+    {
+      "id": "s11",
+      "title": "Composio: Managed OAuth apps (directory)",
+      "url": "https://docs.composio.dev/toolkits/managed-auth.md",
+      "publisher": "official",
+      "retrievedAt": "2026-10-29"
+    }
+  ],
+  "research": {
+    "method": "fixed",
+    "actionsUsed": 13,
+    "pageReads": 15,
+    "seconds": 38,
+    "checklist": [
+      {
+        "item": "registration",
+        "status": "covered",
+        "sourceIds": [
+          "s4",
+          "s10"
+        ]
+      },
+      {
+        "item": "review_process",
+        "status": "covered",
+        "sourceIds": [
+          "s1",
+          "s3",
+          "s5",
+          "s6",
+          "s9"
+        ]
+      },
+      {
+        "item": "scopes_restrictions",
+        "status": "covered",
+        "sourceIds": [
+          "s1",
+          "s2",
+          "s3"
+        ]
+      },
+      {
+        "item": "timing_evidence",
+        "status": "not_found",
+        "sourceIds": []
+      },
+      {
+        "item": "requirements",
+        "status": "covered",
+        "sourceIds": [
+          "s4",
+          "s9",
+          "s10"
+        ]
+      },
+      {
+        "item": "rate_limits",
+        "status": "covered",
+        "sourceIds": [
+          "s3",
+          "s6",
+          "s7"
+        ]
+      },
+      {
+        "item": "community_reports",
+        "status": "not_found",
+        "sourceIds": []
+      },
+      {
+        "item": "composio_status",
+        "status": "covered",
+        "sourceIds": [
+          "s11"
+        ]
+      }
+    ]
+  },
+  "nextAction": "Decide between an OAuth app and the GitHub App GitHub recommends, then, if you stay with OAuth, register the app in Developer settings with your callback URL.",
+  "warnings": [
+    "Skipped off-topic page: https://github.com/topics/stackoverflow",
+    "Skipped off-topic page: https://docs.github.com/pull-requests/collaborating-with-pull-requests/reviewing-changes-in-pull-requests/about-pull-request-reviews",
+    "Skipped off-topic page: https://security.googlecloudcommunity.com/security-validation-5/oauth-verification-for-workspace-add-on-stuck-for-8-weeks-client-critical-6543",
+    "Skipped off-topic page: https://finance.yahoo.com/news/salesloft-says-drift-customer-data-173506199.html",
+    "Skipped off-topic page: https://discuss.google.dev/t/oauth-data-access-verification-stuck-under-review-for-8-weeks-sensitive-scope-only-spreadsheets-no-trust-safety-contact/375352",
+    "Self-check: 0 claim(s) downgraded, 4 flagged as weak",
+    "Required checklist item not found: timing_evidence"
+  ]
+}

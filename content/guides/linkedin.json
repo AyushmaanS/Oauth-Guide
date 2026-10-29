@@ -1,0 +1,775 @@
+{
+  "schemaVersion": 1,
+  "slug": "linkedin",
+  "appName": "LinkedIn",
+  "providerSite": "linkedin.com",
+  "mode": "library",
+  "generatedAt": "2026-10-29T08:12:15.303Z",
+  "pipelineVersion": "0.3.0",
+  "modelUsed": "anthropic/claude-sonnet-5.5",
+  "complete": true,
+  "attemptLevel": "L1",
+  "attemptLevelReason": "Documentation read and synthesized. Nothing was observed directly yet (no probe, trace or walkthrough).",
+  "probe": [],
+  "verdict": {
+    "difficulty": "gated",
+    "difficultyReason": "A registered business entity is required for this use case.",
+    "useCase": "An agent that posts to LinkedIn on behalf of a user or their organization's Page (member posting via w_member_social, or organization/Community Management APIs for Pages)",
+    "timeToCredentials": {
+      "minHours": 1,
+      "maxHours": 1,
+      "basis": "The Client ID and Secret come from the Auth tab after creating the app. The only time figure in the sources is a '2 minutes' app-creation step in the Verified on LinkedIn quickstart, so the 1-hour range is my rough allowance and not a sourced number.",
+      "evidence": {
+        "label": "unverified",
+        "sourceIds": []
+      }
+    },
+    "timeToProduction": {
+      "minDays": 14,
+      "basis": "One developer reported waiting about two weeks for a Share on LinkedIn review, which ended in rejection; the official docs give no review time. The factor stage rates the wait as weeks, and no maximum is sourced.",
+      "evidence": {
+        "label": "reported",
+        "sourceIds": [
+          "s9"
+        ]
+      }
+    },
+    "humanEffortHours": {
+      "basis": "No source gives hours of human effort for the access request, the Page verification or the screencast, so no figure is given.",
+      "evidence": {
+        "label": "unverified",
+        "sourceIds": []
+      }
+    },
+    "summary": "You can create a LinkedIn app and get a Client ID and Secret yourself, and member posting with w_member_social is an open permission. Posting as a Page needs LinkedIn's manual review and a registered legal organization.",
+    "biggestLaunchRisk": "Page posting access is gated by manual vetting. A developer reported rejection for failing to prove a legally registered, active organization, and a GitHub Pages docs site was not accepted as the organization website.",
+    "factors": {
+      "registrationFriction": "account_needed",
+      "reviewRequired": "for_sensitive_scopes",
+      "reviewDepth": "manual",
+      "docsQuality": "partial",
+      "waitBasis": "reported",
+      "waitMagnitude": "weeks",
+      "businessEntityRequired": "yes",
+      "specialRequirements": [
+        "Business email address (personal email won't pass vetting)",
+        "Organization legal name, registered address, website and privacy policy",
+        "LinkedIn Page associated with the app, with the app verified by a Page super admin",
+        "Verified organization website and domain",
+        "Screen recording/screencast of the app demonstrating each use case (Standard tier upgrade)",
+        "Test credentials for reviewers (Standard tier upgrade)",
+        "Proof of a legally registered, active organization"
+      ]
+    }
+  },
+  "managedVsOwn": {
+    "composioManaged": "yes",
+    "managedCovers": [
+      {
+        "text": "Composio lists LinkedIn among its managed OAuth apps, so you can prototype without registering your own LinkedIn app.",
+        "evidence": {
+          "label": "documented",
+          "sourceIds": [
+            "s12"
+          ]
+        }
+      }
+    ],
+    "youNeedOwnWhen": [
+      {
+        "text": "You need to post as an organization Page through the Community Management APIs, where LinkedIn requires your own access request, vetting and Page-verified app. The sources do not say whether a managed app could cover this.",
+        "evidence": {
+          "label": "documented",
+          "sourceIds": [
+            "s4"
+          ]
+        }
+      },
+      {
+        "text": "You want control over your own app's identity, scope approvals and rate limits, which are viewed per app in the Developer Portal. The sources do not describe what a managed app's limits or approvals look like.",
+        "evidence": {
+          "label": "unverified",
+          "sourceIds": [
+            "s3"
+          ]
+        }
+      }
+    ],
+    "source": "https://docs.composio.dev/toolkits/managed-auth.md"
+  },
+  "requirements": [
+    {
+      "text": "A LinkedIn member account in good standing, and legal authority to register the app if you act for a company.",
+      "evidence": {
+        "label": "documented",
+        "sourceIds": [
+          "s7"
+        ]
+      }
+    },
+    {
+      "text": "A registered legal organization for commercial use cases, which Community Management APIs are limited to.",
+      "evidence": {
+        "label": "documented",
+        "sourceIds": [
+          "s4"
+        ]
+      }
+    },
+    {
+      "text": "A verified business email address, plus the organization's legal name, registered address, website and privacy policy. Personal email addresses won't pass vetting.",
+      "evidence": {
+        "label": "documented",
+        "sourceIds": [
+          "s4"
+        ]
+      }
+    },
+    {
+      "text": "A LinkedIn Page associated with the app, with the app verified by a super admin of that Page.",
+      "evidence": {
+        "label": "documented",
+        "sourceIds": [
+          "s4"
+        ]
+      }
+    },
+    {
+      "text": "A verified organization website and domain. A developer reported a GitHub Pages docs site was not accepted.",
+      "evidence": {
+        "label": "documented",
+        "sourceIds": [
+          "s4",
+          "s9"
+        ]
+      }
+    },
+    {
+      "text": "For the Standard tier upgrade: a company and product overview, a use case description, test credentials, and a high-resolution screen recording of each use case.",
+      "evidence": {
+        "label": "documented",
+        "sourceIds": [
+          "s4"
+        ]
+      }
+    },
+    {
+      "text": "An absolute HTTPS redirect URL with no # fragment, registered in the Auth tab.",
+      "evidence": {
+        "label": "documented",
+        "sourceIds": [
+          "s1"
+        ]
+      }
+    },
+    {
+      "text": "The app must not include any portion of the LinkedIn or Microsoft names or logos.",
+      "evidence": {
+        "label": "documented",
+        "sourceIds": [
+          "s4"
+        ]
+      }
+    }
+  ],
+  "steps": [
+    {
+      "order": 1,
+      "title": "Sign in to LinkedIn and open the Developer Portal",
+      "estimate": "unverified",
+      "detail": "Use a LinkedIn member account in good standing. If registering for a company, you need the legal authority to bind it to the API Terms.",
+      "requires": [
+        "login_or_account"
+      ],
+      "actor": "you",
+      "observed": false,
+      "evidence": {
+        "label": "documented",
+        "sourceIds": [
+          "s7",
+          "s2"
+        ]
+      }
+    },
+    {
+      "order": 2,
+      "title": "Prepare organization details and the Page",
+      "estimate": "unverified",
+      "detail": "Gather the business email, organization legal name, registered address, website and privacy policy. Make sure a LinkedIn Page exists for the organization and that a super admin can verify the app.",
+      "requires": [
+        "text_drafting",
+        "docs_reading"
+      ],
+      "actor": "agent",
+      "agentPrep": "Draft the access request text, use case description and company/product overview, and list the required organization details.",
+      "observed": false,
+      "evidence": {
+        "label": "documented",
+        "sourceIds": [
+          "s4"
+        ]
+      }
+    },
+    {
+      "order": 3,
+      "title": "Create the app",
+      "estimate": "unverified",
+      "detail": "Click Create app and fill in the required fields. A logo is needed: square, with at least one dimension of 100px or more (from the Verified on LinkedIn quickstart; it may not apply to every app type).",
+      "requires": [
+        "config_check"
+      ],
+      "actor": "agent",
+      "observed": false,
+      "evidence": {
+        "label": "documented",
+        "sourceIds": [
+          "s5",
+          "s2"
+        ]
+      }
+    },
+    {
+      "order": 4,
+      "title": "Associate the app with the LinkedIn Page and have a super admin verify it",
+      "estimate": "unverified",
+      "detail": "A super admin of the associated Page must verify the application before the access request is reviewed.",
+      "requires": [
+        "identity_or_business_verification",
+        "config_check"
+      ],
+      "actor": "you",
+      "observed": false,
+      "evidence": {
+        "label": "documented",
+        "sourceIds": [
+          "s4"
+        ]
+      }
+    },
+    {
+      "order": 5,
+      "title": "Configure redirect URL and get Client ID and Secret",
+      "estimate": "unverified",
+      "detail": "In the Auth tab, add an absolute HTTPS redirect URL (no # fragment) and note the Client ID and Client Secret. Keep the secret out of URLs and public places.",
+      "url": "https://learn.microsoft.com/en-us/linkedin/shared/authentication/authorization-code-flow",
+      "requires": [
+        "config_check"
+      ],
+      "actor": "agent",
+      "observed": false,
+      "evidence": {
+        "label": "documented",
+        "sourceIds": [
+          "s1"
+        ]
+      }
+    },
+    {
+      "order": 6,
+      "title": "Implement 3-legged OAuth and member posting",
+      "estimate": "unverified",
+      "detail": "For member posting, request w_member_social, which is listed as an open permission. The member consents to all requested scopes together. Exchange the authorization code for an access token. Per the sources, 2-legged OAuth is not available for Marketing APIs.",
+      "requires": [
+        "code_writing",
+        "docs_reading"
+      ],
+      "actor": "agent",
+      "agentPrep": "Write the authorization URL builder, callback handler and token exchange, with state checking.",
+      "observed": false,
+      "evidence": {
+        "label": "documented",
+        "sourceIds": [
+          "s1",
+          "s8",
+          "s6"
+        ]
+      }
+    },
+    {
+      "order": 7,
+      "title": "Submit the Community Management access request for Page posting",
+      "estimate": "unverified",
+      "detail": "Complete the access request form accurately and completely. LinkedIn reviews the approved use case, business email, organization, website/domain and Page-verified app for Development tier access.",
+      "requires": [
+        "manual_submission",
+        "identity_or_business_verification",
+        "legal_acceptance"
+      ],
+      "actor": "you",
+      "agentPrep": "Pre-fill the form answers and a use case description. Check that the organization website is a real organizational site, not a project docs page.",
+      "observed": false,
+      "evidence": {
+        "label": "documented",
+        "sourceIds": [
+          "s4",
+          "s7"
+        ]
+      }
+    },
+    {
+      "order": 8,
+      "title": "Wait for LinkedIn's review",
+      "estimate": "unverified; one developer reported about 2 weeks",
+      "detail": "The official docs give no review time. One developer reported about two weeks for a Share on LinkedIn review, which ended in an identity vetting rejection.",
+      "requires": [
+        "provider_review_wait"
+      ],
+      "actor": "provider_wait",
+      "observed": false,
+      "evidence": {
+        "label": "reported",
+        "sourceIds": [
+          "s9"
+        ]
+      }
+    },
+    {
+      "order": 9,
+      "title": "Prepare and submit the Standard tier upgrade",
+      "estimate": "unverified",
+      "detail": "After Development tier approval and full API integration, provide the company and product overview, use case description, test credentials and a screen recording of each use case. Later functionality changes may require re-review.",
+      "requires": [
+        "text_drafting",
+        "manual_submission",
+        "provider_review_wait"
+      ],
+      "actor": "provider_wait",
+      "agentPrep": "Draft the overview and use case descriptions and write a script for the screencast. Prepare test credentials for reviewers.",
+      "observed": false,
+      "evidence": {
+        "label": "documented",
+        "sourceIds": [
+          "s4"
+        ]
+      }
+    }
+  ],
+  "scopesAndNuances": [
+    {
+      "text": "w_member_social is listed by an official source as an open permission available to all apps. A third-party guide says it requires verification; this conflicts, so treat the third-party claim as unconfirmed.",
+      "evidence": {
+        "label": "unverified",
+        "sourceIds": [
+          "s8",
+          "s11"
+        ]
+      }
+    },
+    {
+      "text": "A third-party source says new apps get only basic open permissions by default and that most others, such as company page data, need LinkedIn approval, often via a partner program.",
+      "evidence": {
+        "label": "reported",
+        "sourceIds": [
+          "s10"
+        ]
+      }
+    },
+    {
+      "text": "A third-party source says requesting a scope not approved for your app produces a 403 'Not enough permissions' error.",
+      "evidence": {
+        "label": "reported",
+        "sourceIds": [
+          "s10"
+        ]
+      }
+    },
+    {
+      "text": "One developer reported that posting to a Page with w_organization_social was gated behind the Share on LinkedIn product review.",
+      "evidence": {
+        "label": "reported",
+        "sourceIds": [
+          "s9"
+        ]
+      }
+    },
+    {
+      "text": "LinkedIn has a Self-Serve API Program (APIs available on registration) and Vetted API Programs with eligibility criteria and additional terms.",
+      "evidence": {
+        "label": "documented",
+        "sourceIds": [
+          "s7"
+        ]
+      }
+    },
+    {
+      "text": "Standard rate limits are not published. They can be viewed per app in the Developer Portal Analytics tab, which only lists endpoints you have called that day (UTC).",
+      "evidence": {
+        "label": "documented",
+        "sourceIds": [
+          "s3"
+        ]
+      }
+    },
+    {
+      "text": "The Verified on LinkedIn Development tier is auto-provisioned without review, but it is for testing with your own admin accounts only, is not for production, and is currently not available to request. It is a different product from Page posting.",
+      "evidence": {
+        "label": "documented",
+        "sourceIds": [
+          "s5"
+        ]
+      }
+    },
+    {
+      "text": "Apps cannot create application tokens by default. Contacting the LinkedIn Relationship Manager or Business Development team is the documented route if you need that access.",
+      "evidence": {
+        "label": "documented",
+        "sourceIds": [
+          "s6"
+        ]
+      }
+    }
+  ],
+  "blockers": [
+    {
+      "problem": "Rejection with 'Identity vetting failed': LinkedIn could not verify a legally registered, active organization.",
+      "fix": "Provide a real organizational website and proof of legal registration. A project docs site on github.io was not accepted in the reported case.",
+      "contact": "LinkedIn Developer Support Portal",
+      "evidence": {
+        "label": "reported",
+        "sourceIds": [
+          "s9",
+          "s4"
+        ]
+      }
+    },
+    {
+      "problem": "A personal email address is used for the access request.",
+      "fix": "Use a verified business email. Check spam, junk, social and promotional folders for the verification email.",
+      "evidence": {
+        "label": "documented",
+        "sourceIds": [
+          "s4"
+        ]
+      }
+    },
+    {
+      "problem": "The app has not been verified by a super admin of the associated Page.",
+      "fix": "Ask a Page super admin to verify the app before submitting the request.",
+      "evidence": {
+        "label": "documented",
+        "sourceIds": [
+          "s4"
+        ]
+      }
+    },
+    {
+      "problem": "403 'Not enough permissions' when calling an endpoint or scope.",
+      "fix": "Request only scopes approved for your app, and complete the needed product or access approval first.",
+      "evidence": {
+        "label": "reported",
+        "sourceIds": [
+          "s10"
+        ]
+      }
+    }
+  ],
+  "handoff": {
+    "agentCanDo": [
+      {
+        "text": "Step 2: Prepare organization details and the Page",
+        "evidence": {
+          "label": "documented",
+          "sourceIds": [
+            "s4"
+          ]
+        }
+      },
+      {
+        "text": "Step 3: Create the app",
+        "evidence": {
+          "label": "documented",
+          "sourceIds": [
+            "s5",
+            "s2"
+          ]
+        }
+      },
+      {
+        "text": "Step 5: Configure redirect URL and get Client ID and Secret",
+        "evidence": {
+          "label": "documented",
+          "sourceIds": [
+            "s1"
+          ]
+        }
+      },
+      {
+        "text": "Step 6: Implement 3-legged OAuth and member posting",
+        "evidence": {
+          "label": "documented",
+          "sourceIds": [
+            "s1",
+            "s8",
+            "s6"
+          ]
+        }
+      },
+      {
+        "text": "Step 7 (prep): Pre-fill the form answers and a use case description. Check that the organization website is a real organizational site, not a project docs page.",
+        "evidence": {
+          "label": "documented",
+          "sourceIds": [
+            "s4",
+            "s7"
+          ]
+        }
+      }
+    ],
+    "youMustDo": [
+      {
+        "text": "Step 1: Sign in to LinkedIn and open the Developer Portal (needs: login_or_account)",
+        "evidence": {
+          "label": "documented",
+          "sourceIds": [
+            "s7",
+            "s2"
+          ]
+        }
+      },
+      {
+        "text": "Step 4: Associate the app with the LinkedIn Page and have a super admin verify it (needs: identity_or_business_verification)",
+        "evidence": {
+          "label": "documented",
+          "sourceIds": [
+            "s4"
+          ]
+        }
+      },
+      {
+        "text": "Step 7: Submit the Community Management access request for Page posting (needs: manual_submission, identity_or_business_verification, legal_acceptance)",
+        "evidence": {
+          "label": "documented",
+          "sourceIds": [
+            "s4",
+            "s7"
+          ]
+        }
+      }
+    ],
+    "providerWait": [
+      {
+        "text": "Step 8: Wait for LinkedIn's review",
+        "evidence": {
+          "label": "reported",
+          "sourceIds": [
+            "s9"
+          ]
+        }
+      },
+      {
+        "text": "Step 9: Prepare and submit the Standard tier upgrade",
+        "evidence": {
+          "label": "documented",
+          "sourceIds": [
+            "s4"
+          ]
+        }
+      }
+    ]
+  },
+  "tested": {
+    "unverified": [
+      "No official time for review turnaround; the only figure is one developer's reported two weeks.",
+      "How long the Standard tier upgrade review takes.",
+      "Whether member posting with w_member_social needs any product approval beyond the open permission, given the conflicting third-party claim.",
+      "Whether Page posting with w_organization_social goes through Community Management review or Share on LinkedIn review. The sources describe both.",
+      "Hours of human effort for the full process.",
+      "Whether a managed Composio app can post as a Page or supports the scopes you need.",
+      "Weakly supported (self-check): A verified organization website and domain. A developer reported a GitHub Pages docs site was not accepted.",
+      "Weakly supported (self-check): LinkedIn has a Self-Serve API Program (APIs available on registration) and Vetted API Programs with eligibility criteria and additional term",
+      "Weakly supported (self-check): The Verified on LinkedIn Development tier is auto-provisioned without review, but it is for testing with your own admin accounts only, is no",
+      "Weakly supported (self-check): Apps cannot create application tokens by default. Contacting the LinkedIn Relationship Manager or Business Development team is the documente",
+      "Weakly supported (self-check): Associate the app with the LinkedIn Page and have a super admin verify it. A super admin of the associated Page must verify the application ",
+      "Weakly supported (self-check): Configure redirect URL and get Client ID and Secret. In the Auth tab, add an absolute HTTPS redirect URL (no # fragment) and note the Client",
+      "Weakly supported (self-check): Submit the Community Management access request for Page posting. Complete the access request form accurately and completely. LinkedIn review"
+    ]
+  },
+  "sources": [
+    {
+      "id": "s1",
+      "title": "LinkedIn 3-Legged OAuth Flow - LinkedIn | Microsoft Learn",
+      "url": "https://learn.microsoft.com/en-us/linkedin/shared/authentication/authorization-code-flow",
+      "publisher": "official",
+      "retrievedAt": "2026-10-29"
+    },
+    {
+      "id": "s2",
+      "title": "LinkedIn Developer Solutions",
+      "url": "https://developer.linkedin.com",
+      "publisher": "official",
+      "retrievedAt": "2026-10-29"
+    },
+    {
+      "id": "s3",
+      "title": "LinkedIn API Rate Limiting - LinkedIn | Microsoft Learn",
+      "url": "https://learn.microsoft.com/en-us/linkedin/shared/api-guide/concepts/rate-limits",
+      "publisher": "official",
+      "retrievedAt": "2026-10-29"
+    },
+    {
+      "id": "s4",
+      "title": "Community Management App Review - LinkedIn | Microsoft Learn",
+      "url": "https://learn.microsoft.com/en-us/linkedin/marketing/community-management-app-review?view=li-lms-2026-09",
+      "publisher": "official",
+      "retrievedAt": "2026-10-29"
+    },
+    {
+      "id": "s5",
+      "title": "Quickstart on Development Tier - LinkedIn | Microsoft Learn",
+      "url": "https://learn.microsoft.com/en-us/linkedin/consumer/integrations/verified-on-linkedin/guides/quickstart",
+      "publisher": "official",
+      "retrievedAt": "2026-10-29"
+    },
+    {
+      "id": "s6",
+      "title": "LinkedIn 2-Legged OAuth Flow - LinkedIn | Microsoft Learn",
+      "url": "https://learn.microsoft.com/en-us/linkedin/shared/authentication/client-credentials-flow",
+      "publisher": "official",
+      "retrievedAt": "2026-10-29"
+    },
+    {
+      "id": "s7",
+      "title": "API Terms of Use",
+      "url": "https://www.linkedin.com/legal/l/api-terms-of-use",
+      "publisher": "official",
+      "retrievedAt": "2026-10-29"
+    },
+    {
+      "id": "s8",
+      "title": "Authenticating with OAuth 2.0 Overview - LinkedIn | Microsoft Learn",
+      "url": "https://learn.microsoft.com/en-us/linkedin/shared/authentication/authentication",
+      "publisher": "official",
+      "retrievedAt": "2026-10-29"
+    },
+    {
+      "id": "s9",
+      "title": "LinkedIn API Approval Rejected: What They Actually Require - Richard Fu",
+      "url": "https://www.richardfu.net/linkedin-api-approval-rejected-organizational-website",
+      "publisher": "third_party",
+      "retrievedAt": "2026-10-29"
+    },
+    {
+      "id": "s10",
+      "title": "Why Your LinkedIn API Returns 'Not Enough Permissions' Error",
+      "url": "https://www.trykondo.com/blog/fix-linkedin-permissions-error",
+      "publisher": "third_party",
+      "retrievedAt": "2026-10-29"
+    },
+    {
+      "id": "s11",
+      "title": "Implementing LinkedIn OAuth 2.0 Authentication in Web Apps",
+      "url": "https://reintech.io/blog/implementing-linkedin-oauth-20-authentication-in-web-apps",
+      "publisher": "third_party",
+      "retrievedAt": "2026-10-29"
+    },
+    {
+      "id": "s12",
+      "title": "Composio: Managed OAuth apps (directory)",
+      "url": "https://docs.composio.dev/toolkits/managed-auth.md",
+      "publisher": "official",
+      "retrievedAt": "2026-10-29"
+    }
+  ],
+  "research": {
+    "method": "fixed",
+    "actionsUsed": 13,
+    "pageReads": 14,
+    "seconds": 44,
+    "checklist": [
+      {
+        "item": "registration",
+        "status": "covered",
+        "sourceIds": [
+          "s1",
+          "s2",
+          "s4",
+          "s5",
+          "s6",
+          "s7",
+          "s9",
+          "s10",
+          "s11"
+        ]
+      },
+      {
+        "item": "review_process",
+        "status": "covered",
+        "sourceIds": [
+          "s1",
+          "s2",
+          "s4",
+          "s5",
+          "s7",
+          "s8",
+          "s9",
+          "s10",
+          "s11"
+        ]
+      },
+      {
+        "item": "scopes_restrictions",
+        "status": "covered",
+        "sourceIds": [
+          "s1",
+          "s5",
+          "s7",
+          "s8",
+          "s10",
+          "s11"
+        ]
+      },
+      {
+        "item": "timing_evidence",
+        "status": "covered",
+        "sourceIds": [
+          "s5"
+        ]
+      },
+      {
+        "item": "requirements",
+        "status": "covered",
+        "sourceIds": [
+          "s1",
+          "s2",
+          "s4",
+          "s5",
+          "s9",
+          "s10",
+          "s11"
+        ]
+      },
+      {
+        "item": "rate_limits",
+        "status": "covered",
+        "sourceIds": [
+          "s3"
+        ]
+      },
+      {
+        "item": "community_reports",
+        "status": "covered",
+        "sourceIds": [
+          "s9",
+          "s10"
+        ]
+      },
+      {
+        "item": "composio_status",
+        "status": "covered",
+        "sourceIds": [
+          "s12"
+        ]
+      }
+    ]
+  },
+  "nextAction": "For member posting, create the app and test w_member_social. If you also need Page posting, gather the business email, organization registration proof and website, and have a Page super admin verify the app.",
+  "warnings": [
+    "Skipped off-topic page: https://www.linkedin.com/learning/content-marketing-online-reviews-in-social-media/setting-up-a-linkedin-reviews-page",
+    "Skipped off-topic page: https://www.linkedin.com/pulse/what-happens-during-app-store-review-submission-approval-rrykc",
+    "Skipped off-topic page: https://www.linkedin.com/posts/simonatglance_appdevelopment-appstore-mobileapps-activity-7398741269977448448-84Dy",
+    "Could not read https://www.reddit.com/r/SaaS/comments/1tk372k/i_spent_3_weeks_waiting_for_linkedin_api_approval; not used as a source",
+    "Dropped a step link that was not one of the fetched sources (step 1)",
+    "Dropped a step link that was not one of the fetched sources (step 3)",
+    "Self-check: 0 claim(s) downgraded, 7 flagged as weak"
+  ]
+}

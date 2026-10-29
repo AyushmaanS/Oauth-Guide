@@ -19,6 +19,13 @@ describe("computeDifficulty", () => {
   it("weeks of OPTIONAL review does not make it hard", () => expect(d({ reviewRequired: "none", waitMagnitude: "weeks" })).toBe("easy"));
   it("moderate: review for public use", () => expect(d({ reviewRequired: "for_public_use", reviewDepth: "manual", waitMagnitude: "days" })).toBe("moderate"));
   it("moderate: sensitive scopes, automated review", () => expect(d({ reviewRequired: "for_sensitive_scopes", reviewDepth: "automated" })).toBe("moderate"));
+  it("unknown: review required but depth and wait both unknown", () => expect(d({ reviewRequired: "for_sensitive_scopes", reviewDepth: "unknown", waitMagnitude: "unknown" })).toBe("unknown"));
+  it("moderate with a known depth but unknown wait says so", () => {
+    const r = computeDifficulty({ ...base, reviewRequired: "for_public_use", reviewDepth: "manual", waitMagnitude: "unknown" });
+    expect(r.difficulty).toBe("moderate");
+    expect(r.reason).toContain("not established");
+  });
+  it("business entity beats a paid-account reason", () => expect(computeDifficulty({ ...base, registrationFriction: "paid_or_business_account", businessEntityRequired: "yes" }).reason).toContain("business entity"));
   it("moderate: always reviewed", () => expect(d({ reviewRequired: "always", reviewDepth: "automated" })).toBe("moderate"));
   it("moderate: three special requirements", () => expect(d({ specialRequirements: ["a", "b", "c"] })).toBe("moderate"));
   it("two special requirements stay easy", () => expect(d({ specialRequirements: ["a", "b"] })).toBe("easy"));
