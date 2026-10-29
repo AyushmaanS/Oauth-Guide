@@ -1,0 +1,113 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`guideToMarkdown > matches the snapshot 1`] = `
+"# ExampleApp (fixture) — OAuth app setup guide
+
+*Library (deep research) · generated 2026-01-01 · attempt level L3: FAKE FIXTURE: the sample walkthrough stopped at the review-submission step, which only a human may do.*
+
+## Verdict: MODERATE
+
+FAKE FIXTURE: you get working credentials in about 15 minutes, but going public takes a manual review of several days.
+
+*For use case:* FAKE: an agent acting for your customers on ExampleApp. *Why this label:* FAKE FIXTURE: account needed, manual review for public use, a few special requirements, wait measured in days.
+
+- **Time to first credentials:** 0.25–0.5 hours — FAKE: measured in the sample walkthrough (14 minutes of work). (**Tested** — Fake sample walkthrough on 2026-01-01 reached issued credentials in 14 minutes.)
+
+- **Time to production / approval:** 3–5 days — FAKE: the fixture docs claim 3-5 business days. (**Documented** [2])
+
+- **Your effort:** 2–6 hours — FAKE: includes recording a demo video and writing a privacy policy. (**Unverified**)
+
+
+**Biggest risk to your launch date:** FAKE FIXTURE: a rejected review because the privacy policy is missing.
+
+## Managed OAuth vs your own app
+Composio-managed: unknown
+
+**Managed covers**
+- FAKE: a managed app would let you prototype without registering. (**Unverified**)
+
+**You need your own app when**
+- FAKE: you need your own app for your own branding and for review-gated scopes. (**Documented** [1])
+
+## Before you start
+- A free developer account on the provider's site (fake). (**Tested** — Sample walkthrough created a free account on 2026-01-01 (fake).)
+- A public privacy policy URL before submitting for review (fake). (**Documented** [2])
+- HTTPS redirect URIs in production (fake). (**Reported** [3])
+
+## Steps
+1. **Read the developer docs** — Agent, 10 min (observed; **Tested** — GET of the docs page returned a public page on 2026-01-01 (fake).)
+   FAKE: read the registration and review pages before starting.
+   https://developers.example.com/docs
+2. **Create a developer account** — You, 10 min (observed; **Tested** — Console redirected to sign-in on 2026-01-01; sample walkthrough stopped at the email code (fake).)
+   FAKE: sign up and confirm your email with the code you receive.
+   Agent prepares: Agent can open the sign-up page and list what you will need.
+   https://developers.example.com/console
+3. **Register your app** — Agent, 5 min (observed; **Tested** — Sample walkthrough created a test app on 2026-01-01 (fake).)
+   FAKE: give the app a name and a redirect URI.
+   https://developers.example.com/docs/register-an-app
+4. **Copy your client ID and secret into environment variables** — Agent, 5 min (observed; **Tested** — Credentials were issued immediately in the sample walkthrough (fake).)
+   FAKE: store the secret in your secret manager, never in code.
+5. **Prepare and submit the review form** — You, 2-6 h (observed; **Tested** — Sample walkthrough reached the submit page and stopped there (fake).)
+   FAKE: write the scope justification, record a demo video, and submit.
+   Agent prepares: Agent can draft the scope justification and a privacy-policy checklist.
+6. **Wait for the provider's review** — Waiting on provider, 3-5 business days (inferred; **Documented** [2])
+   FAKE: the docs state a typical review window.
+
+## Scopes and nuances
+- FAKE: apps in testing mode allow up to 100 test users. (**Documented** [1])
+- FAKE: community members report tokens expiring faster in testing mode. (**Reported** [3])
+
+## Blockers and fixes
+- **FAKE: review rejected for a missing privacy policy.** → Publish a privacy policy at a public HTTPS URL and resubmit. (FAKE: the provider's developer support form) (**Reported** [3])
+
+## What an agent can do vs where you take over
+**Agent**
+- Step 1: Read the developer docs (**Tested** — GET of the docs page returned a public page on 2026-01-01 (fake).)
+- Step 2 (prep): Agent can open the sign-up page and list what you will need. (**Tested** — Console redirected to sign-in on 2026-01-01; sample walkthrough stopped at the email code (fake).)
+- Step 3: Register your app (**Tested** — Sample walkthrough created a test app on 2026-01-01 (fake).)
+- Step 4: Copy your client ID and secret into environment variables (**Tested** — Credentials were issued immediately in the sample walkthrough (fake).)
+- Step 5 (prep): Agent can draft the scope justification and a privacy-policy checklist. (**Tested** — Sample walkthrough reached the submit page and stopped there (fake).)
+
+**You**
+- Step 2: Create a developer account (needs: login_or_account, email_or_phone_verification) (**Tested** — Console redirected to sign-in on 2026-01-01; sample walkthrough stopped at the email code (fake).)
+- Step 5: Prepare and submit the review form (needs: manual_submission) (**Tested** — Sample walkthrough reached the submit page and stopped there (fake).)
+
+**Provider wait**
+- Step 6: Wait for the provider's review (**Documented** [2])
+
+## How far we observed
+**Public path followed:** Developer docs (fixture) [public] → Register an app (fixture) [public] → Sign in (fixture) [login_redirect]. FAKE FIXTURE: the console redirected to a sign-in page, so the public path ends here.
+
+**Gate probe**
+- https://developers.example.com/docs → public (2026-01-01)
+- https://developers.example.com/docs/register-an-app → public (2026-01-01)
+- https://developers.example.com/console → login_redirect (2026-01-01)
+
+**Provider metadata:** found at https://accounts.example.com/.well-known/openid-configuration; dynamic registration: not_listed.
+
+**Walkthrough (2026-01-01):** stopped at Submit for review page.
+- a1: Opened console sign-up page → stopped_human_required. Sign-up needs an email code. Stopped and handed back to the owner (fake).
+- a2: Owner finished sign-up; agent resumed → completed. Console dashboard loaded for the new free account (fake).
+- a3: Created app named oauthpath-test-20260101 with a placeholder redirect URI → differs_from_docs. App created instantly; no review prompt. Docs said a review might apply (fake).
+- a4: Opened the credentials tab → completed. Client ID and secret issued immediately. Secret not copied anywhere (fake).
+- a5: Opened the 'Submit for review' page → stopped_human_required. Page asks for a demo video upload and business details. Not submitted (fake).
+
+**Open uncertainties**
+- FAKE: whether review time differs for restricted scopes.
+- FAKE: what happens after the submit page; nothing behind it was observed.
+- Research gap (partial): scopes_restrictions
+- Research gap (not found): rate_limits
+- Research gap (not found): composio_status
+
+## Sources
+1. [ExampleApp developer docs: register an app (fake)](https://developers.example.com/docs/register-an-app) — official, retrieved 2026-01-01
+2. [ExampleApp app review policy (fake)](https://developers.example.com/docs/app-review) — official, retrieved 2026-01-01
+3. [Community thread about ExampleApp review (fake)](https://forum.example.org/t/exampleapp-review) — community, retrieved 2026-01-01
+
+## Do this next
+FAKE FIXTURE: create your developer account, then register a test app.
+
+## Warnings
+- This is a hand-written fake fixture for UI development. Nothing in it is real.
+"
+`;

@@ -67,3 +67,12 @@ Why this set: spans Easy → Hard → Gated, and the two L3 targets (GitHub, Goo
 ## D-009 Owner approvals (2026-10-29)
 Owner approved: the attempt protocol; the library list (GitHub, Google/Gmail, LinkedIn at L2; Slack fallback); the spec changes (`useCase` in the verdict, `businessEntityRequired` factor, customer-side approval shown as requirement/blocker); the draft rubric.
 **This is NOT per-provider walkthrough consent.** That is requested separately, in writing, before Sprint 6.
+
+## D-010 Sprint 2 notes
+- Schema additions from D-009 are in `src/lib/schema/guide.ts`: `verdict.useCase`, `factors.businessEntityRequired`, plus `factors.waitMagnitude` (days vs weeks, needed by the rubric) and `providerMetadata.registrationEndpoint` (so "dynamic registration: supported" can be checked against a parsed value).
+- Rubric (`rubric.ts`) follows `docs/RUBRIC-DRAFT.md`. One refinement: weeks of wait only makes a guide "hard" when the review is required (GitHub's optional Marketplace wait does not).
+- `validateGuide` takes a structurally valid draft (`GuideShape`), repairs or downgrades what it can with warnings, then runs the full `Guide` schema. Direct schema parsing rejects instead (stricter); the pipeline will use validate.
+- **Deviation:** the scaffold enabled Next `cacheComponents` and `partialPrefetching`. Turned off: incompatible with `dynamicParams` and unneeded for this app.
+- The fake fixture shows in development only (or `SHOW_FIXTURE=1`); production builds show only `content/guides/*.json`. An invalid library guide fails the build (tested with a deliberately broken file).
+- Dev-server note: the Browser pane's built-in launcher could not start Next (Turbopack could not find `node`). Running `npx next dev` from a shell with `.tools/node/bin` on PATH works; use that.
+- Not yet done in the UI (later sprints): Attempt Kit panel, progress panel, live generation, full /about.
