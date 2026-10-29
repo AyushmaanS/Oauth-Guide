@@ -192,7 +192,7 @@
       "estimate": true,
       "minDays": 7,
       "maxDays": 60,
-      "basis": "Our estimate: no source gives a review time. Review only applies at 10,000+ users or at annual renewal. A manual review of this kind likely takes weeks, so the range is wide.",
+      "basis": "Our estimate: Discord does not publish a review time, and no source says whether review is manual. Review only applies at 10,000+ users or at annual renewal. The range is a guess.",
       "evidence": {
         "label": "unverified",
         "sourceIds": []
@@ -299,7 +299,7 @@
       {
         "text": "You want to verify the bot. Verification is tied to a Developer Team owner's ID, and ownership cannot be transferred afterwards.",
         "evidence": {
-          "label": "documented",
+          "label": "unverified",
           "sourceIds": [
             "s16"
           ]
@@ -358,7 +358,7 @@
     {
       "text": "To verify the bot, a Developer Team owner aged 16 or over must submit a qualifying ID through Stripe. This is a personal ID, and the sources do not mention a business entity being required.",
       "evidence": {
-        "label": "documented",
+        "label": "unverified",
         "sourceIds": [
           "s16"
         ]
@@ -367,7 +367,7 @@
     {
       "text": "The Developer Policy requires explicit permission before changing a user's account or starting processes on a user's or server's behalf.",
       "evidence": {
-        "label": "documented",
+        "label": "unverified",
         "sourceIds": [
           "s8"
         ]
@@ -378,7 +378,7 @@
     {
       "order": 1,
       "title": "Sign in with a Discord account",
-      "estimate": "5-30 minutes",
+      "estimate": "5-30 minutes (our estimate; unverified)",
       "detail": "You need a Discord account to register a developer application. Any verification prompts Discord shows for the account are not described in the sources.",
       "requires": [
         "login_or_account"
@@ -397,7 +397,7 @@
     {
       "order": 2,
       "title": "Read the OAuth2 and Developer Policy docs",
-      "estimate": "30-90 minutes",
+      "estimate": "30-90 minutes (our estimate; unverified)",
       "detail": "Review the OAuth2 flows, the bot scope, and the policy on user permission and server permission. Note that some scopes need Discord approval.",
       "url": "https://docs.discord.com/developers/topics/oauth2",
       "requires": [
@@ -407,19 +407,17 @@
       "observed": true,
       "traceHop": 1,
       "evidence": {
-        "label": "tested",
+        "label": "documented",
         "sourceIds": [
           "s1",
           "s8"
-        ],
-        "testNote": "Only reachability was observed: a read-only GET of this page on 2026-10-29 was classified \"public\" (host docs.discord.com).",
-        "observationRef": "https://docs.discord.com/developers/topics/oauth2"
+        ]
       }
     },
     {
       "order": 3,
       "title": "Register the application and save credentials",
-      "estimate": "15-45 minutes",
+      "estimate": "15-45 minutes (our estimate; unverified)",
       "detail": "Create the application in the Developer Portal and retrieve the client ID and client secret. A community report says one OAuth failure came from using the public key instead of the application secret.",
       "requires": [
         "config_check",
@@ -441,7 +439,7 @@
     {
       "order": 4,
       "title": "Configure the bot scope and invite link",
-      "estimate": "15-45 minutes",
+      "estimate": "15-45 minutes (our estimate; unverified)",
       "detail": "Use the bot scope so the bot is added to the guild the installer selects. The applications.commands scope is included by default with it.",
       "requires": [
         "config_check"
@@ -449,18 +447,16 @@
       "actor": "agent",
       "observed": true,
       "evidence": {
-        "label": "tested",
+        "label": "documented",
         "sourceIds": [
           "s1"
-        ],
-        "testNote": "Observed in a signed-in walkthrough on 2026-10-29: The generator lists about 25 scopes including bot. The Bot page says tokens can only be viewed once (Reset Token) and has Public Bot and OAuth2 Code Grant options. No invite link was generated.",
-        "observationRef": "dc-4"
+        ]
       }
     },
     {
       "order": 5,
       "title": "Enable the Message Content intent in the Developer Portal",
-      "estimate": "5-15 minutes",
+      "estimate": "5-15 minutes (our estimate; unverified)",
       "detail": "On the app's Bot page, under Privileged Gateway Intents, toggle on Message Content. This works without applying while the app has under 10,000 unique users. Enable only what the bot actually needs.",
       "requires": [
         "config_check"
@@ -468,20 +464,18 @@
       "actor": "agent",
       "observed": true,
       "evidence": {
-        "label": "tested",
+        "label": "documented",
         "sourceIds": [
           "s5",
           "s15"
-        ],
-        "testNote": "Observed in a signed-in walkthrough on 2026-10-29: Presence, Server Members and Message Content are toggles; the page says review applies only once a bot reaches 10,000 users. They were not toggled.",
-        "observationRef": "dc-5"
+        ]
       }
     },
     {
       "order": 6,
       "title": "Build the bot to read and post messages",
       "estimate": "Depends on scope of the agent",
-      "detail": "Without the intent, the app cannot access message content fields. Make sure server owners clearly consent to the bot acting in their servers.",
+      "detail": "Without the intent, the app receives empty values in message content fields, except for messages it sends itself, DMs to it, and messages that @mention it. Make sure server owners clearly consent to the bot acting in their servers.",
       "requires": [
         "code_writing"
       ],
@@ -498,8 +492,8 @@
     {
       "order": 7,
       "title": "Watch the unique-user count and prepare use case documentation",
-      "estimate": "2-6 hours",
-      "detail": "At 10,000 unique users the app or team owner is notified by email or system DM, and the Developer Portal shows a message. Draft answers on app functionality, the Message Content use case, and data practices.",
+      "estimate": "2-6 hours (our estimate; unverified)",
+      "detail": "At 10,000 unique users you are notified in the Developer Portal when it is time to apply. Draft answers on app functionality, the Message Content use case, and data practices.",
       "requires": [
         "text_drafting"
       ],
@@ -516,7 +510,7 @@
     {
       "order": 8,
       "title": "Submit the Privileged Intent application within 90 days",
-      "estimate": "30-60 minutes",
+      "estimate": "30-60 minutes (our estimate; unverified)",
       "detail": "Submit through the Developer Portal within 90 days of the notification. If you miss the window, intent access is removed, though you can still apply later.",
       "requires": [
         "manual_submission"
@@ -533,7 +527,7 @@
     {
       "order": 9,
       "title": "Wait for Discord's review decision",
-      "estimate": "Unknown; likely weeks",
+      "estimate": "Unknown: Discord does not publish a review time",
       "detail": "The app keeps working with the requested intents and can keep joining servers during review. No source states the review duration or whether it is manual.",
       "requires": [
         "provider_review_wait"
@@ -541,7 +535,7 @@
       "actor": "provider_wait",
       "observed": false,
       "evidence": {
-        "label": "documented",
+        "label": "unverified",
         "sourceIds": [
           "s5",
           "s15"
@@ -551,7 +545,7 @@
     {
       "order": 10,
       "title": "Reapply each year to keep access",
-      "estimate": "1-3 hours per year",
+      "estimate": "1-3 hours per year (our estimate; unverified)",
       "detail": "After the annual notification you have 90 days to reapply. Keep your use case documentation current.",
       "requires": [
         "text_drafting",
@@ -581,7 +575,7 @@
       "agentPrep": "Move the app to a Developer Team and make sure the team owner has a qualifying ID ready.",
       "observed": false,
       "evidence": {
-        "label": "documented",
+        "label": "unverified",
         "sourceIds": [
           "s16"
         ]
@@ -681,7 +675,7 @@
       "problem": "The intended verifying team owner is under 16 or has no qualifying ID.",
       "fix": "Add a Developer Team owner aged 16 or over with a qualifying ID, such as a co-developer, parent or guardian. They must apply from their own account, and ownership cannot be transferred after verification.",
       "evidence": {
-        "label": "documented",
+        "label": "unverified",
         "sourceIds": [
           "s16"
         ]
@@ -875,14 +869,20 @@
       "Research gap (not found): rate_limits",
       "Research gap (not found): community_reports",
       "Steps 2, 6, 7, 8, 9, 10, 11 were not walked through (the walkthrough stopped at before revealing a client secret or bot token: guide steps 3 to 5 were read, not completed; steps 6 to 11 were not attempted); they stay as documented, not observed.",
-      "Cleanup was incomplete after the walkthrough: a test app may still exist."
+      "Cleanup was incomplete after the walkthrough: a test app may still exist.",
+      "Walkthrough scope on steps 4 and 5: the OAuth2 scope list, the token-viewable-once note and the intent toggles were observed on the pages, but no invite link was generated and no intent was toggled.",
+      "Discord's verification and policy details (age 16, ID through Stripe, ownership transfer, permission requirement) come from support pages that could not be fetched on 2026-10-29 (HTTP 403); check them manually before relying on them."
     ]
   },
   "changelog": [
     "2026-10-29: signed-in walkthrough merged (level L3).",
     "2026-10-29: corrected \"A Discord account is needed to register an application in the Developer Portal a\" to \"Creating the app needs a Discord account and ticking agreement to the Developer \" after the walkthrough.",
     "2026-10-29: corrected \"A community report says the Developer Portal's display of public key and secret \" to \"The General Information page shows the Application ID and a Public Key; the Clie\" after the walkthrough.",
-    "2026-10-29: noted that Discord's terms on automated access are ambiguous and the owner ran this walkthrough knowingly."
+    "2026-10-29: noted that Discord's terms on automated access are ambiguous and the owner ran this walkthrough knowingly.",
+    "2026-10-29: verification: Message Content wording corrected (empty values, with exceptions); the 10,000-user notice is documented only for the Developer Portal.",
+    "2026-10-29: verification: steps 2, 4 and 5 changed from tested to documented (reachability only, or the action was not performed).",
+    "2026-10-29: verification: step time ranges marked as our estimates; the 'likely weeks' review guess removed (no source gives a review time).",
+    "2026-10-29: verification: the bot-verification and Developer Policy claims downgraded to unverified (primary pages returned HTTP 403)."
   ],
   "sources": [
     {
