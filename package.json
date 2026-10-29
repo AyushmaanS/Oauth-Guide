@@ -12,7 +12,8 @@
     "typecheck": "tsc --noEmit",
     "guide": "tsx --env-file=.env.local scripts/generate-guide.ts",
     "prebuild": "tsx scripts/validate-content.ts",
-    "smoke": "tsx --env-file=.env.local scripts/smoke-live.ts"
+    "smoke": "tsx --env-file=.env.local scripts/smoke-live.ts",
+    "merge": "tsx scripts/merge-attempt.ts"
   },
   "dependencies": {
     "@tavily/core": "^0.7.14",

@@ -325,6 +325,8 @@ export const GuideShape = z.strictObject({
     providerWait: z.array(Claim),
   }),
   tested: z.strictObject({ unverified: z.array(z.string()) }),
+  /** Dated lines recording corrections applied after a walkthrough or verification. */
+  changelog: z.array(z.string()).optional(),
   sources: z.array(Source),
   research: z.strictObject({
     method: z.enum(["agent", "fixed", "fixed_fallback"]),

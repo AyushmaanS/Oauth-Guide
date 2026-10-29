@@ -93,6 +93,12 @@ export function GuideView({ guide }: { guide: Guide }) {
         <h3 className="mb-1 mt-4 font-semibold">Gate probe</h3><ProbeList probe={guide.probe} />
         <h3 className="mb-1 mt-4 font-semibold">Provider OAuth metadata</h3><ProviderMetadataPanel meta={guide.providerMetadata} />
         {guide.attempt && (<><h3 className="mb-1 mt-4 font-semibold">Signed-in walkthrough</h3><AttemptLogView attempt={guide.attempt} /></>)}
+        {guide.changelog && guide.changelog.length > 0 && (
+          <>
+            <h3 className="mb-1 mt-4 font-semibold">Changelog</h3>
+            <ul className="list-disc pl-5 text-sm">{guide.changelog.map((l, i) => (<li key={i}>{l}</li>))}</ul>
+          </>
+        )}
         <h3 className="mb-1 mt-4 font-semibold">Open uncertainties</h3><TestedPanel items={guide.tested.unverified} />
         <h3 className="mb-1 mt-4 font-semibold">How this was researched</h3>
         <p className="text-sm">
