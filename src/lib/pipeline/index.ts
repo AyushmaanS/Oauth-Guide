@@ -100,7 +100,7 @@ function hitSources(app: Resolved, now: Date): Source[] {
 export interface RunArgs {
   query: string;
   mode: PipelineMode;
-  /** Gather strategy. Default: fixed (see D-012); GATHER_MODE=agent switches live mode to the bounded research agent. */
+  /** Gather strategy. Default: agent for live (fast) mode, fixed for deep mode (D-013); GATHER_MODE=fixed forces fixed. */
   gather?: "agent" | "fixed";
   /** If set, a cached complete guide for the resolved slug stops the run early. */
   cacheLookup?: (slug: string) => Promise<Guide | null>;
@@ -156,8 +156,8 @@ export async function runPipeline(args: RunArgs): Promise<PipelineResult> {
   }
 
   let gathered: Gathered | null = null;
-  // Default is the fixed gather: the Sprint 4 comparison (docs/DECISIONS.md D-012) found the agent no better. GATHER_MODE=agent opts in.
-  const strategy = args.gather ?? (process.env.GATHER_MODE === "agent" ? "agent" : "fixed");
+  // Live mode defaults to the research agent (owner decision, D-013). Deep mode and GATHER_MODE=fixed use the fixed gather.
+  const strategy = args.gather ?? (mode === "deep" || process.env.GATHER_MODE === "fixed" ? "fixed" : "agent");
   try {
     gathered = await stage("gather", strategy === "agent" ? "Research agent investigating" : "Researching official docs and community reports", async () => {
       if (strategy === "fixed") return fixedGather(app, mode, deps, ctx);
