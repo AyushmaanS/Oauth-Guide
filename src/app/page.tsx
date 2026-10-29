@@ -2,7 +2,9 @@ import { GenerateBox } from "@/components/GenerateBox";
 import { LibraryBrowser, type LibraryItem } from "@/components/LibraryBrowser";
 import { getLibraryGuides } from "@/lib/guides";
 
-export default function Home() {
+export default async function Home({ searchParams }: { searchParams: Promise<{ q?: string | string[] }> }) {
+  const q = (await searchParams).q;
+  const initialQuery = typeof q === "string" ? q : "";
   const items: LibraryItem[] = getLibraryGuides().map((g) => ({
     slug: g.slug,
     appName: g.appName,
@@ -20,7 +22,7 @@ export default function Home() {
         Before you build an integration, see whether registering your own OAuth app is an hour or a month, what blocks approval,
         and what an agent can do versus what you must do. Every claim says how well it is evidenced.
       </p>
-      <GenerateBox />
+      <GenerateBox initialQuery={initialQuery} />
       <section className="mt-10" aria-labelledby="lib"><h2 id="lib" className="mb-3 text-xl font-semibold">Library</h2><LibraryBrowser items={items} /></section>
     </main>
   );

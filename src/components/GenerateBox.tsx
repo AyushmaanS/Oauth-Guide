@@ -6,9 +6,9 @@ import { ProgressPanel, emptyProgress, type ProgressState } from "./ProgressPane
 
 type Ev = { stage?: string; label?: string; n?: number; action?: "search" | "read"; target?: string; reason?: string; title?: string; url?: string; items?: ProgressState["checklist"]; message?: string; slug?: string };
 
-export function GenerateBox() {
+export function GenerateBox({ initialQuery = "" }: { initialQuery?: string }) {
   const router = useRouter();
-  const [query, setQuery] = useState("");
+  const [query, setQuery] = useState(initialQuery.slice(0, 120));
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [progress, setProgress] = useState<ProgressState>(emptyProgress());

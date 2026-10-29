@@ -29,7 +29,7 @@ export function GuideView({ guide }: { guide: Guide }) {
   guide.blockers.forEach((b) => tally(b.evidence.label));
 
   return (
-    <article className="mx-auto max-w-4xl px-4 py-8">
+    <main className="mx-auto max-w-4xl px-4 py-8">
       {!guide.complete && (
         <div role="alert" className="mb-4 rounded border border-red-700 bg-red-50 p-3 text-sm text-red-950">
           <strong>Incomplete guide.</strong> Some stages did not finish. Missing parts are unverified.
@@ -110,6 +110,6 @@ export function GuideView({ guide }: { guide: Guide }) {
       <Section id="sources" title="Sources"><SourceList sources={guide.sources} /></Section>
       <Section id="next" title="Do this next"><p className="text-lg">{guide.nextAction}</p></Section>
       <Section id="kit" title="Go further"><AttemptKitPanel kit={buildAttemptKit(guide)} appName={guide.appName} /></Section>
-    </article>
+    </main>
   );
 }

@@ -43,7 +43,8 @@ export function mergeAttempt(draft: GuideShape, rawLog: AttemptLog, opts: MergeO
   }
 
   g.attemptLevel = "L3";
-  g.attemptLevelReason = `Signed-in walkthrough on ${log.date} (free account, separate browser profile) stopped at ${log.stoppedAt}${log.stoppedBecause.length ? `, because a human is needed for: ${log.stoppedBecause.join(", ")}` : ""}.`;
+  const stop = /^(before|after)\b/i.test(log.stoppedAt) ? `stopped: ${log.stoppedAt}` : `stopped at ${log.stoppedAt}`;
+  g.attemptLevelReason = `Signed-in walkthrough on ${log.date} (free account, separate browser profile) ${stop}${log.stoppedBecause.length ? `, because a human is needed for: ${log.stoppedBecause.join(", ")}` : ""}.`;
   changelog.push(`${log.date}: signed-in walkthrough merged (level L3).`);
 
   // ---- steps ----
@@ -76,7 +77,7 @@ export function mergeAttempt(draft: GuideShape, rawLog: AttemptLog, opts: MergeO
   const notReached = g.steps.filter((s) => !reached.has(s.order)).map((s) => s.order);
   if (notReached.length) {
     const range = notReached.length === 1 ? `Step ${notReached[0]}` : `Steps ${notReached.join(", ")}`;
-    addUnverified(`${range} ${notReached.length === 1 ? "was" : "were"} not walked through (the walkthrough stopped at ${log.stoppedAt}); they stay as documented, not observed.`);
+    addUnverified(`${range} ${notReached.length === 1 ? "was" : "were"} not walked through (the walkthrough ${/^(before|after)\b/i.test(log.stoppedAt) ? `stopped: ${log.stoppedAt}` : `stopped at ${log.stoppedAt}`}); they stay as documented, not observed.`);
   }
 
   // ---- measured time to credentials ----

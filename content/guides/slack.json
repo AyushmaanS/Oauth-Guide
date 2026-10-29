@@ -9,7 +9,7 @@
   "modelUsed": "anthropic/claude-sonnet-5.5",
   "complete": true,
   "attemptLevel": "L3",
-  "attemptLevelReason": "Signed-in walkthrough on 2026-10-29 (free account, separate browser profile) stopped at before adding scopes or installing: guide steps 1, 2 and 4 were read, steps 3 and 5 to 9 were not attempted, because a human is needed for: login_or_account. Slack's terms say nothing explicit about an owner driving their own developer console (ambiguous, allowed-leaning); the walkthrough used a new free workspace created for it and the owner approved it (decision D-018).",
+  "attemptLevelReason": "Signed-in walkthrough on 2026-10-29 (free account, separate browser profile) stopped: before adding scopes or installing: guide steps 1, 2 and 4 were read, steps 3 and 5 to 9 were not attempted, because a human is needed for: login_or_account. Slack's terms say nothing explicit about an owner driving their own developer console (ambiguous, allowed-leaning); the walkthrough used a new free workspace created for it and the owner approved it (decision D-018).",
   "probe": [
     {
       "url": "https://docs.slack.dev/tools/developer-sandboxes",
@@ -882,7 +882,7 @@
       "Weakly supported (self-check): Add HTTPS redirect URLs and implement the v2 OAuth flow. Redirect users to https://slack.com/oauth/v2/authorize with client_id and scopes, r",
       "Weakly supported (self-check): A customer's Workspace Owner has app approval enabled and blocks or delays the install. -> Give admins clear information on scopes and data ",
       "Not observed: anything beyond the end of the public path (js shell unclear at https://api.slack.com/apps).",
-      "Steps 3, 5, 6, 7, 8, 9 were not walked through (the walkthrough stopped at before adding scopes or installing: guide steps 1, 2 and 4 were read, steps 3 and 5 to 9 were not attempted); they stay as documented, not observed.",
+      "Steps 3, 5, 6, 7, 8, 9 were not walked through (the walkthrough stopped: before adding scopes or installing: guide steps 1, 2 and 4 were read, steps 3 and 5 to 9 were not attempted); they stay as documented, not observed.",
       "Cleanup was incomplete after the walkthrough: a test app may still exist.",
       "Whether public distribution needs any review is not stated by Slack (its docs mention none); the 'no review' statement comes from a third party and was not tested. Steps 2 and 4 were only partly observed: app creation and the Manage Distribution page were read, but no scope was configured and activation was not attempted."
     ]

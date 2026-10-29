@@ -9,7 +9,7 @@
   "modelUsed": "anthropic/claude-sonnet-5.5",
   "complete": true,
   "attemptLevel": "L3",
-  "attemptLevelReason": "Signed-in walkthrough on 2026-10-29 (free account, separate browser profile) stopped at before revealing a client secret or bot token: guide steps 3 to 5 were read, not completed; steps 6 to 11 were not attempted, because a human is needed for: legal_acceptance. Discord's terms are ambiguous and lean against automated access (they ban self-bots and say nothing about the Developer Portal); the owner ran this single walkthrough knowingly (decision D-018).",
+  "attemptLevelReason": "Signed-in walkthrough on 2026-10-29 (free account, separate browser profile) stopped: before revealing a client secret or bot token: guide steps 3 to 5 were read, not completed; steps 6 to 11 were not attempted, because a human is needed for: legal_acceptance. Discord's terms are ambiguous and lean against automated access (they ban self-bots and say nothing about the Developer Portal); the owner ran this single walkthrough knowingly (decision D-018).",
   "probe": [
     {
       "url": "https://docs.discord.com/developers/topics/oauth2",
@@ -868,7 +868,7 @@
       "Not observed: anything beyond the end of the public path (js shell unclear at https://discord.com/developers/home).",
       "Research gap (not found): rate_limits",
       "Research gap (not found): community_reports",
-      "Steps 2, 6, 7, 8, 9, 10, 11 were not walked through (the walkthrough stopped at before revealing a client secret or bot token: guide steps 3 to 5 were read, not completed; steps 6 to 11 were not attempted); they stay as documented, not observed.",
+      "Steps 2, 6, 7, 8, 9, 10, 11 were not walked through (the walkthrough stopped: before revealing a client secret or bot token: guide steps 3 to 5 were read, not completed; steps 6 to 11 were not attempted); they stay as documented, not observed.",
       "Cleanup was incomplete after the walkthrough: a test app may still exist.",
       "Walkthrough scope on steps 4 and 5: the OAuth2 scope list, the token-viewable-once note and the intent toggles were observed on the pages, but no invite link was generated and no intent was toggled.",
       "Discord's verification and policy details (age 16, ID through Stripe, ownership transfer, permission requirement) come from support pages that could not be fetched on 2026-10-29 (HTTP 403); check them manually before relying on them."

@@ -9,7 +9,7 @@
   "modelUsed": "anthropic/claude-sonnet-5.5",
   "complete": true,
   "attemptLevel": "L3",
-  "attemptLevelReason": "Signed-in walkthrough on 2026-10-29 (free account, separate browser profile) stopped at before viewing the client secret or using the Web API (greyed out on a free account): guide steps 1, 3 and 4 were observed, steps 2 and 5 to 9 were not attempted, because a human is needed for: email_or_phone_verification, legal_acceptance. Spotify's terms are ambiguous on an agent driving the dashboard (allowed-leaning); the owner ran this single walkthrough on a free account knowingly (decision D-018).",
+  "attemptLevelReason": "Signed-in walkthrough on 2026-10-29 (free account, separate browser profile) stopped: before viewing the client secret or using the Web API (greyed out on a free account): guide steps 1, 3 and 4 were observed, steps 2 and 5 to 9 were not attempted, because a human is needed for: email_or_phone_verification, legal_acceptance. Spotify's terms are ambiguous on an agent driving the dashboard (allowed-leaning); the owner ran this single walkthrough on a free account knowingly (decision D-018).",
   "probe": [
     {
       "url": "https://developer.spotify.com/documentation/web-api/concepts/quota-modes",
@@ -877,7 +877,7 @@
       "Not observed: anything beyond the end of the public path (depth limit at https://developer.spotify.com/documentation/web-api/concepts/authorization).",
       "Research gap (not found): timing_evidence",
       "Research gap (not found): community_reports",
-      "Steps 2, 5, 6, 7, 8, 9 were not walked through (the walkthrough stopped at before viewing the client secret or using the Web API (greyed out on a free account): guide steps 1, 3 and 4 were observed, steps 2 and 5 to 9 were not attempted); they stay as documented, not observed.",
+      "Steps 2, 5, 6, 7, 8, 9 were not walked through (the walkthrough stopped: before viewing the client secret or using the Web API (greyed out on a free account): guide steps 1, 3 and 4 were observed, steps 2 and 5 to 9 were not attempted); they stay as documented, not observed.",
       "Cleanup was incomplete after the walkthrough: a test app may still exist.",
       "Step 3: only app creation and the Client ID were observed; the client secret was not viewed.",
       "Whether a free-account app can call the Web API was not tested; the form greyed out the option and Spotify's docs require a Premium owner.",
