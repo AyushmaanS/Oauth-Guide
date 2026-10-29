@@ -1,0 +1,79 @@
+{
+  "performedBy": "owner_with_claude_code",
+  "date": "2026-10-29",
+  "accountType": "free",
+  "browserProfile": "separate",
+  "steps": [
+    {
+      "id": "gh-1",
+      "guideStepOrder": 2,
+      "action": "Opened Settings > Developer settings > OAuth Apps in the project browser profile (owner already signed in)",
+      "observation": "Signed in already, no re-authentication, 2FA, CAPTCHA or email prompt appeared (whether the email was already verified was not checked). The OAuth Apps list was empty.",
+      "outcome": "completed",
+      "tags": [
+        "login_or_account"
+      ],
+      "minutes": 1
+    },
+    {
+      "id": "gh-2",
+      "guideStepOrder": 3,
+      "action": "Clicked New OAuth app and read the registration form",
+      "observation": "Form fields: name*, homepage URL*, description (optional), Redirect URIs (up to 10, wildcard option), Enable Device Flow, Expire user access tokens (ticked by default).",
+      "outcome": "differs_from_docs",
+      "tags": [
+        "config_check"
+      ],
+      "minutes": 1
+    },
+    {
+      "id": "gh-3",
+      "guideStepOrder": 3,
+      "action": "Filled the form with throwaway values (oauthpath-test-20261029, http://localhost:3000, http://localhost:3000/callback) and clicked Register application",
+      "observation": "GitHub reported 'Application created successfully' and opened the app settings page. No terms to accept, no payment, no review step appeared.",
+      "outcome": "completed",
+      "tags": [
+        "config_check"
+      ],
+      "minutes": 2
+    },
+    {
+      "id": "gh-4",
+      "guideStepOrder": 4,
+      "action": "Read the new app's settings page without generating a secret",
+      "observation": "A Client ID is shown at once. The page says a client secret is needed and offers 'Generate a new client secret'; none was generated, to keep secrets out of logs.",
+      "outcome": "differs_from_docs",
+      "tags": [
+        "config_check"
+      ],
+      "minutes": 1
+    },
+    {
+      "id": "gh-5",
+      "action": "Cleanup: the owner clicked Delete application in the Danger zone; the agent reloaded the OAuth Apps list",
+      "observation": "The list showed 'No OAuth apps' afterwards. A first delete attempt had not taken effect, and a second one did.",
+      "outcome": "completed",
+      "tags": []
+    }
+  ],
+  "stoppedAt": "the client-secret step (guide step 4): no secret was generated; steps 5 to 7 were not attempted",
+  "stoppedBecause": [],
+  "corrections": [
+    {
+      "docClaim": "An Authorization callback URL that you own and control, since ownership of it prevents token leakage to an attacker.",
+      "observed": "The form labels it 'Redirect URIs': up to 10 are allowed, with an optional wildcard-matching checkbox. The label 'Authorization callback URL' was not shown."
+    },
+    {
+      "docClaim": "Access tokens can expire after eight hours with a refresh token that expires after six months without use. Requesting offline_access opts in per sign-in. Existing non-expiring tokens are not changed when expiry is later enforced.",
+      "observed": "The registration form has 'Expire user access tokens' ticked by default, which provides refresh tokens. The offline_access scope was not tested."
+    },
+    {
+      "docClaim": "The app gets a unique Client ID and Client Secret.",
+      "observed": "The Client ID is shown at once; a client secret is created only after clicking 'Generate a new client secret'."
+    }
+  ],
+  "cleanup": {
+    "appsDeleted": true,
+    "secretsRemoved": true
+  }
+}

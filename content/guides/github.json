@@ -8,8 +8,8 @@
   "pipelineVersion": "0.3.0",
   "modelUsed": "anthropic/claude-sonnet-5.5",
   "complete": true,
-  "attemptLevel": "L2",
-  "attemptLevelReason": "Gate probed: 3 page(s) requested read-only on 2026-10-29; public path followed for 3 page(s) (dead end). No account was used.",
+  "attemptLevel": "L3",
+  "attemptLevelReason": "Signed-in walkthrough on 2026-10-29 (free account, separate browser profile) stopped at the client-secret step (guide step 4): no secret was generated; steps 5 to 7 were not attempted.",
   "probe": [
     {
       "url": "https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/authorizing-oauth-apps",
@@ -141,6 +141,85 @@
       "Not published at the standard locations. That does not mean a feature is unsupported."
     ]
   },
+  "attempt": {
+    "performedBy": "owner_with_claude_code",
+    "date": "2026-10-29",
+    "accountType": "free",
+    "browserProfile": "separate",
+    "steps": [
+      {
+        "id": "gh-1",
+        "guideStepOrder": 2,
+        "action": "Opened Settings > Developer settings > OAuth Apps in the project browser profile (owner already signed in)",
+        "observation": "Signed in already, no re-authentication, 2FA, CAPTCHA or email prompt appeared (whether the email was already verified was not checked). The OAuth Apps list was empty.",
+        "outcome": "completed",
+        "tags": [
+          "login_or_account"
+        ],
+        "minutes": 1
+      },
+      {
+        "id": "gh-2",
+        "guideStepOrder": 3,
+        "action": "Clicked New OAuth app and read the registration form",
+        "observation": "Form fields: name*, homepage URL*, description (optional), Redirect URIs (up to 10, wildcard option), Enable Device Flow, Expire user access tokens (ticked by default).",
+        "outcome": "differs_from_docs",
+        "tags": [
+          "config_check"
+        ],
+        "minutes": 1
+      },
+      {
+        "id": "gh-3",
+        "guideStepOrder": 3,
+        "action": "Filled the form with throwaway values (oauthpath-test-20261029, http://localhost:3000, http://localhost:3000/callback) and clicked Register application",
+        "observation": "GitHub reported 'Application created successfully' and opened the app settings page. No terms to accept, no payment, no review step appeared.",
+        "outcome": "completed",
+        "tags": [
+          "config_check"
+        ],
+        "minutes": 2
+      },
+      {
+        "id": "gh-4",
+        "guideStepOrder": 4,
+        "action": "Read the new app's settings page without generating a secret",
+        "observation": "A Client ID is shown at once. The page says a client secret is needed and offers 'Generate a new client secret'; none was generated, to keep secrets out of logs.",
+        "outcome": "differs_from_docs",
+        "tags": [
+          "config_check"
+        ],
+        "minutes": 1
+      },
+      {
+        "id": "gh-5",
+        "action": "Cleanup: the owner clicked Delete application in the Danger zone; the agent reloaded the OAuth Apps list",
+        "observation": "The list showed 'No OAuth apps' afterwards. A first delete attempt had not taken effect, and a second one did.",
+        "outcome": "completed",
+        "tags": []
+      }
+    ],
+    "stoppedAt": "the client-secret step (guide step 4): no secret was generated; steps 5 to 7 were not attempted",
+    "stoppedBecause": [],
+    "corrections": [
+      {
+        "docClaim": "An Authorization callback URL that you own and control, since ownership of it prevents token leakage to an attacker.",
+        "observed": "The form labels it 'Redirect URIs': up to 10 are allowed, with an optional wildcard-matching checkbox. The label 'Authorization callback URL' was not shown."
+      },
+      {
+        "docClaim": "Access tokens can expire after eight hours with a refresh token that expires after six months without use. Requesting offline_access opts in per sign-in. Existing non-expiring tokens are not changed when expiry is later enforced.",
+        "observed": "The registration form has 'Expire user access tokens' ticked by default, which provides refresh tokens. The offline_access scope was not tested."
+      },
+      {
+        "docClaim": "The app gets a unique Client ID and Client Secret.",
+        "observed": "The Client ID is shown at once; a client secret is created only after clicking 'Generate a new client secret'."
+      }
+    ],
+    "cleanup": {
+      "appsDeleted": true,
+      "secretsRemoved": true
+    }
+  },
   "verdict": {
     "difficulty": "easy",
     "difficultyReason": "Credentials are available on a normal account with no required review.",
@@ -256,12 +335,14 @@
       }
     },
     {
-      "text": "An Authorization callback URL that you own and control, since ownership of it prevents token leakage to an attacker.",
+      "text": "The form labels it 'Redirect URIs': up to 10 are allowed, with an optional wildcard-matching checkbox. The label 'Authorization callback URL' was not shown. (Docs said: An Authorization callback URL that you own and control, since ownership of it prevents token leakage to an attacker.)",
       "evidence": {
-        "label": "documented",
+        "label": "tested",
         "sourceIds": [
           "s6"
-        ]
+        ],
+        "testNote": "Observed in a signed-in walkthrough on 2026-10-29; this corrects the documentation.",
+        "observationRef": "gh-2"
       }
     },
     {
@@ -311,54 +392,59 @@
     {
       "order": 2,
       "title": "Sign in to GitHub and verify the account email",
-      "estimate": "5-30 minutes",
+      "estimate": "1 min (measured in one walkthrough)",
       "detail": "Sign in to the account that will own the app. Users must have a verified email before they can authorize an OAuth app.",
       "requires": [
-        "login_or_account",
-        "email_or_phone_verification"
+        "login_or_account"
       ],
       "actor": "you",
-      "observed": false,
+      "observed": true,
       "evidence": {
-        "label": "documented",
+        "label": "tested",
         "sourceIds": [
           "s2"
-        ]
+        ],
+        "testNote": "Observed in a signed-in walkthrough on 2026-10-29: Signed in already, no re-authentication, 2FA, CAPTCHA or email prompt appeared (whether the email was already verified was not checked). The OAuth Apps list was empty.",
+        "observationRef": "gh-1"
       }
     },
     {
       "order": 3,
       "title": "Register the OAuth app",
-      "estimate": "10-30 minutes",
+      "estimate": "3 min (measured in one walkthrough)",
       "detail": "Open the new-application page and fill in the form. Most fields are free-form; set the Authorization callback URL carefully to a URL you own. The app gets a unique Client ID and Client Secret.",
       "requires": [
         "config_check"
       ],
       "actor": "agent",
       "agentPrep": "Prepare app name, homepage URL and callback URL values.",
-      "observed": false,
+      "observed": true,
       "evidence": {
-        "label": "documented",
+        "label": "tested",
         "sourceIds": [
           "s6"
-        ]
+        ],
+        "testNote": "Observed in a signed-in walkthrough on 2026-10-29: Form fields: name*, homepage URL*, description (optional), Redirect URIs (up to 10, wildcard option), Enable Device Flow, Expire user access tokens (ticked by default).",
+        "observationRef": "gh-2"
       }
     },
     {
       "order": 4,
       "title": "Store the Client ID and Client Secret securely",
-      "estimate": "5-15 minutes",
+      "estimate": "1 min (measured in one walkthrough)",
       "detail": "Keep them in environment variables or a secret store. The secret is used to exchange the code for an access token; do not leak it from web apps.",
       "requires": [
         "config_check"
       ],
       "actor": "agent",
-      "observed": false,
+      "observed": true,
       "evidence": {
-        "label": "documented",
+        "label": "tested",
         "sourceIds": [
           "s6"
-        ]
+        ],
+        "testNote": "Observed in a signed-in walkthrough on 2026-10-29: A Client ID is shown at once. The page says a client secret is needed and offers 'Generate a new client secret'; none was generated, to keep secrets out of logs.",
+        "observationRef": "gh-4"
       }
     },
     {
@@ -466,12 +552,14 @@
       }
     },
     {
-      "text": "Access tokens can expire after eight hours with a refresh token that expires after six months without use. Requesting offline_access opts in per sign-in. Existing non-expiring tokens are not changed when expiry is later enforced.",
+      "text": "The registration form has 'Expire user access tokens' ticked by default, which provides refresh tokens. The offline_access scope was not tested. (Docs said: Access tokens can expire after eight hours with a refresh token that expires after six months without use. Requesting offline_access opts in per sign-in. Existing non-expiring tokens are not changed when expiry is later enforced.)",
       "evidence": {
-        "label": "documented",
+        "label": "tested",
         "sourceIds": [
           "s1"
-        ]
+        ],
+        "testNote": "Observed in a signed-in walkthrough on 2026-10-29; this corrects the documentation.",
+        "observationRef": "gh-2"
       }
     },
     {
@@ -490,6 +578,15 @@
         "sourceIds": [
           "s3"
         ]
+      }
+    },
+    {
+      "text": "The Client ID is shown at once; a client secret is created only after clicking 'Generate a new client secret'. (Docs said: The app gets a unique Client ID and Client Secret.)",
+      "evidence": {
+        "label": "tested",
+        "sourceIds": [],
+        "testNote": "Observed in a signed-in walkthrough on 2026-10-29; this corrects the documentation.",
+        "observationRef": "gh-2"
       }
     }
   ],
@@ -544,19 +641,23 @@
       {
         "text": "Step 3: Register the OAuth app",
         "evidence": {
-          "label": "documented",
+          "label": "tested",
           "sourceIds": [
             "s6"
-          ]
+          ],
+          "testNote": "Observed in a signed-in walkthrough on 2026-10-29: Form fields: name*, homepage URL*, description (optional), Redirect URIs (up to 10, wildcard option), Enable Device Flow, Expire user access tokens (ticked by default).",
+          "observationRef": "gh-2"
         }
       },
       {
         "text": "Step 4: Store the Client ID and Client Secret securely",
         "evidence": {
-          "label": "documented",
+          "label": "tested",
           "sourceIds": [
             "s6"
-          ]
+          ],
+          "testNote": "Observed in a signed-in walkthrough on 2026-10-29: A Client ID is shown at once. The page says a client secret is needed and offers 'Generate a new client secret'; none was generated, to keep secrets out of logs.",
+          "observationRef": "gh-4"
         }
       },
       {
@@ -581,12 +682,14 @@
     ],
     "youMustDo": [
       {
-        "text": "Step 2: Sign in to GitHub and verify the account email (needs: login_or_account, email_or_phone_verification)",
+        "text": "Step 2: Sign in to GitHub and verify the account email (needs: login_or_account)",
         "evidence": {
-          "label": "documented",
+          "label": "tested",
           "sourceIds": [
             "s2"
-          ]
+          ],
+          "testNote": "Observed in a signed-in walkthrough on 2026-10-29: Signed in already, no re-authentication, 2FA, CAPTCHA or email prompt appeared (whether the email was already verified was not checked). The OAuth Apps list was empty.",
+          "observationRef": "gh-1"
         }
       }
     ],
@@ -616,9 +719,15 @@
       "Weakly supported (self-check): You need control over token settings such as expiring tokens, or your own rate-limit budget and app-level settings.",
       "Weakly supported (self-check): Request organization owner approval where restrictions are enabled. When access restrictions are on, members request owner approval for the ",
       "Not observed: anything beyond the end of the public path (dead end at https://docs.github.com/en/apps/creating-github-apps/about-creating-github-apps/migrating-oauth-apps-to-github-apps).",
-      "No account was used: steps after the first sign-in are inferred from documentation, not observed."
+      "Steps 1, 5, 6, 7 were not walked through (the walkthrough stopped at the client-secret step (guide step 4): no secret was generated; steps 5 to 7 were not attempted); they stay as documented, not observed."
     ]
   },
+  "changelog": [
+    "2026-10-29: signed-in walkthrough merged (level L3).",
+    "2026-10-29: corrected \"An Authorization callback URL that you own and control, since ownership of it pr\" to \"The form labels it 'Redirect URIs': up to 10 are allowed, with an optional wildc\" after the walkthrough.",
+    "2026-10-29: corrected \"Access tokens can expire after eight hours with a refresh token that expires aft\" to \"The registration form has 'Expire user access tokens' ticked by default, which p\" after the walkthrough.",
+    "2026-10-29: corrected \"The app gets a unique Client ID and Client Secret.\" to \"The Client ID is shown at once; a client secret is created only after clicking '\" after the walkthrough."
+  ],
   "sources": [
     {
       "id": "s1",
