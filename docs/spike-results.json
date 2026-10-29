@@ -1,0 +1,371 @@
+{
+  "date": "2026-10-29T06:36:29.249Z",
+  "base": "https://go.fastrouter.ai/api/v1",
+  "models": {
+    "ok": true,
+    "count": 223,
+    "candidatesAvailable": {
+      "anthropic/claude-haiku-5.5": true,
+      "google/gemini-3.8-flash": true,
+      "anthropic/claude-sonnet-5.5": true,
+      "anthropic/claude-opus-5.5": true
+    }
+  },
+  "modelTests": {
+    "anthropic/claude-sonnet-5.5": {
+      "plain": {
+        "ok": true,
+        "ms": 1760,
+        "text": "pong"
+      },
+      "jsonMode": {
+        "ok": true,
+        "ms": 1435,
+        "parsed": {
+          "a": 1,
+          "b": [
+            "x"
+          ]
+        }
+      },
+      "jsonSchema": {
+        "ok": true,
+        "ms": 1191,
+        "parsed": {
+          "name": "x",
+          "count": 2
+        }
+      },
+      "toolCalling": {
+        "ok": true,
+        "ms": 2507,
+        "calledTool": true
+      },
+      "streaming": {
+        "ok": true,
+        "ms": 1239,
+        "chunks": 4,
+        "firstTokenMs": 3
+      },
+      "jsonActionProtocol": {
+        "trials": 10,
+        "parsed": 10,
+        "validAgainstZod": 10,
+        "medianMs": 1807,
+        "fails": []
+      }
+    },
+    "anthropic/claude-haiku-5.5": {
+      "plain": {
+        "ok": true,
+        "ms": 2325,
+        "text": "pong"
+      },
+      "jsonMode": {
+        "ok": true,
+        "ms": 1793,
+        "parsed": {
+          "a": 1,
+          "b": [
+            "x"
+          ]
+        }
+      },
+      "jsonSchema": {
+        "ok": true,
+        "ms": 722,
+        "parsed": {
+          "name": "x",
+          "count": 2
+        }
+      },
+      "toolCalling": {
+        "ok": true,
+        "ms": 2772,
+        "calledTool": true
+      },
+      "streaming": {
+        "ok": true,
+        "ms": 1560,
+        "chunks": 4,
+        "firstTokenMs": 1
+      },
+      "jsonActionProtocol": {
+        "trials": 10,
+        "parsed": 10,
+        "validAgainstZod": 10,
+        "medianMs": 2214,
+        "fails": []
+      }
+    },
+    "anthropic/claude-opus-5.5": {
+      "plain": {
+        "ok": true,
+        "ms": 1763,
+        "text": ""
+      },
+      "jsonMode": {
+        "ok": true,
+        "ms": 1435,
+        "parsed": {
+          "a": 1,
+          "b": [
+            "x"
+          ]
+        }
+      },
+      "jsonSchema": {
+        "ok": true,
+        "ms": 1639,
+        "parsed": {
+          "name": "x",
+          "count": 2
+        }
+      },
+      "toolCalling": {
+        "ok": true,
+        "ms": 2772,
+        "calledTool": true
+      },
+      "streaming": {
+        "ok": true,
+        "ms": 1505,
+        "chunks": 4,
+        "firstTokenMs": 1
+      },
+      "jsonActionProtocol": {
+        "trials": 10,
+        "parsed": 10,
+        "validAgainstZod": 10,
+        "medianMs": 2633,
+        "fails": []
+      }
+    },
+    "google/gemini-3.8-flash": {
+      "plain": {
+        "ok": true,
+        "ms": 1855,
+        "text": ""
+      },
+      "jsonMode": {
+        "ok": true,
+        "ms": 2267,
+        "parsed": {
+          "a": 1,
+          "b": [
+            "x"
+          ]
+        }
+      },
+      "jsonSchema": {
+        "ok": true,
+        "ms": 3484,
+        "parsed": "PARSE_FAILED"
+      },
+      "toolCalling": {
+        "ok": true,
+        "ms": 3559,
+        "calledTool": true
+      },
+      "streaming": {
+        "ok": true,
+        "ms": 3536,
+        "chunks": 1,
+        "firstTokenMs": 242
+      },
+      "jsonActionProtocol": {
+        "trials": 10,
+        "parsed": 8,
+        "validAgainstZod": 8,
+        "medianMs": 3588,
+        "fails": [
+          "notjson:{\"action\":\"search\",\"query\":\"\\\"Example API\\\"",
+          "notjson:{\"action\":\"search\",\"query\":\"Example API register OAuth appli"
+        ]
+      }
+    }
+  },
+  "tavily": {
+    "search": {
+      "ok": true,
+      "ms": 5241,
+      "results": 5,
+      "sample": [
+        "https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/creating-an-oauth-app",
+        "https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/authorizing-oauth-apps",
+        "https://docs.github.com/en/apps/creating-github-apps/registering-a-github-app/registering-a-github-app"
+      ]
+    },
+    "extract": {
+      "ok": true,
+      "ms": 2636,
+      "url": "https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/creating-an-oauth-app",
+      "chars": 2751
+    }
+  },
+  "reachability": [
+    {
+      "url": "https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/creating-an-oauth-app",
+      "status": 200,
+      "server": null,
+      "ms": 493
+    },
+    {
+      "url": "https://github.com/settings/developers",
+      "status": 302,
+      "location": "https://github.com/login?return_to=https%3A%2F%2Fgithub.com%2Fsettings%2Fdevelopers",
+      "server": "github.com",
+      "ms": 4553
+    },
+    {
+      "url": "https://github.com/login/oauth/authorize",
+      "status": 302,
+      "location": "https://github.com/login?return_to=%2Flogin%2Foauth%2Fauthorize",
+      "server": "github.com",
+      "ms": 4504
+    },
+    {
+      "url": "https://developers.google.com/identity/protocols/oauth2",
+      "status": 200,
+      "server": "Google Frontend",
+      "ms": 5008
+    },
+    {
+      "url": "https://console.cloud.google.com/apis/credentials",
+      "status": 302,
+      "location": "https://accounts.google.com/ServiceLogin?service=cloudconsole&passive=1209600&osid=1&continue=https:",
+      "server": "ESF",
+      "ms": 553
+    },
+    {
+      "url": "https://accounts.google.com/.well-known/openid-configuration",
+      "status": 200,
+      "server": "sffe",
+      "ms": 1909
+    },
+    {
+      "url": "https://api.slack.com/authentication/oauth-v2",
+      "status": 302,
+      "location": "https://docs.slack.dev/authentication/installing-with-oauth",
+      "server": "Apache",
+      "ms": 2085
+    },
+    {
+      "url": "https://api.slack.com/apps",
+      "status": 200,
+      "server": "Apache",
+      "ms": 2531
+    },
+    {
+      "url": "https://developers.notion.com/docs/authorization",
+      "status": 308,
+      "location": "/guides/get-started/authorization",
+      "server": "Vercel",
+      "ms": 5802
+    },
+    {
+      "url": "https://www.notion.so/my-integrations",
+      "status": 301,
+      "location": "/developers/connections",
+      "server": "cloudflare",
+      "ms": 6622
+    },
+    {
+      "url": "https://learn.microsoft.com/en-us/linkedin/shared/authentication/authentication",
+      "status": 200,
+      "server": null,
+      "ms": 5613
+    },
+    {
+      "url": "https://developer.linkedin.com/",
+      "status": 200,
+      "server": "cloudflare",
+      "ms": 7113
+    },
+    {
+      "url": "https://www.linkedin.com/developers/apps",
+      "error": "The operation was aborted due to timeout"
+    }
+  ],
+  "dnsCheck": {
+    "nodeVersion": "v26.13.0",
+    "cases": [
+      {
+        "host": "docs.github.com",
+        "ips": [
+          "2606:50c0:8003::154",
+          "2606:50c0:8000::154",
+          "2606:50c0:8001::154",
+          "2606:50c0:8002::154",
+          "185.199.111.154",
+          "185.199.110.154",
+          "185.199.108.154",
+          "185.199.109.154"
+        ],
+        "anyPrivate": false
+      },
+      {
+        "host": "localhost",
+        "ips": [
+          "::1",
+          "127.0.0.1"
+        ],
+        "anyPrivate": true
+      },
+      {
+        "host": "metadata.google.internal",
+        "error": "getaddrinfo ENOTFOUND metadata.google.internal"
+      },
+      {
+        "host": "127.0.0.1.nip.io",
+        "ips": [
+          "127.0.0.1"
+        ],
+        "anyPrivate": true
+      }
+    ],
+    "unitChecks": {
+      "169.254.169.254": true,
+      "10.1.2.3": true,
+      "8.8.8.8": false,
+      "::1": true
+    }
+  },
+  "composio": [
+    {
+      "url": "https://docs.composio.dev/toolkits/managed-auth",
+      "status": 200,
+      "type": "text/html; charset=utf-8",
+      "bytes": 100701,
+      "mentionsGithub": true,
+      "mentionsManaged": true,
+      "mentionsGmail": true
+    },
+    {
+      "url": "https://docs.composio.dev/llms.txt",
+      "status": 200,
+      "type": "text/plain; charset=utf-8",
+      "bytes": 5747,
+      "mentionsGithub": true,
+      "mentionsManaged": true,
+      "mentionsGmail": false
+    },
+    {
+      "url": "https://docs.composio.dev/toolkits/managed-auth.md",
+      "status": 200,
+      "type": "text/markdown; charset=utf-8",
+      "bytes": 23040,
+      "mentionsGithub": true,
+      "mentionsManaged": true,
+      "mentionsGmail": true
+    },
+    {
+      "url": "https://docs.composio.dev/toolkits/github",
+      "error": "The operation was aborted due to timeout"
+    },
+    {
+      "url": "https://docs.composio.dev/toolkits/github.md",
+      "error": "The operation was aborted due to timeout"
+    }
+  ]
+}

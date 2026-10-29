@@ -22,3 +22,26 @@ create-next-app gave Next 16.4.3, React 19.3, Tailwind 4, ESLint 9. Spec said "N
 `@types/node` raised to ^24 because Vitest 5 would not install against ^20.
 `tsc --noEmit` needs a prior `next build` (Next generates the `LayoutProps` types).
 The scaffold's `AGENTS.md`/README were not kept; our README is written in Sprint 7.
+
+## D-005 Sprint 0 spike results (2026-10-29) — raw data in `docs/spike-results.json`, script `scripts/spike-env.ts`
+
+| [VERIFY] item | Outcome |
+|---|---|
+| FastRouter base URL `https://go.fastrouter.ai/api/v1` | **Confirmed.** OpenAI SDK works unchanged; `GET /models` returns 223 models (many are image/video/audio). |
+| Models usable | Claude Haiku 5.5, Sonnet 5.5, Opus 5.5 and Gemini 3.8 Flash all answered. Model ids look like `anthropic/claude-haiku-5.5`. |
+| JSON object mode + strict JSON-schema output | Worked on all four, except Gemini 3.8 Flash returned unparseable output once for json_schema. |
+| Native tool calling (informational) | Worked on all four. We still use the JSON-action protocol (spec 6.5). |
+| **JSON-action protocol, 10 trials, plain prompt, zod-validated** | Haiku 5.5: 10/10. Sonnet 5.5: 10/10. Opus 5.5: 10/10. Gemini 3.8 Flash: 8/10 (2 truncated/invalid). |
+| Streaming | **Works** (stream:true accepted). Gateway delivered only ~4 chunks for a short reply, so it is coarse; stage-level progress stays as designed (spec 6.2). |
+| Latency (single short calls, one sample) | Haiku ~0.7–2.8 s; Sonnet ~1.2–2.5 s; Opus ~1.4–2.8 s; Gemini ~2.3–3.6 s. Medians of the 10-trial run: Sonnet 1.8 s, Haiku 2.2 s, Opus 2.6 s, Gemini 3.6 s. Too small a sample to rank Haiku vs Sonnet on speed. |
+| Tavily | Search 5.2 s (5 results), extract 2.6 s. Search is slower than hoped; agent budget (75 s) must allow for ~5 s per search. |
+| Provider reachability from this machine | Reachable: docs.github.com, github.com (302 to login), developers.google.com, console.cloud.google.com (302 to Google sign-in), accounts.google.com OIDC metadata (200), api.slack.com, developers.notion.com, notion.so, learn.microsoft.com (LinkedIn docs), developer.linkedin.com. **Timed out at 10 s:** `www.linkedin.com/developers/apps` (the console; may block bots or just be slow; recheck in Sprint 5). Several docs URLs moved (Slack to docs.slack.dev, Notion to new paths) — the trace must follow redirects only within the allow-list, so allow-lists need the new hosts. |
+| DNS/IP validation in Node | Works: `dns.lookup(all:true)` + private-range check correctly flags localhost and a rebinding-style hostname (`127.0.0.1.nip.io`). Safefetch will pin the validated IP per request. |
+| Composio managed-auth directory | **Readable programmatically.** The page renders client-side, but `https://docs.composio.dev/toolkits/managed-auth.md` returns clean markdown with a table of 124 OAuth toolkits that Composio manages (GitHub, Gmail, Notion, Slack, LinkedIn all listed) and says how to confirm via the API field `composio_managed_auth_schemes`. Individual `/toolkits/github(.md)` pages timed out once; retry later. So `composioManaged` stays in scope, sourced from that page (Documented). |
+
+## D-006 Model choice
+- `MODEL_FAST = anthropic/claude-haiku-5.5` — 10/10 on the JSON-action protocol, schema output worked, cheapest Claude tier by name (price not verified; FastRouter pricing not checked).
+- `MODEL_DEEP = anthropic/claude-sonnet-5.5` — 10/10, quick, stronger tier for synthesis; Opus 5.5 was also 10/10 but slower in the spike and presumably costlier, so it is kept as an upgrade option if Sonnet drafts disappoint.
+- Gemini 3.8 Flash rejected for now: 2 of 10 invalid in the protocol test.
+- Caveat: Opus and Gemini returned an empty string to the tiny "pong" test (max_tokens 20). Cause not investigated (possibly reasoning tokens use the budget). Pipeline calls must set generous `max_tokens` and treat empty output as a failure to retry.
+- The spike used one sample per model; revisit with real pipeline prompts in Sprint 3/4.
