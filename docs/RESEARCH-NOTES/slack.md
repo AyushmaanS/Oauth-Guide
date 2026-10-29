@@ -77,10 +77,22 @@ Labels: Documented = official; Reported = community/third-party; Unverified = in
 
 ## 8. Terms on automation
 
-- API ToS (S8, section "Access to our APIs"): bars circumventing "technical processes or security measures", rate-limit abuse/"excessive or abusive usage", reverse engineering. Data Access / Real-Time Search API: background scraping unrelated to user queries prohibited. Page is silent on web UI/console automation; says the Contract grants no right to use the Services themselves, governed separately.
-- User ToS (S9): no automated-access clause found on the page; incorporates the AUP by reference.
-- AUP (S10/S11): policy text is in a Salesforce PDF I could not decode - NOT FOUND / could not read.
-- Plain reading: the API terms govern API use, not driving the developer console in a browser. Driving the logged-in console by an agent at human pace for the owner's own app is ambiguous and not clearly forbidden; AUP unread. Confidence: low-medium. Not legal advice. Flag: AMBIGUOUS.
+Re-verified 2026-10-29 from primary documents (retrieval date for all URLs below).
+
+- AUP, "Acceptable Use and External-Facing Services Policy", last updated July 08, 2025 (https://slack.com/acceptable-use-policy, links to the Salesforce PDF; text decoded locally from the PDF). Its only automation-related clause (XXIV) restricts accessing a *third-party* web property for scraping/crawling/monitoring without a unique User Agent and robots.txt compliance ("web scraping, web crawling, web monitoring") - aimed at scrapers of other parties' sites, not an owner using their own console. Nothing found banning bots/automation of one's own account or the developer console. Related: AUP 1.B says "Slack is not available for consumer purposes" (see feasibility note); XV bars interfering with service availability for others; XXIII bars reformatting/framing the admin display (not an issue for ordinary browsing).
+- User ToS, effective 17 Feb 2023 (https://slack.com/terms-of-service/user): page text has no automated-access/bot/scraping clause; incorporates the AUP: "comply with the most recent version of our acceptable use policy."
+- API ToS, effective 10 Oct 2025 (https://slack.com/terms-of-service/api): rules cover API calls and data ("excessive or abusive usage"; scraping prohibited for Data Access/RTS APIs). Silent on the app-management web console and on deleting apps. Slack may audit and suspend access for violations.
+- Slack help/dev docs (https://api.slack.com/apps, https://docs.slack.dev/app-management/): no statement about automating or not automating the console.
+- Verdict: ALLOWED-leaning, with residual AMBIGUITY (no source explicitly addresses an AI agent operating the console). Confidence: medium. The owner is the human principal, signed in, creating and deleting their own throwaway app at human pace; no cited clause prohibits it. Mitigations: owner signs in, low volume, no bypass of CAPTCHA/rate limits, delete the app after. Not legal advice.
+
+### Free workspace feasibility
+
+- Free plan may add "up to ten third-party or custom apps" (https://slack.com/help/articles/115002422943-Slack-plans-and-features-FAQ), so a custom app is permitted on free; one throwaway app is within the limit.
+- Creator needs: signing in ("You'll need to sign in to your Slack account to create an application") at https://api.slack.com/apps?new_app=1, and a workspace to attach it to. No official page found requiring workspace-admin approval to create an app; no plan restriction found. Owner of own workspace is admin anyway.
+- App approval settings (https://slack.com/help/articles/360000281563) are documented for Enterprise orgs and govern *installing* (approve/restrict), not creating; on a free workspace owned by the user this should not block. Not confirmed for free plans specifically.
+- Creation flow (https://docs.slack.dev/app-management/quickstart-app-settings/): "Create an app" > choose "Blank app" (from scratch) > Continue > App Name > pick Workspace > Create. Manifest option was not described in fetched docs (live UI not observed; expected as an alternate choice in the same dialog - Unverified).
+- Deletion steps are not documented in the pages fetched (expected: app Basic Information > Delete App at the bottom - Unverified).
+- Caveat: AUP says Slack "is not available for consumer purposes"; a personal throwaway workspace used for development testing is a mild grey area, not a clear violation.
 
 ## 9. Surprises
 
