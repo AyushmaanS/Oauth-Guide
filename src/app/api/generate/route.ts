@@ -14,7 +14,7 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 export const maxDuration = 300;
 
-const Body = z.object({ query: z.string(), force: z.boolean().optional() });
+const Body = z.object({ query: z.string(), force: z.boolean().optional(), lookup: z.boolean().optional() });
 const FAST_BUDGET_MS = 170_000; // target 120 s; stages after this are skipped, platform limit is 300 s
 
 const json = (status: number, error: string) => Response.json({ error }, { status });
@@ -36,6 +36,11 @@ export async function POST(req: Request) {
     return json(400, e instanceof InputError ? e.message : "Invalid input.");
   }
   const force = parsed.data.force === true;
+  // Lookup only: lets the page find a guide that finished after its stream dropped. Never starts a run.
+  if (parsed.data.lookup === true) {
+    const hit = await getAnyGuide(guessSlug(input));
+    return hit?.complete ? Response.json({ slug: hit.slug }) : json(404, "Not ready yet.");
+  }
   const models = { fast: process.env.MODEL_FAST ?? "", deep: process.env.MODEL_DEEP ?? "" };
   if (!models.fast || !process.env.FASTROUTER_API_KEY || !process.env.TAVILY_API_KEY) return json(503, "Live generation is not configured on this server.");
 

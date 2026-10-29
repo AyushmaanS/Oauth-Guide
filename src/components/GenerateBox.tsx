@@ -15,6 +15,21 @@ export function GenerateBox({ initialQuery = "" }: { initialQuery?: string }) {
   const [progress, setProgress] = useState<ProgressState>(emptyProgress());
   const ac = useRef<AbortController | null>(null);
 
+  /** The server keeps working and saves the guide even if this page's stream drops, so look for it before giving up. */
+  async function recover(signal: AbortSignal): Promise<string | null> {
+    for (let i = 0; i < 30; i++) {
+      await new Promise((r) => setTimeout(r, 6000));
+      if (signal.aborted) return null;
+      try {
+        const r = await fetch("/api/generate", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ query, lookup: true }), signal });
+        if (r.ok) return ((await r.json()) as { slug: string }).slug;
+      } catch {
+        /* keep trying */
+      }
+    }
+    return null;
+  }
+
   async function run(force: boolean) {
     setBusy(true);
     setError("");
@@ -38,9 +53,13 @@ export function GenerateBox({ initialQuery = "" }: { initialQuery?: string }) {
         else if (event === "error") { setError(d.message ?? "Something went wrong."); return; }
         else if (event === "complete") { router.push(`/guide/${d.slug}`); return; }
       }
-      setError("The connection ended before the guide finished. Please try again.");
+      throw new Error("stream ended early");
     } catch (e) {
-      if ((e as Error).name !== "AbortError") setError("The connection failed. Please try again.");
+      if ((e as Error).name === "AbortError") return;
+      setProgress((p) => ({ ...p, warnings: [...p.warnings, "The live connection dropped. The guide keeps building on the server, so we are checking for it."] }));
+      const slug = await recover(ac.current!.signal);
+      if (slug) router.push(`/guide/${slug}`);
+      else setError("The connection dropped and the guide did not finish. Please try again.");
     } finally {
       setBusy(false);
     }
