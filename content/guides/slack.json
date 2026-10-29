@@ -317,14 +317,15 @@
       }
     },
     "timeToProduction": {
-      "basis": "Slack's review guide says preliminary feedback takes up to 10 business days and functional review up to 10 weeks for new submissions (6 weeks for resubmissions of published apps); turnaround varies with volume, and the estimate is shown on the submission page. An app must also first be installed on 10 or more active workspaces.",
+      "basis": "About 12 weeks at most: Slack's review guide says preliminary feedback takes up to 10 business days and functional review up to 10 weeks for new submissions (6 weeks for resubmissions of published apps); turnaround varies with volume, and the estimate is shown on the submission page. An app must also first be installed on 10 or more active workspaces.",
       "evidence": {
         "label": "documented",
         "sourceIds": [
           "s3",
           "s15"
         ]
-      }
+      },
+      "maxDays": 84
     },
     "humanEffortHours": {
       "estimate": true,
@@ -895,7 +896,8 @@
     "2026-10-29: verification: Marketplace review time corrected to Slack's documented maximums (10 business days, then 10 weeks) and the 10-active-workspace eligibility added; summary and risk reworded.",
     "2026-10-29: verification: rate-limit dates corrected; Slack's wording on commercial distribution (Marketplace only) now cited; scopes-are-additive upgraded to documented.",
     "2026-10-29: verification: steps 2 to 7 and 9 changed from tested to documented (only page reads, or the action was not performed); step 4 no longer presents the third-party 'no review' claim as established.",
-    "2026-10-29: verification: step time ranges marked as our estimates (no Slack page or walkthrough timing supports them)."
+    "2026-10-29: verification: step time ranges marked as our estimates (no Slack page or walkthrough timing supports them).",
+    "2026-10-30: time to production now shows the documented ceiling as a number (up to 10 business days plus up to 10 weeks, about 84 days) instead of a bare 'unknown'."
   ],
   "sources": [
     {

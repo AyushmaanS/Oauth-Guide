@@ -1,24 +1,268 @@
 @import "tailwindcss";
 
+/* ------------------------------------------------------------------ design tokens */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --paper: #f6f3ec;
+  --surface: #ffffff;
+  --surface-2: #efebe1;
+  --ink: #15171b;
+  --ink-2: #353a42;
+  --muted: #5a6068;
+  --line: #ddd7c9;
+  --line-strong: #b9b2a0;
+  --accent: #0b5d4b;
+  --accent-ink: #ffffff;
+
+  /* difficulty scale */
+  --easy: #17784a;
+  --moderate: #b4690e;
+  --hard: #c2410c;
+  --gated: #a0123f;
+  --unknown: #5a6068;
+  /* evidence */
+  --tested: #0b6b4f;
+  --documented: #1d4ed8;
+  --reported: #a16207;
+  --unverified: #6b7280;
+  /* who does it */
+  --agent: #0369a1;
+  --you: #be185d;
+  --wait: #6b7280;
+
+  --shadow: 0 1px 2px rgb(20 23 27 / 0.05), 0 8px 24px -12px rgb(20 23 27 / 0.12);
+  --radius: 14px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --paper: #0e1013;
+    --surface: #16191e;
+    --surface-2: #1c2026;
+    --ink: #eeece6;
+    --ink-2: #c9ccd2;
+    --muted: #9aa1ab;
+    --line: #272c33;
+    --line-strong: #3b424c;
+    --accent: #4cc9a6;
+    --accent-ink: #06231b;
+
+    --easy: #4ade80;
+    --moderate: #fbbf24;
+    --hard: #fb923c;
+    --gated: #fb7185;
+    --unknown: #9aa1ab;
+    --tested: #34d399;
+    --documented: #7aa2ff;
+    --reported: #fbbf24;
+    --unverified: #9ca3af;
+    --agent: #38bdf8;
+    --you: #f472b6;
+    --wait: #9ca3af;
+    --shadow: 0 1px 2px rgb(0 0 0 / 0.4), 0 10px 30px -14px rgb(0 0 0 / 0.6);
+  }
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+  --color-paper: var(--paper);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-accent: var(--accent);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 5.5rem;
+}
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-sans), system-ui, sans-serif;
+  font-feature-settings: "ss01", "cv11";
+}
+::selection {
+  background: color-mix(in srgb, var(--accent) 28%, transparent);
+}
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 6px;
 }
 
-:focus-visible {
-  outline: 2px solid #1d4ed8;
-  outline-offset: 2px;
+.display {
+  font-family: var(--font-display), Georgia, serif;
+  font-weight: 400;
+  letter-spacing: -0.015em;
+}
+.eyebrow {
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+.card-flat {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+.prose-tight p + p {
+  margin-top: 0.6rem;
+}
+
+/* ------------------------------------------------------------------ tone system
+   A .tone-* class sets --tone. Chips and tints derive from it, so the same
+   component works for difficulty, evidence and actors in light and dark. */
+.tone-easy { --tone: var(--easy); }
+.tone-moderate { --tone: var(--moderate); }
+.tone-hard { --tone: var(--hard); }
+.tone-gated { --tone: var(--gated); }
+.tone-unknown { --tone: var(--unknown); }
+.tone-tested { --tone: var(--tested); }
+.tone-documented { --tone: var(--documented); }
+.tone-reported { --tone: var(--reported); }
+.tone-unverified { --tone: var(--unverified); }
+.tone-agent { --tone: var(--agent); }
+.tone-you { --tone: var(--you); }
+.tone-wait { --tone: var(--wait); }
+.tone-accent { --tone: var(--accent); }
+.tone-ink { --tone: var(--ink); }
+
+.chip {
+  --tone-ink: color-mix(in srgb, var(--tone) 72%, var(--ink));
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  white-space: nowrap;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--tone) 38%, transparent);
+  background: color-mix(in srgb, var(--tone) 10%, var(--surface));
+  color: var(--tone-ink);
+  padding: 0.12rem 0.55rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1.35;
+}
+.chip-dashed {
+  border-style: dashed;
+  background: transparent;
+}
+.tint {
+  background: color-mix(in srgb, var(--tone) 9%, var(--surface));
+  border-color: color-mix(in srgb, var(--tone) 32%, transparent);
+}
+.tone-text {
+  color: color-mix(in srgb, var(--tone) 76%, var(--ink));
+}
+.dot {
+  display: inline-block;
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 999px;
+  background: var(--tone);
+}
+
+/* ------------------------------------------------------------------ buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  border-radius: 999px;
+  border: 1px solid var(--line-strong);
+  background: var(--surface);
+  color: var(--ink);
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  transition: background 0.15s, border-color 0.15s, transform 0.15s;
+}
+.btn:hover {
+  border-color: var(--ink);
+  background: var(--surface-2);
+}
+.btn:active {
+  transform: translateY(1px);
+}
+.btn-primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-ink);
+}
+.btn-primary:hover {
+  background: color-mix(in srgb, var(--accent) 88%, var(--ink));
+  border-color: transparent;
+}
+.btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+/* ------------------------------------------------------------------ route-map line */
+.route-line {
+  background-image: linear-gradient(to bottom, var(--line-strong) 55%, transparent 0);
+  background-size: 2px 9px;
+  background-repeat: repeat-y;
+}
+.route-line-solid {
+  background: var(--ink);
+}
+
+/* contour texture for hero areas */
+.contours {
+  background-image:
+    radial-gradient(ellipse 60% 50% at 78% 20%, color-mix(in srgb, var(--accent) 12%, transparent), transparent 70%),
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='520' height='320' viewBox='0 0 520 320' fill='none' stroke='%23999' stroke-opacity='0.22' stroke-width='1'><path d='M-20 250c70-60 120 20 190-30s90-110 170-70 90 100 190 40'/><path d='M-20 220c70-60 120 20 190-30s90-110 170-70 90 100 190 40'/><path d='M-20 190c70-60 120 20 190-30s90-110 170-70 90 100 190 40'/><path d='M-20 160c70-60 120 20 190-30s90-110 170-70 90 100 190 40'/><path d='M-20 130c70-60 120 20 190-30s90-110 170-70 90 100 190 40'/><path d='M-20 100c70-60 120 20 190-30s90-110 170-70 90 100 190 40'/><path d='M-20 70c70-60 120 20 190-30s90-110 170-70 90 100 190 40'/></svg>");
+  background-repeat: no-repeat, repeat;
+  background-size: auto, 520px 320px;
+}
+
+@keyframes pulse-ring {
+  0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent) 55%, transparent); }
+  100% { box-shadow: 0 0 0 10px transparent; }
+}
+@keyframes slide-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes shimmer {
+  from { background-position: 200% 0; }
+  to { background-position: -200% 0; }
+}
+.pulse { animation: pulse-ring 1.5s ease-out infinite; }
+.enter { animation: slide-in 0.28s ease-out both; }
+.shimmer {
+  background: linear-gradient(100deg, transparent 30%, color-mix(in srgb, var(--accent) 22%, transparent) 50%, transparent 70%);
+  background-size: 200% 100%;
+  animation: shimmer 2.2s linear infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .pulse, .enter, .shimmer { animation: none; }
+}
+
+details > summary {
+  list-style: none;
+  cursor: pointer;
+}
+details > summary::-webkit-details-marker {
+  display: none;
+}
+.chev {
+  transition: transform 0.18s;
+}
+details[open] > summary .chev {
+  transform: rotate(90deg);
 }

@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import { Icon } from "./ui";
 
 export function ShareBar({ markdown }: { markdown: string }) {
   const [msg, setMsg] = useState("");
@@ -12,12 +13,11 @@ export function ShareBar({ markdown }: { markdown: string }) {
     }
     setTimeout(() => setMsg(""), 2500);
   }
-  const btn = "rounded border border-gray-700 px-3 py-1 text-sm hover:bg-gray-100";
   return (
     <div className="flex flex-wrap items-center gap-2" role="group" aria-label="Share this guide">
-      <button type="button" className={btn} onClick={() => copy(window.location.href, "Link")}>Copy link</button>
-      <button type="button" className={btn} onClick={() => copy(markdown, "Markdown")}>Copy as markdown</button>
-      <span role="status" className="text-sm text-green-800">{msg}</span>
+      <button type="button" className="btn" onClick={() => copy(window.location.href, "Link")}><Icon name="copy" /> Copy link</button>
+      <button type="button" className="btn" onClick={() => copy(markdown, "Markdown")}><Icon name="file" /> Copy as markdown</button>
+      <span role="status" className="flex items-center gap-1 text-sm font-medium text-[var(--tested)]">{msg && <><Icon name="check" className="h-4 w-4" />{msg}</>}</span>
     </div>
   );
 }

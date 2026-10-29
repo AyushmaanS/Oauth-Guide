@@ -3,6 +3,7 @@ import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
 import { readSse } from "@/lib/sse";
 import { ProgressPanel, emptyProgress, type ProgressState } from "./ProgressPanel";
+import { Icon } from "./ui";
 
 type Ev = { stage?: string; label?: string; n?: number; action?: "search" | "read"; target?: string; reason?: string; title?: string; url?: string; items?: ProgressState["checklist"]; message?: string; slug?: string };
 
@@ -45,21 +46,32 @@ export function GenerateBox({ initialQuery = "" }: { initialQuery?: string }) {
     }
   }
 
+  const examples = ["Zoom", "Notion", "Shopify", "Dropbox", "HubSpot"];
   return (
-    <form className="mt-6" onSubmit={(e) => { e.preventDefault(); if (query.trim() && !busy) run(false); }}>
-      <label htmlFor="gen" className="block text-sm font-medium">Generate a guide for any app (name or website)</label>
-      <div className="mt-1 flex gap-2">
-        <input id="gen" value={query} onChange={(e) => setQuery(e.target.value)} maxLength={120} disabled={busy} placeholder="e.g. Zoom, or zoom.us"
-          className="w-full rounded border border-gray-500 px-3 py-2" />
-        <button type="submit" disabled={busy || !query.trim()} className="rounded bg-gray-900 px-4 py-2 text-white disabled:bg-gray-400">{busy ? "Working…" : "Generate"}</button>
+    <form id="generate" className="scroll-mt-24" onSubmit={(e) => { e.preventDefault(); if (query.trim() && !busy) run(false); }}>
+      <label htmlFor="gen" className="sr-only">Generate a guide for any app (name or website)</label>
+      <div className="card flex items-center gap-2 !rounded-full p-1.5 pl-5 focus-within:border-[var(--accent)]">
+        <Icon name="search" className="h-5 w-5 text-muted" />
+        <input id="gen" value={query} onChange={(e) => setQuery(e.target.value)} maxLength={120} disabled={busy} placeholder="Any app or website, e.g. Zoom" autoComplete="off"
+          className="min-w-0 flex-1 bg-transparent py-2.5 text-base text-ink outline-none placeholder:text-muted focus-visible:outline-none" />
+        <button type="submit" disabled={busy || !query.trim()} className="btn btn-primary shrink-0 !px-4 !py-2.5 !text-base sm:!px-5">
+          {busy ? <><Icon name="loader" spin /> Working…</> : <>Generate <Icon name="arrow" /></>}
+        </button>
       </div>
-      <p className="mt-1 text-xs text-gray-700">Takes up to about two minutes. Live guides are researched faster and with lighter evidence than library guides.</p>
+      <div className="mt-3 flex flex-wrap items-center gap-2 text-sm text-muted">
+        <span>Try</span>
+        {examples.map((x) => (
+          <button key={x} type="button" disabled={busy} onClick={() => setQuery(x)} className="rounded-full border border-line bg-surface px-3 py-1 text-xs font-medium text-ink-2 hover:border-ink disabled:opacity-50">{x}</button>
+        ))}
+        <span className="basis-full pt-1 text-xs">Takes up to about two minutes. Live guides are researched faster and with lighter evidence than library guides.</span>
+      </div>
       {error && (
-        <div role="alert" className="mt-3 rounded border border-red-700 bg-red-50 p-3 text-sm text-red-950">
-          {error} {!busy && query.trim() && <button type="button" className="ml-2 underline" onClick={() => run(false)}>Retry</button>}
+        <div role="alert" className="tone-hard tint mt-4 flex items-start gap-3 rounded-xl border p-3.5 text-sm text-ink">
+          <Icon name="alert" className="mt-0.5 h-4 w-4 text-[var(--hard)]" />
+          <span>{error} {!busy && query.trim() && <button type="button" className="ml-2 font-semibold underline underline-offset-4" onClick={() => run(false)}>Retry</button>}</span>
         </div>
       )}
-      {(busy || progress.stages.length > 0) && <ProgressPanel p={progress} />}
+      {(busy || progress.stages.length > 0) && <ProgressPanel p={progress} subject={query.trim() || undefined} />}
     </form>
   );
 }

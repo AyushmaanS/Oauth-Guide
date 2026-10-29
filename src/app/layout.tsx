@@ -1,17 +1,13 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono, Instrument_Serif } from "next/font/google";
 import Link from "next/link";
 import "./globals.css";
+import { NavLinks } from "@/components/NavLinks";
+import { Icon, Logo } from "@/components/ui";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
+const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
+const display = Instrument_Serif({ variable: "--font-display", subsets: ["latin"], weight: "400", style: ["normal", "italic"] });
 
 export const metadata: Metadata = {
   title: { default: "OAuthPath", template: "%s · OAuthPath" },
@@ -21,21 +17,28 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html
-      lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
-    >
-      <body className="min-h-full flex flex-col">
-        <header className="border-b border-gray-200">
-          <nav aria-label="Main" className="mx-auto flex max-w-4xl items-center gap-6 px-4 py-3">
-            <Link href="/" className="font-semibold">OAuthPath</Link>
-            <Link href="/" className="text-sm text-gray-700 hover:underline">Library</Link>
-            <Link href="/about" className="text-sm text-gray-700 hover:underline">How it works</Link>
+    <html lang="en" className={`${geistSans.variable} ${geistMono.variable} ${display.variable} h-full antialiased`}>
+      <body className="flex min-h-full flex-col">
+        <a href="#content" className="sr-only focus:not-sr-only focus:fixed focus:left-3 focus:top-3 focus:z-50 focus:rounded-full focus:bg-ink focus:px-4 focus:py-2 focus:text-paper">Skip to content</a>
+        <header className="sticky top-0 z-40 border-b border-line bg-[color-mix(in_srgb,var(--paper)_82%,transparent)] backdrop-blur-md">
+          <nav aria-label="Main" className="mx-auto flex h-14 max-w-6xl items-center gap-1 px-4 sm:gap-2">
+            <Link href="/" className="mr-1 flex shrink-0 items-center gap-2 sm:mr-3" aria-label="OAuthPath home">
+              <Logo />
+              <span className="display text-xl">OAuthPath</span>
+            </Link>
+            <NavLinks />
+            <Link href="/#generate" className="btn btn-primary ml-auto shrink-0 !px-3.5 !py-1.5">
+              <Icon name="sparkles" /> <span className="hidden sm:inline">Generate a guide</span><span className="sm:hidden">Generate</span>
+            </Link>
           </nav>
         </header>
-        <div className="flex-1">{children}</div>
-        <footer className="border-t border-gray-200 px-4 py-4 text-center text-xs text-gray-600">
-          Guides are research aids, not legal or compliance advice. Check the sources.
+        <div id="content" className="flex-1">{children}</div>
+        <footer className="mt-20 border-t border-line">
+          <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 px-4 py-8 text-sm text-muted">
+            <div className="flex items-center gap-2"><Logo className="h-5 w-5" /><span className="display text-base text-ink">OAuthPath</span></div>
+            <p className="max-w-xl">Guides are research aids, not legal or compliance advice. Check the sources, and check the date a guide was generated.</p>
+            <Link href="/about" className="font-medium text-ink underline underline-offset-4">How it works</Link>
+          </div>
         </footer>
       </body>
     </html>

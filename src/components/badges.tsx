@@ -1,14 +1,5 @@
 import type { Actor, Difficulty, Guide } from "@/lib/schema/guide";
-
-const DIFF: Record<Difficulty, { text: string; cls: string }> = {
-  easy: { text: "Easy", cls: "bg-green-100 text-green-900 border-green-700" },
-  moderate: { text: "Moderate", cls: "bg-yellow-100 text-yellow-900 border-yellow-700" },
-  hard: { text: "Hard", cls: "bg-orange-100 text-orange-900 border-orange-700" },
-  gated: { text: "Gated", cls: "bg-red-100 text-red-900 border-red-700" },
-  unknown: { text: "Unknown", cls: "bg-gray-100 text-gray-900 border-gray-500 border-dashed" },
-};
-
-const cap = (s: string) => s[0].toUpperCase() + s.slice(1);
+import { DIFF_TEXT, Icon, LevelLadder } from "./ui";
 
 export function DifficultyBadge({
   difficulty,
@@ -21,19 +12,20 @@ export function DifficultyBadge({
   confidence?: "established" | "estimated" | "unresolved";
   range?: { best: Difficulty; worst: Difficulty };
 }) {
-  const d = DIFF[difficulty];
-  const size = large ? "px-3 py-1 text-xl" : "px-2 py-0.5 text-xs";
+  const size = large ? "!px-3.5 !py-1 !text-base" : "";
   if (difficulty === "unknown" && range && range.best !== range.worst)
     return (
-      <span title="The sources do not settle the difficulty; this is the plausible range." className={`inline-block rounded border border-dashed border-gray-600 bg-gray-100 font-semibold text-gray-900 ${size}`}>
-        {cap(range.best)} to {range.worst}
+      <span title="The sources do not settle the difficulty; this is the plausible range." className={`chip chip-dashed tone-unknown ${size}`}>
+        <Icon name="help" className="h-3.5 w-3.5" />
+        {DIFF_TEXT[range.best]} to {DIFF_TEXT[range.worst].toLowerCase()}
       </span>
     );
   return (
     <span title={confidence === "estimated" ? "Our estimate: some factors are inferred, not stated by sources." : undefined}
-      className={`inline-block rounded border font-semibold ${d.cls} ${confidence === "estimated" ? "border-dashed" : ""} ${size}`}>
-      {d.text}
-      {confidence === "estimated" && <span className={large ? "ml-2 text-sm font-medium" : "ml-1 font-medium"}>(estimate)</span>}
+      className={`chip tone-${difficulty} ${confidence === "estimated" ? "chip-dashed" : ""} ${size}`}>
+      <span className="dot" aria-hidden="true" />
+      {DIFF_TEXT[difficulty]}
+      {confidence === "estimated" && <span className="font-medium opacity-80">· estimate</span>}
     </span>
   );
 }
@@ -46,23 +38,24 @@ const LEVEL_TIP: Record<Guide["attemptLevel"], string> = {
 
 export function AttemptLevelBadge({ level }: { level: Guide["attemptLevel"] }) {
   return (
-    <span title={LEVEL_TIP[level]} className="inline-flex cursor-help items-center rounded border border-indigo-700 bg-indigo-50 px-2 py-0.5 text-xs font-semibold text-indigo-900">
-      Attempt level {level}
+    <span title={LEVEL_TIP[level]} className="inline-flex cursor-help items-center gap-2">
+      <LevelLadder level={level} compact />
+      <span className="text-xs font-semibold text-ink-2">Level {level.slice(1)}</span>
     </span>
   );
 }
 
-const ACTOR: Record<Actor, { text: string; icon: string; cls: string }> = {
-  agent: { text: "Agent", icon: "🤖", cls: "bg-sky-50 text-sky-900 border-sky-700" },
-  you: { text: "You", icon: "👤", cls: "bg-rose-50 text-rose-900 border-rose-700" },
-  provider_wait: { text: "Waiting on provider", icon: "⏳", cls: "bg-gray-100 text-gray-900 border-gray-600" },
+const ACTOR: Record<Actor, { text: string; icon: "bot" | "user" | "hourglass" }> = {
+  agent: { text: "Agent", icon: "bot" },
+  you: { text: "You", icon: "user" },
+  provider_wait: { text: "Provider wait", icon: "hourglass" },
 };
 
 export function ActorChip({ actor }: { actor: Actor }) {
   const a = ACTOR[actor];
   return (
-    <span className={`inline-flex items-center gap-1 whitespace-nowrap rounded-full border px-2 py-0.5 text-xs font-medium ${a.cls}`}>
-      <span aria-hidden="true">{a.icon}</span>
+    <span className={`chip ${actor === "agent" ? "tone-agent" : actor === "you" ? "tone-you" : "tone-wait"}`}>
+      <Icon name={a.icon} className="h-3.5 w-3.5" />
       {a.text}
     </span>
   );
