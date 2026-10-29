@@ -162,6 +162,7 @@ export async function agentGather(app: Resolved, deps: Deps, ctx: Ctx, model: st
     } catch (e) {
       invalidStreak++;
       invalidMsg = (e as Error).message.slice(0, 200);
+      if (process.env.AGENT_DEBUG) console.error(`[agent] invalid turn ${invalidStreak}: ${invalidMsg}`);
       actions++; // a wasted action
       continue;
     }
