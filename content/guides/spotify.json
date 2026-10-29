@@ -1,0 +1,986 @@
+{
+  "schemaVersion": 1,
+  "slug": "spotify",
+  "appName": "Spotify",
+  "providerSite": "spotify.com",
+  "mode": "library",
+  "generatedAt": "2026-10-29T17:13:42.811Z",
+  "pipelineVersion": "0.3.0",
+  "modelUsed": "anthropic/claude-sonnet-5.5",
+  "complete": true,
+  "attemptLevel": "L2",
+  "attemptLevelReason": "Gate probed: 6 page(s) requested read-only on 2026-10-29; public path followed for 5 page(s) (depth limit). No account was used.",
+  "probe": [
+    {
+      "url": "https://developer.spotify.com/documentation/web-api/concepts/quota-modes",
+      "checkedAt": "2026-10-29T17:15:01.350Z",
+      "httpStatus": 200,
+      "finalHost": "developer.spotify.com",
+      "classification": "public",
+      "signals": [
+        "status:200",
+        "text_len:9757"
+      ],
+      "reading": {
+        "category": "public_docs",
+        "also": [],
+        "confidence": "high",
+        "quote": "Quota modes | Spotify for Developers Skip to content Documentation Documentation Products",
+        "quoteVerified": true,
+        "reason": "Readable public developer documentation page with navigation, a Quota modes title, and no forms, sign-in, or gating text.",
+        "agreement": "agree"
+      }
+    },
+    {
+      "url": "https://developer.spotify.com/documentation/web-api/concepts/scopes",
+      "checkedAt": "2026-10-29T17:15:01.358Z",
+      "httpStatus": 200,
+      "finalHost": "developer.spotify.com",
+      "classification": "public",
+      "signals": [
+        "status:200",
+        "text_len:8011"
+      ],
+      "reading": {
+        "category": "public_docs",
+        "also": [],
+        "confidence": "high",
+        "quote": "Documentation Products Web API Web Playback SDK Ads API",
+        "quoteVerified": true,
+        "reason": "Readable Spotify developer documentation page on API scopes with navigation and reference links; no sign-in, form, or gate visible.",
+        "agreement": "agree"
+      }
+    },
+    {
+      "url": "https://developer.spotify.com/documentation/web-api/tutorials/code-flow",
+      "checkedAt": "2026-10-29T17:15:01.372Z",
+      "httpStatus": 200,
+      "finalHost": "developer.spotify.com",
+      "classification": "public",
+      "signals": [
+        "status:200",
+        "text_len:8813"
+      ],
+      "reading": {
+        "category": "public_docs",
+        "also": [],
+        "confidence": "high",
+        "quote": "Authorization Code Flow | Spotify for Developers",
+        "quoteVerified": true,
+        "reason": "Readable developer documentation tutorial with navigation, reference and changelog sections. No login, form or gate is shown in the fetched text.",
+        "agreement": "agree"
+      }
+    },
+    {
+      "url": "https://developer.spotify.com/documentation/web-api/tutorials/getting-started",
+      "checkedAt": "2026-10-29T17:15:21.044Z",
+      "httpStatus": 200,
+      "finalHost": "developer.spotify.com",
+      "classification": "public",
+      "signals": [
+        "status:200",
+        "text_len:9162"
+      ],
+      "reading": {
+        "category": "public_docs",
+        "also": [],
+        "confidence": "high",
+        "quote": "Getting started with Web API | Spotify for Developers",
+        "quoteVerified": true,
+        "reason": "Readable Web API tutorial and navigation for documentation, with no login, form, or gated content in the visible text.",
+        "agreement": "agree"
+      }
+    },
+    {
+      "url": "https://developer.spotify.com/documentation/web-api/concepts/apps",
+      "checkedAt": "2026-10-29T17:15:21.045Z",
+      "httpStatus": 200,
+      "finalHost": "developer.spotify.com",
+      "classification": "public",
+      "signals": [
+        "status:200",
+        "text_len:10291"
+      ],
+      "reading": {
+        "category": "public_docs",
+        "also": [],
+        "confidence": "high",
+        "quote": "Web API Overview Getting started Building with AI Concepts Concepts Concepts Access Token API calls Apps",
+        "quoteVerified": true,
+        "reason": "Developer documentation page (Concepts > Apps) with navigation and reference content, no forms, and no sign-in or account prompt visible.",
+        "agreement": "agree"
+      }
+    },
+    {
+      "url": "https://developer.spotify.com/documentation/web-api/concepts/authorization",
+      "checkedAt": "2026-10-29T17:15:21.046Z",
+      "httpStatus": 200,
+      "finalHost": "developer.spotify.com",
+      "classification": "public",
+      "signals": [
+        "status:200",
+        "text_len:9832"
+      ],
+      "reading": {
+        "category": "public_docs",
+        "also": [],
+        "confidence": "high",
+        "quote": "Authorization | Spotify for Developers Skip to content Documentation Documentation Products Web API",
+        "quoteVerified": true,
+        "reason": "Page is Spotify's authorization documentation with navigation, tutorials and reference sections, readable without signing in. No forms or login.",
+        "agreement": "agree"
+      }
+    }
+  ],
+  "flowTrace": {
+    "startUrl": "https://developer.spotify.com/documentation/web-api/concepts/quota-modes",
+    "checkedAt": "2026-10-29T17:15:21.044Z",
+    "hops": [
+      {
+        "n": 1,
+        "url": "https://developer.spotify.com/documentation/web-api/concepts/quota-modes",
+        "title": "Quota modes | Spotify for Developers",
+        "classification": "public",
+        "chosenBy": "start",
+        "reading": {
+          "category": "public_docs",
+          "also": [],
+          "confidence": "high",
+          "quote": "Skip to content Documentation Documentation Products Web API Web Playback SDK Ads API",
+          "quoteVerified": true,
+          "reason": "Readable Spotify developer documentation page on quota modes with navigation and reference content; no sign-in, form or gate is shown.",
+          "agreement": "agree"
+        },
+        "matchedStepOrder": 2
+      },
+      {
+        "n": 2,
+        "url": "https://developer.spotify.com/documentation/web-api/tutorials/getting-started",
+        "title": "Getting started with Web API | Spotify for Developers",
+        "classification": "public",
+        "viaLinkText": "Getting started",
+        "chosenBy": "model",
+        "reading": {
+          "category": "public_docs",
+          "also": [],
+          "confidence": "high",
+          "quote": "Getting started with Web API | Spotify for Developers",
+          "quoteVerified": true,
+          "reason": "Readable Web API tutorial and navigation for documentation, with no login, form, or gated content in the visible text.",
+          "agreement": "agree"
+        },
+        "matchedStepOrder": 5
+      },
+      {
+        "n": 3,
+        "url": "https://developer.spotify.com/documentation/web-api/concepts/apps",
+        "title": "Apps | Spotify for Developers",
+        "classification": "public",
+        "viaLinkText": "Apps",
+        "chosenBy": "model",
+        "reading": {
+          "category": "public_docs",
+          "also": [],
+          "confidence": "high",
+          "quote": "Web API Overview Getting started Building with AI Concepts Concepts Concepts Access Token API calls Apps",
+          "quoteVerified": true,
+          "reason": "Developer documentation page (Concepts > Apps) with navigation and reference content, no forms, and no sign-in or account prompt visible.",
+          "agreement": "agree"
+        },
+        "matchedStepOrder": 2
+      },
+      {
+        "n": 4,
+        "url": "https://developer.spotify.com/documentation/web-api/tutorials/code-flow",
+        "title": "Authorization Code Flow | Spotify for Developers",
+        "classification": "public",
+        "viaLinkText": "Authorization code",
+        "chosenBy": "model",
+        "reading": {
+          "category": "public_docs",
+          "also": [],
+          "confidence": "high",
+          "quote": "Authorization Code Flow | Spotify for Developers Skip to content Documentation Documentation Products Web API",
+          "quoteVerified": true,
+          "reason": "Readable developer tutorial navigation and reference content with no sign-in, form, or verification prompt visible.",
+          "agreement": "agree"
+        },
+        "matchedStepOrder": 5
+      },
+      {
+        "n": 5,
+        "url": "https://developer.spotify.com/documentation/web-api/concepts/authorization",
+        "title": "Authorization | Spotify for Developers",
+        "classification": "public",
+        "viaLinkText": "Authorization",
+        "chosenBy": "model",
+        "reading": {
+          "category": "public_docs",
+          "also": [],
+          "confidence": "high",
+          "quote": "Authorization | Spotify for Developers Skip to content Documentation Documentation Products Web API",
+          "quoteVerified": true,
+          "reason": "Page is Spotify's authorization documentation with navigation, tutorials and reference sections, readable without signing in. No forms or login.",
+          "agreement": "agree"
+        },
+        "matchedStepOrder": 2
+      }
+    ],
+    "endedAt": "depth_limit",
+    "endedReason": "Stopped after 5 pages (hop limit)."
+  },
+  "providerMetadata": {
+    "checkedAt": "2026-10-29T17:15:21.047Z",
+    "found": true,
+    "sourceUrl": "https://accounts.spotify.com/.well-known/openid-configuration",
+    "issuer": "https://accounts.spotify.com",
+    "authorizationEndpoint": "https://accounts.spotify.com/oauth2/v2/auth",
+    "tokenEndpoint": "https://accounts.spotify.com/api/token",
+    "scopesListed": [
+      "email",
+      "openid",
+      "profile"
+    ],
+    "pkceMethods": [
+      "S256"
+    ],
+    "tokenEndpointAuthMethods": [
+      "client_secret_basic",
+      "client_secret_post"
+    ],
+    "dynamicRegistration": "not_listed",
+    "notes": [
+      "No registration endpoint is listed, so manual console registration is likely still needed."
+    ]
+  },
+  "verdict": {
+    "difficulty": "hard",
+    "difficultyReason": "Our estimate: Required review takes weeks. Sources do not settle every factor, so it could be anywhere from easy to hard.",
+    "useCase": "An agent that reads a user's Spotify library and playlists and controls playback on their behalf, using the Web API Authorization Code flow",
+    "timeToCredentials": {
+      "estimate": true,
+      "minHours": 0.25,
+      "maxHours": 2,
+      "basis": "Our estimate: registration needs only a developer account and a dashboard form (no source states a time), and typical instant app registration takes minutes to an hour or two.",
+      "evidence": {
+        "label": "unverified",
+        "sourceIds": []
+      }
+    },
+    "timeToProduction": {
+      "estimate": true,
+      "minDays": 7,
+      "maxDays": 28,
+      "basis": "Our estimate: the factors suggest a manual review for public use with a wait of weeks, but no source states a turnaround time. A single-user agent on your own account may not need this at all.",
+      "evidence": {
+        "label": "unverified",
+        "sourceIds": []
+      }
+    },
+    "humanEffortHours": {
+      "estimate": true,
+      "minHours": 3,
+      "maxHours": 10,
+      "basis": "Our estimate: creating the app, wiring the Authorization Code flow and refresh handling, choosing scopes and testing playback and library calls. No source gives effort figures.",
+      "evidence": {
+        "label": "unverified",
+        "sourceIds": []
+      }
+    },
+    "summary": "Spotify requires you to register your own app; Composio lists no managed Spotify app. Creating the app looks quick. The sources don't say whether serving other users needs a manual review. Plan for a wait of weeks (our estimate).",
+    "biggestLaunchRisk": "Development Mode is quota-limited, and the captured sources do not say how to get past it for other users' accounts. An unknown review could delay public launch by weeks.",
+    "factors": {
+      "registrationFriction": "account_needed",
+      "reviewRequired": "for_public_use",
+      "reviewDepth": "manual",
+      "docsQuality": "partial",
+      "waitBasis": "unknown",
+      "waitMagnitude": "weeks",
+      "businessEntityRequired": "no",
+      "specialRequirements": []
+    },
+    "difficultyConfidence": "estimated",
+    "difficultyRange": {
+      "best": "easy",
+      "worst": "hard"
+    },
+    "factorBasis": {
+      "registrationFriction": "stated",
+      "reviewRequired": "inferred",
+      "reviewDepth": "inferred",
+      "waitMagnitude": "inferred",
+      "businessEntityRequired": "inferred"
+    },
+    "inference": [
+      {
+        "factor": "reviewRequired",
+        "value": "for_public_use",
+        "confidence": "medium",
+        "rationale": "The sources show a 'Development Mode' with per-developer-account quotas (s1, s9), and the sources suggest moving beyond it typically requires provider approval before other users' accounts can be served. An agent acting only on the developer's own account woul",
+        "sourceIds": [
+          "s1",
+          "s9"
+        ]
+      },
+      {
+        "factor": "reviewDepth",
+        "value": "manual",
+        "confidence": "low",
+        "rationale": "Typically, moving from a development/quota-limited mode to broader access involves a manual provider review of the app and use case. The captured sources do not describe the review process, so this is a cautious guess.",
+        "sourceIds": [
+          "s1",
+          "s9"
+        ]
+      },
+      {
+        "factor": "waitMagnitude",
+        "value": "weeks",
+        "confidence": "low",
+        "rationale": "Typically, manual extended-quota or public-use reviews take days to weeks; choosing the more cautious value. No captured source states a turnaround time, so this is an unverified estimate.",
+        "sourceIds": []
+      },
+      {
+        "factor": "businessEntityRequired",
+        "value": "no",
+        "confidence": "low",
+        "rationale": "No source says a business entity is required for registering a Web API app; the dashboard registration appears to need only a developer account (s4, s10). Only the separate Open Access partner program is described as partner-approved (s6), and it is not part o",
+        "sourceIds": [
+          "s4",
+          "s6",
+          "s10"
+        ]
+      }
+    ],
+    "checkFirst": [
+      "Does Spotify require an application for extended quota before accounts other than the developer's own can authorize the app beyond Development Mode?",
+      "Does Spotify limit Development Mode apps to a fixed number of allow-listed user accounts, so that only the developer's own account is needed for this agent?",
+      "Does Spotify require a registered business or organization to apply for extended quota mode for a Web API app?"
+    ]
+  },
+  "managedVsOwn": {
+    "composioManaged": "no",
+    "managedCovers": [],
+    "youNeedOwnWhen": [
+      {
+        "text": "Always, for Spotify: Composio's managed-auth directory lists Spotify under 'Bring your own OAuth app', so you register your own Spotify app even for prototyping.",
+        "evidence": {
+          "label": "documented",
+          "sourceIds": [
+            "s12"
+          ]
+        }
+      }
+    ],
+    "source": "https://docs.composio.dev/toolkits/managed-auth.md"
+  },
+  "requirements": [
+    {
+      "text": "A Spotify developer account to create and manage Client IDs in the Spotify dashboard. The captured sources show only that developers manage Client IDs through the dashboard, not the exact sign-up requirements.",
+      "evidence": {
+        "label": "documented",
+        "sourceIds": [
+          "s6"
+        ]
+      }
+    },
+    {
+      "text": "Development Mode apps are tied to a developer account, which can create up to 25 Client IDs.",
+      "evidence": {
+        "label": "documented",
+        "sourceIds": [
+          "s9"
+        ]
+      }
+    },
+    {
+      "text": "Keep the Client Secret out of browsers and client software (stated in the Open Access docs; it is sensible practice for the Web API flow too).",
+      "evidence": {
+        "label": "documented",
+        "sourceIds": [
+          "s6"
+        ]
+      }
+    },
+    {
+      "text": "No source states that a business entity is required to register a Web API app. This is not confirmed either way.",
+      "evidence": {
+        "label": "unverified",
+        "sourceIds": []
+      }
+    }
+  ],
+  "steps": [
+    {
+      "order": 1,
+      "title": "Sign in to the Spotify developer dashboard",
+      "estimate": "5-30 minutes",
+      "detail": "Sign in with a Spotify account to reach the developer dashboard, where Client IDs are created. The captured sources do not detail account verification steps.",
+      "requires": [
+        "login_or_account"
+      ],
+      "actor": "you",
+      "agentPrep": "List which Spotify account will own the app so the right person signs in.",
+      "observed": false,
+      "evidence": {
+        "label": "unverified",
+        "sourceIds": [
+          "s6"
+        ]
+      }
+    },
+    {
+      "order": 2,
+      "title": "Read the Apps and Quota modes docs",
+      "estimate": "20-60 minutes",
+      "detail": "Check how Development Mode limits work and what the docs say about moving beyond it. The captured text of these pages is mostly navigation, so confirm details on the live pages.",
+      "url": "https://developer.spotify.com/documentation/web-api/concepts/quota-modes",
+      "requires": [
+        "docs_reading"
+      ],
+      "actor": "agent",
+      "agentPrep": "Summarize the live quota-modes page, noting any extension or review process.",
+      "observed": true,
+      "traceHop": 1,
+      "evidence": {
+        "label": "tested",
+        "sourceIds": [
+          "s1"
+        ],
+        "testNote": "Only reachability was observed: a read-only GET of this page on 2026-10-29 was classified \"public\" (host developer.spotify.com).",
+        "observationRef": "https://developer.spotify.com/documentation/web-api/concepts/quota-modes"
+      }
+    },
+    {
+      "order": 3,
+      "title": "Create the app and obtain Client ID and Secret",
+      "estimate": "10-30 minutes",
+      "detail": "Create the app in the dashboard. Creating a Client ID also generates a Client Secret. New apps run in Development Mode, whose quota is counted per developer account.",
+      "requires": [
+        "config_check"
+      ],
+      "actor": "agent",
+      "observed": false,
+      "evidence": {
+        "label": "documented",
+        "sourceIds": [
+          "s6",
+          "s9"
+        ]
+      }
+    },
+    {
+      "order": 4,
+      "title": "Register the redirect URI",
+      "estimate": "10-20 minutes",
+      "detail": "Register the callback URL your agent's backend will use for the Authorization Code flow. The captured sources do not show the dashboard fields or redirect URI rules, so check the Redirect URIs docs.",
+      "requires": [
+        "config_check",
+        "docs_reading"
+      ],
+      "actor": "agent",
+      "agentPrep": "Decide the exact callback URL, using https where it is not local.",
+      "observed": false,
+      "evidence": {
+        "label": "unverified",
+        "sourceIds": []
+      }
+    },
+    {
+      "order": 5,
+      "title": "Implement the Authorization Code flow",
+      "estimate": "2-6 hours",
+      "detail": "Send the user to the Spotify authorize page, exchange the returned code for tokens on your server, and refresh tokens as needed. Keep the Client Secret server-side.",
+      "url": "https://developer.spotify.com/documentation/web-api/tutorials/code-flow",
+      "requires": [
+        "code_writing",
+        "docs_reading"
+      ],
+      "actor": "agent",
+      "agentPrep": "Scaffold the authorize redirect, token exchange and refresh logic.",
+      "observed": true,
+      "traceHop": 2,
+      "evidence": {
+        "label": "tested",
+        "sourceIds": [
+          "s2"
+        ],
+        "testNote": "Only reachability was observed: a read-only GET of this page on 2026-10-29 was classified \"public\" (host developer.spotify.com).",
+        "observationRef": "https://developer.spotify.com/documentation/web-api/tutorials/code-flow"
+      }
+    },
+    {
+      "order": 6,
+      "title": "Choose scopes for library, playlists and playback",
+      "estimate": "30-60 minutes",
+      "detail": "Pick the scopes your agent needs for reading the library and playlists and controlling playback. The scope names were not captured in the sources, so take them from the Scopes page. Request only what is needed.",
+      "url": "https://developer.spotify.com/documentation/web-api/concepts/scopes",
+      "requires": [
+        "docs_reading",
+        "config_check"
+      ],
+      "actor": "agent",
+      "agentPrep": "Map each planned agent action to the matching scope from the live Scopes page.",
+      "observed": true,
+      "evidence": {
+        "label": "tested",
+        "sourceIds": [
+          "s7"
+        ],
+        "testNote": "Only reachability was observed: a read-only GET of this page on 2026-10-29 was classified \"public\" (host developer.spotify.com).",
+        "observationRef": "https://developer.spotify.com/documentation/web-api/concepts/scopes"
+      }
+    },
+    {
+      "order": 7,
+      "title": "Test on your own account and handle quota errors",
+      "estimate": "1-3 hours",
+      "detail": "Run the full flow in Development Mode. Handle HTTP 429 responses and use the 'reason' field (QUOTA_EXCEEDED) to tell quota limits from rate limits.",
+      "requires": [
+        "code_writing",
+        "config_check"
+      ],
+      "actor": "agent",
+      "agentPrep": "Add 429 handling that branches on the 'reason' field and backs off.",
+      "observed": false,
+      "evidence": {
+        "label": "documented",
+        "sourceIds": [
+          "s9"
+        ]
+      }
+    },
+    {
+      "order": 8,
+      "title": "Prepare an extended-access request if other users will use the agent",
+      "estimate": "1-3 hours",
+      "detail": "The sources do not say whether this application exists or what it requires. Confirm in the dashboard and docs, then submit any app review or quota extension form if one is offered.",
+      "requires": [
+        "text_drafting",
+        "manual_submission"
+      ],
+      "actor": "you",
+      "agentPrep": "Draft the use-case description, the scopes requested with a justification for each, and any demo material the form asks for.",
+      "observed": false,
+      "evidence": {
+        "label": "unverified",
+        "sourceIds": []
+      }
+    },
+    {
+      "order": 9,
+      "title": "Wait for Spotify's decision, if a review applies",
+      "estimate": "1-4 weeks (our estimate)",
+      "detail": "No source states a turnaround time. Do not plan a public launch until access beyond Development Mode is confirmed.",
+      "requires": [
+        "provider_review_wait"
+      ],
+      "actor": "provider_wait",
+      "observed": false,
+      "evidence": {
+        "label": "unverified",
+        "sourceIds": []
+      }
+    }
+  ],
+  "scopesAndNuances": [
+    {
+      "text": "Development Mode quota is counted per developer account, not per Client ID. All your Development Mode apps share one budget.",
+      "evidence": {
+        "label": "documented",
+        "sourceIds": [
+          "s9"
+        ]
+      }
+    },
+    {
+      "text": "A developer account can have up to 25 Client IDs (raised from 1).",
+      "evidence": {
+        "label": "documented",
+        "sourceIds": [
+          "s9"
+        ]
+      }
+    },
+    {
+      "text": "When the quota is exceeded, the 429 response body includes \"reason\": \"QUOTA_EXCEEDED\". Rate-limit 429s do not carry this reason.",
+      "evidence": {
+        "label": "documented",
+        "sourceIds": [
+          "s9"
+        ]
+      }
+    },
+    {
+      "text": "Spotify Open Access is a separate partner API for approved partners only, with Client IDs allow-listed by Partner Management. It does not clearly apply to a standard Web API agent.",
+      "evidence": {
+        "label": "documented",
+        "sourceIds": [
+          "s6"
+        ]
+      }
+    },
+    {
+      "text": "The Android auth-lib is a Beta library that returns an authorization code through the Spotify client. It requires an application fingerprint and falls back to a web login if Spotify is not installed. It is only relevant if your agent has an Android client.",
+      "evidence": {
+        "label": "documented",
+        "sourceIds": [
+          "s13"
+        ]
+      }
+    },
+    {
+      "text": "The provider's published OAuth metadata lists: 3 scope(s) listed; PKCE: S256; no registration endpoint is listed.",
+      "evidence": {
+        "label": "tested",
+        "sourceIds": [],
+        "testNote": "The metadata document at https://accounts.spotify.com/.well-known/openid-configuration was read on 2026-10-29.",
+        "observationRef": "https://accounts.spotify.com/.well-known/openid-configuration"
+      }
+    }
+  ],
+  "blockers": [
+    {
+      "problem": "Requests return 429 with reason QUOTA_EXCEEDED while the app is in Development Mode.",
+      "fix": "Reduce call volume and cache library and playlist reads. Keep Development Mode apps to what you need, since they share one quota. Look for an extended-quota route in the dashboard or the docs.",
+      "contact": "Spotify Developer Community forum (linked from the Spotify quota-updates blog post)",
+      "evidence": {
+        "label": "documented",
+        "sourceIds": [
+          "s9"
+        ]
+      }
+    },
+    {
+      "problem": "Other users' accounts cannot use the app, or you are unsure whether they can, because the sources do not describe the Development Mode user limits.",
+      "fix": "Check the live Quota modes page and the dashboard for how to request wider access, then ask on the Spotify Developer Community forum if it is unclear.",
+      "contact": "Spotify Developer Community forum",
+      "evidence": {
+        "label": "unverified",
+        "sourceIds": [
+          "s9"
+        ]
+      }
+    }
+  ],
+  "handoff": {
+    "agentCanDo": [
+      {
+        "text": "Step 1 (prep): List which Spotify account will own the app so the right person signs in.",
+        "evidence": {
+          "label": "unverified",
+          "sourceIds": [
+            "s6"
+          ]
+        }
+      },
+      {
+        "text": "Step 2: Read the Apps and Quota modes docs",
+        "evidence": {
+          "label": "tested",
+          "sourceIds": [
+            "s1"
+          ],
+          "testNote": "Only reachability was observed: a read-only GET of this page on 2026-10-29 was classified \"public\" (host developer.spotify.com).",
+          "observationRef": "https://developer.spotify.com/documentation/web-api/concepts/quota-modes"
+        }
+      },
+      {
+        "text": "Step 3: Create the app and obtain Client ID and Secret",
+        "evidence": {
+          "label": "documented",
+          "sourceIds": [
+            "s6",
+            "s9"
+          ]
+        }
+      },
+      {
+        "text": "Step 4: Register the redirect URI",
+        "evidence": {
+          "label": "unverified",
+          "sourceIds": []
+        }
+      },
+      {
+        "text": "Step 5: Implement the Authorization Code flow",
+        "evidence": {
+          "label": "tested",
+          "sourceIds": [
+            "s2"
+          ],
+          "testNote": "Only reachability was observed: a read-only GET of this page on 2026-10-29 was classified \"public\" (host developer.spotify.com).",
+          "observationRef": "https://developer.spotify.com/documentation/web-api/tutorials/code-flow"
+        }
+      },
+      {
+        "text": "Step 6: Choose scopes for library, playlists and playback",
+        "evidence": {
+          "label": "tested",
+          "sourceIds": [
+            "s7"
+          ],
+          "testNote": "Only reachability was observed: a read-only GET of this page on 2026-10-29 was classified \"public\" (host developer.spotify.com).",
+          "observationRef": "https://developer.spotify.com/documentation/web-api/concepts/scopes"
+        }
+      },
+      {
+        "text": "Step 7: Test on your own account and handle quota errors",
+        "evidence": {
+          "label": "documented",
+          "sourceIds": [
+            "s9"
+          ]
+        }
+      },
+      {
+        "text": "Step 8 (prep): Draft the use-case description, the scopes requested with a justification for each, and any demo material the form asks for.",
+        "evidence": {
+          "label": "unverified",
+          "sourceIds": []
+        }
+      }
+    ],
+    "youMustDo": [
+      {
+        "text": "Step 1: Sign in to the Spotify developer dashboard (needs: login_or_account)",
+        "evidence": {
+          "label": "unverified",
+          "sourceIds": [
+            "s6"
+          ]
+        }
+      },
+      {
+        "text": "Step 8: Prepare an extended-access request if other users will use the agent (needs: manual_submission)",
+        "evidence": {
+          "label": "unverified",
+          "sourceIds": []
+        }
+      }
+    ],
+    "providerWait": [
+      {
+        "text": "Step 9: Wait for Spotify's decision, if a review applies",
+        "evidence": {
+          "label": "unverified",
+          "sourceIds": []
+        }
+      }
+    ]
+  },
+  "tested": {
+    "unverified": [
+      "Whether Spotify requires an extended-quota application or review before accounts other than the developer's can authorize the app.",
+      "Whether Development Mode limits how many user accounts can authorize the app, so that only your own account is guaranteed to work.",
+      "Whether a registered business or organization is needed for extended access.",
+      "Any review turnaround time. The weeks-long wait is only our estimate.",
+      "The exact dashboard fields, redirect URI rules and scope names. Most captured Spotify pages contained only navigation text.",
+      "Whether email or phone verification, 2FA or terms acceptance are required when creating a developer account.",
+      "Weakly supported (self-check): A Spotify developer account to create and manage Client IDs in the Spotify dashboard. The captured sources show only that developers manage ",
+      "Weakly supported (self-check): When the quota is exceeded, the 429 response body includes \"reason\": \"QUOTA_EXCEEDED\". Rate-limit 429s do not carry this reason.",
+      "Weakly supported (self-check): Spotify Open Access is a separate partner API for approved partners only, with Client IDs allow-listed by Partner Management. It does not cl",
+      "Weakly supported (self-check): The Android auth-lib is a Beta library that returns an authorization code through the Spotify client. It requires an application fingerprint",
+      "Weakly supported (self-check): Always, for Spotify: Composio's managed-auth directory lists Spotify under 'Bring your own OAuth app', so you register your own Spotify app ",
+      "Weakly supported (self-check): Sign in to the Spotify developer dashboard. Sign in with a Spotify account to reach the developer dashboard, where Client IDs are created. T",
+      "Weakly supported (self-check): Requests return 429 with reason QUOTA_EXCEEDED while the app is in Development Mode. -> Reduce call volume and cache library and playlist re",
+      "Not observed: anything beyond the end of the public path (depth limit at https://developer.spotify.com/documentation/web-api/concepts/authorization).",
+      "No account was used: steps after the first sign-in are inferred from documentation, not observed.",
+      "Research gap (not found): timing_evidence",
+      "Research gap (not found): community_reports"
+    ]
+  },
+  "sources": [
+    {
+      "id": "s1",
+      "title": "Quota modes | Spotify for Developers",
+      "url": "https://developer.spotify.com/documentation/web-api/concepts/quota-modes",
+      "publisher": "official",
+      "retrievedAt": "2026-10-29"
+    },
+    {
+      "id": "s2",
+      "title": "Authorization Code Flow | Spotify for Developers",
+      "url": "https://developer.spotify.com/documentation/web-api/tutorials/code-flow",
+      "publisher": "official",
+      "retrievedAt": "2026-10-29"
+    },
+    {
+      "id": "s3",
+      "title": "Authorization | Spotify for Developers",
+      "url": "https://developer.spotify.com/documentation/web-api/concepts/authorization",
+      "publisher": "official",
+      "retrievedAt": "2026-10-29"
+    },
+    {
+      "id": "s4",
+      "title": "Apps | Spotify for Developers",
+      "url": "https://developer.spotify.com/documentation/web-api/concepts/apps",
+      "publisher": "official",
+      "retrievedAt": "2026-10-29"
+    },
+    {
+      "id": "s5",
+      "title": "Rate Limits | Spotify for Developers",
+      "url": "https://developer.spotify.com/documentation/web-api/concepts/rate-limits",
+      "publisher": "official",
+      "retrievedAt": "2026-10-29"
+    },
+    {
+      "id": "s6",
+      "title": "Open Access Concepts | Spotify for Developers",
+      "url": "https://developer.spotify.com/documentation/open-access/concepts",
+      "publisher": "official",
+      "retrievedAt": "2026-10-29"
+    },
+    {
+      "id": "s7",
+      "title": "Scopes | Spotify for Developers",
+      "url": "https://developer.spotify.com/documentation/web-api/concepts/scopes",
+      "publisher": "official",
+      "retrievedAt": "2026-10-29"
+    },
+    {
+      "id": "s8",
+      "title": "Security | Spotify for Backstage",
+      "url": "https://backstage.spotify.com/security",
+      "publisher": "official",
+      "retrievedAt": "2026-10-29"
+    },
+    {
+      "id": "s9",
+      "title": "Web API quota updates for Development Mode | Spotify for Developers",
+      "url": "https://developer.spotify.com/blog/2026-07-23-web-api-quota-updates",
+      "publisher": "official",
+      "retrievedAt": "2026-10-29"
+    },
+    {
+      "id": "s10",
+      "title": "Getting started with Web API | Spotify for Developers",
+      "url": "https://developer.spotify.com/documentation/web-api/tutorials/getting-started",
+      "publisher": "official",
+      "retrievedAt": "2026-10-29"
+    },
+    {
+      "id": "s11",
+      "title": "Issues with Spotify OAuth - not opening auth dialog, instantly redirecting back to my frontend",
+      "url": "https://stackoverflow.com/questions/78668881/issues-with-spotify-oauth-not-opening-auth-dialog-instantly-redirecting-back",
+      "publisher": "community",
+      "retrievedAt": "2026-10-29"
+    },
+    {
+      "id": "s12",
+      "title": "Composio: Managed OAuth apps (directory)",
+      "url": "https://docs.composio.dev/toolkits/managed-auth.md",
+      "publisher": "official",
+      "retrievedAt": "2026-10-29"
+    },
+    {
+      "id": "s13",
+      "title": "Authorization | Spotify for Developers",
+      "url": "https://developer.spotify.com/documentation/android/tutorials/authorization",
+      "publisher": "official",
+      "retrievedAt": "2026-10-29"
+    }
+  ],
+  "research": {
+    "method": "fixed",
+    "actionsUsed": 15,
+    "pageReads": 16,
+    "seconds": 78,
+    "checklist": [
+      {
+        "item": "registration",
+        "status": "covered",
+        "sourceIds": [
+          "s6",
+          "s9",
+          "s13"
+        ]
+      },
+      {
+        "item": "review_process",
+        "status": "covered",
+        "sourceIds": [
+          "s6",
+          "s8",
+          "s13"
+        ]
+      },
+      {
+        "item": "scopes_restrictions",
+        "status": "covered",
+        "sourceIds": [
+          "s1",
+          "s2",
+          "s3",
+          "s4",
+          "s5",
+          "s7",
+          "s10",
+          "s13"
+        ]
+      },
+      {
+        "item": "timing_evidence",
+        "status": "not_found",
+        "sourceIds": []
+      },
+      {
+        "item": "requirements",
+        "status": "covered",
+        "sourceIds": [
+          "s1",
+          "s2",
+          "s3",
+          "s4",
+          "s5",
+          "s7",
+          "s10",
+          "s11"
+        ]
+      },
+      {
+        "item": "rate_limits",
+        "status": "covered",
+        "sourceIds": [
+          "s1",
+          "s2",
+          "s3",
+          "s4",
+          "s5",
+          "s7",
+          "s9",
+          "s10"
+        ]
+      },
+      {
+        "item": "community_reports",
+        "status": "not_found",
+        "sourceIds": []
+      },
+      {
+        "item": "composio_status",
+        "status": "covered",
+        "sourceIds": [
+          "s12"
+        ]
+      }
+    ],
+    "steps": [
+      {
+        "action": "read",
+        "target": "https://developer.spotify.com/documentation/android/tutorials/authorization",
+        "reason": "Follow-up: whether an app must be approved before other users can authorize it"
+      }
+    ]
+  },
+  "nextAction": "Create a Spotify developer app, test the flow on your own account in Development Mode, and check the live Quota modes page for how to get access for other users.",
+  "warnings": [
+    "Skipped off-topic page: https://www.spotify.com/ba/legal/privacy-policy",
+    "Skipped off-topic page: https://www.spotify.com/legal/privacy-policy",
+    "Skipped off-topic page: https://developers.facebook.com/community/threads/559016818340433",
+    "Skipped off-topic page: https://finance.yahoo.com/news/spotify-taps-sheerid-verification-partner-151636999.html",
+    "Self-check: 0 claim(s) downgraded, 7 flagged as weak",
+    "Required checklist item not found: timing_evidence"
+  ]
+}

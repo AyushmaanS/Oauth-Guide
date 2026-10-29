@@ -1,0 +1,977 @@
+{
+  "schemaVersion": 1,
+  "slug": "discord",
+  "appName": "Discord",
+  "providerSite": "discord.com",
+  "mode": "library",
+  "generatedAt": "2026-10-29T17:10:38.924Z",
+  "pipelineVersion": "0.3.0",
+  "modelUsed": "anthropic/claude-sonnet-5.5",
+  "complete": true,
+  "attemptLevel": "L2",
+  "attemptLevelReason": "Gate probed: 2 page(s) requested read-only on 2026-10-29; public path followed for 2 page(s) (js shell unclear). No account was used.",
+  "probe": [
+    {
+      "url": "https://docs.discord.com/developers/topics/oauth2",
+      "checkedAt": "2026-10-29T17:12:05.888Z",
+      "httpStatus": 200,
+      "finalHost": "docs.discord.com",
+      "classification": "public",
+      "signals": [
+        "status:200",
+        "text_len:15311"
+      ]
+    },
+    {
+      "url": "https://discord.com/developers/home",
+      "checkedAt": "2026-10-29T17:12:12.903Z",
+      "httpStatus": 200,
+      "finalHost": "discord.com",
+      "classification": "js_shell_unclear",
+      "signals": [
+        "status:200",
+        "text_len:24",
+        "js_shell"
+      ]
+    }
+  ],
+  "flowTrace": {
+    "startUrl": "https://docs.discord.com/developers/topics/oauth2",
+    "checkedAt": "2026-10-29T17:12:12.902Z",
+    "hops": [
+      {
+        "n": 1,
+        "url": "https://docs.discord.com/developers/topics/oauth2",
+        "title": "OAuth2 - Documentation - Discord",
+        "classification": "public",
+        "chosenBy": "start",
+        "reading": {
+          "category": "public_docs",
+          "also": [],
+          "confidence": "high",
+          "quote": "Use this file to discover all available pages before exploring further.",
+          "quoteVerified": true,
+          "reason": "Public Discord developer OAuth2 documentation with navigation and reference text; no sign-in, form, or gate visible.",
+          "agreement": "agree"
+        },
+        "matchedStepOrder": 2
+      },
+      {
+        "n": 2,
+        "url": "https://discord.com/developers/home",
+        "title": "Discord Developer Portal",
+        "classification": "js_shell_unclear",
+        "viaLinkText": "Developer Portal",
+        "chosenBy": "model"
+      }
+    ],
+    "endedAt": "js_shell_unclear",
+    "endedReason": "This page builds itself with JavaScript, so we could not read where it leads. We did not guess."
+  },
+  "providerMetadata": {
+    "checkedAt": "2026-10-29T17:12:12.903Z",
+    "found": true,
+    "sourceUrl": "https://discord.com/.well-known/oauth-authorization-server",
+    "issuer": "https://discord.com",
+    "authorizationEndpoint": "https://discord.com/api/oauth2/authorize",
+    "tokenEndpoint": "https://discord.com/api/oauth2/token",
+    "pkceMethods": [
+      "S256"
+    ],
+    "tokenEndpointAuthMethods": [
+      "client_secret_basic",
+      "client_secret_post",
+      "none"
+    ],
+    "dynamicRegistration": "not_listed",
+    "notes": [
+      "No registration endpoint is listed, so manual console registration is likely still needed."
+    ]
+  },
+  "verdict": {
+    "difficulty": "hard",
+    "difficultyReason": "Our estimate: Sensitive scopes need a manual review. Sources do not settle every factor, so it could be anywhere from moderate to hard.",
+    "useCase": "An AI agent that runs as a bot in customers' Discord servers (OAuth2 bot scope) and reads and posts messages. Reading message content needs the Message Content privileged intent.",
+    "timeToCredentials": {
+      "estimate": true,
+      "minHours": 0.5,
+      "maxHours": 3,
+      "basis": "Our estimate: app creation needs only a Discord account and the Developer Portal, with no review before the bot can be added, so it likely takes under a few hours.",
+      "evidence": {
+        "label": "unverified",
+        "sourceIds": []
+      }
+    },
+    "timeToProduction": {
+      "estimate": true,
+      "minDays": 7,
+      "maxDays": 60,
+      "basis": "Our estimate: no source gives a review time. Review only applies at 10,000+ users or at annual renewal. A manual review of this kind likely takes weeks, so the range is wide.",
+      "evidence": {
+        "label": "unverified",
+        "sourceIds": []
+      }
+    },
+    "humanEffortHours": {
+      "estimate": true,
+      "minHours": 2,
+      "maxHours": 10,
+      "basis": "Our estimate: a few hours to register the app and configure the bot, plus time to draft use case and data-practice answers if the review is triggered. No source gives a figure.",
+      "evidence": {
+        "label": "unverified",
+        "sourceIds": []
+      }
+    },
+    "summary": "Registering a Discord app and adding a bot with the Message Content intent is self-serve under 10,000 users. Past that threshold you must apply for the intent, and the sources give no review time or depth.",
+    "biggestLaunchRisk": "Once the bot reaches 10,000 unique users, you have 90 days to apply for Message Content access or it is removed. The sources give no review turnaround, and access must be renewed every year.",
+    "factors": {
+      "registrationFriction": "account_needed",
+      "reviewRequired": "for_sensitive_scopes",
+      "reviewDepth": "manual",
+      "docsQuality": "clear",
+      "waitBasis": "unknown",
+      "waitMagnitude": "weeks",
+      "businessEntityRequired": "no",
+      "specialRequirements": [
+        "use case documentation for privileged intent review (only once the app reaches over 10,000 users)",
+        "annual reapplication for continued privileged intent access",
+        "qualifying ID from a Developer Team owner aged 16 or over, if the bot is to be verified"
+      ]
+    },
+    "difficultyConfidence": "estimated",
+    "difficultyRange": {
+      "best": "moderate",
+      "worst": "hard"
+    },
+    "factorBasis": {
+      "registrationFriction": "stated",
+      "reviewRequired": "stated",
+      "reviewDepth": "inferred",
+      "waitMagnitude": "inferred",
+      "businessEntityRequired": "stated"
+    },
+    "inference": [
+      {
+        "factor": "reviewDepth",
+        "value": "manual",
+        "confidence": "low",
+        "rationale": "The sources describe a privileged intent review that requires use case documentation (s5, s15), and bot verification that needs a qualifying ID checked via Stripe (s16). Typically such reviews involve human assessment, but no source states whether it is manual",
+        "sourceIds": [
+          "s5",
+          "s15",
+          "s16"
+        ]
+      },
+      {
+        "factor": "waitMagnitude",
+        "value": "weeks",
+        "confidence": "low",
+        "rationale": "The sources give no turnaround time for the privileged intent review or bot verification. They only state a 90-day window in which the developer must apply (s15). Typically, manual reviews of this kind take days to weeks, so the cautious estimate is weeks. Und",
+        "sourceIds": [
+          "s5",
+          "s15"
+        ]
+      }
+    ],
+    "checkFirst": [
+      "Does Discord review the Message Content privileged intent for a bot such as this one before it reaches 10,000 users across its servers?",
+      "Does Discord's privileged intent review for apps over 10,000 users involve a human reviewer rather than an automated check?",
+      "Does Discord publish a typical turnaround time for privileged intent review or bot verification decisions?"
+    ]
+  },
+  "managedVsOwn": {
+    "composioManaged": "yes",
+    "managedCovers": [
+      {
+        "text": "Composio's managed-auth directory lists Discord as available with Composio-managed OAuth, so a shared app may be usable for prototyping.",
+        "evidence": {
+          "label": "documented",
+          "sourceIds": [
+            "s13"
+          ]
+        }
+      },
+      {
+        "text": "Whether Composio's shared app can install a bot with the Message Content intent in customers' servers is not covered by the sources.",
+        "evidence": {
+          "label": "unverified",
+          "sourceIds": []
+        }
+      }
+    ],
+    "youNeedOwnWhen": [
+      {
+        "text": "Your bot passes 10,000 unique users and needs Privileged Intent access. The application is made in the Developer Portal for the specific app, so you likely need your own app to hold that access.",
+        "evidence": {
+          "label": "documented",
+          "sourceIds": [
+            "s5",
+            "s15"
+          ]
+        }
+      },
+      {
+        "text": "You want to verify the bot. Verification is tied to a Developer Team owner's ID, and ownership cannot be transferred afterwards.",
+        "evidence": {
+          "label": "documented",
+          "sourceIds": [
+            "s16"
+          ]
+        }
+      },
+      {
+        "text": "You want your own app identity, use case documentation and annual renewal under your control. The sources do not say whether a shared app can do this.",
+        "evidence": {
+          "label": "unverified",
+          "sourceIds": []
+        }
+      }
+    ],
+    "source": "https://docs.composio.dev/toolkits/managed-auth.md"
+  },
+  "requirements": [
+    {
+      "text": "A Discord account is needed to register an application in the Developer Portal and get a client ID and client secret.",
+      "evidence": {
+        "label": "documented",
+        "sourceIds": [
+          "s1"
+        ]
+      }
+    },
+    {
+      "text": "Message Content is a Privileged Intent. It is disabled by default and gives access to the content, embeds, attachments, components and poll fields of messages.",
+      "evidence": {
+        "label": "documented",
+        "sourceIds": [
+          "s5"
+        ]
+      }
+    },
+    {
+      "text": "At 10,000+ unique users, use case documentation is required. The form asks for current app functionality, the use case for each requested intent, and data practices.",
+      "evidence": {
+        "label": "documented",
+        "sourceIds": [
+          "s15"
+        ]
+      }
+    },
+    {
+      "text": "Apps that already hold Privileged Intent access must reapply once a year.",
+      "evidence": {
+        "label": "documented",
+        "sourceIds": [
+          "s5",
+          "s15"
+        ]
+      }
+    },
+    {
+      "text": "To verify the bot, a Developer Team owner aged 16 or over must submit a qualifying ID through Stripe. This is a personal ID, and the sources do not mention a business entity being required.",
+      "evidence": {
+        "label": "documented",
+        "sourceIds": [
+          "s16"
+        ]
+      }
+    },
+    {
+      "text": "The Developer Policy requires explicit permission before changing a user's account or starting processes on a user's or server's behalf.",
+      "evidence": {
+        "label": "documented",
+        "sourceIds": [
+          "s8"
+        ]
+      }
+    }
+  ],
+  "steps": [
+    {
+      "order": 1,
+      "title": "Sign in with a Discord account",
+      "estimate": "5-30 minutes",
+      "detail": "You need a Discord account to register a developer application. Any verification prompts Discord shows for the account are not described in the sources.",
+      "requires": [
+        "login_or_account"
+      ],
+      "actor": "you",
+      "observed": false,
+      "evidence": {
+        "label": "documented",
+        "sourceIds": [
+          "s1"
+        ]
+      }
+    },
+    {
+      "order": 2,
+      "title": "Read the OAuth2 and Developer Policy docs",
+      "estimate": "30-90 minutes",
+      "detail": "Review the OAuth2 flows, the bot scope, and the policy on user permission and server permission. Note that some scopes need Discord approval.",
+      "url": "https://docs.discord.com/developers/topics/oauth2",
+      "requires": [
+        "docs_reading"
+      ],
+      "actor": "agent",
+      "observed": true,
+      "traceHop": 1,
+      "evidence": {
+        "label": "tested",
+        "sourceIds": [
+          "s1",
+          "s8"
+        ],
+        "testNote": "Only reachability was observed: a read-only GET of this page on 2026-10-29 was classified \"public\" (host docs.discord.com).",
+        "observationRef": "https://docs.discord.com/developers/topics/oauth2"
+      }
+    },
+    {
+      "order": 3,
+      "title": "Register the application and save credentials",
+      "estimate": "15-45 minutes",
+      "detail": "Create the application in the Developer Portal and retrieve the client ID and client secret. A community report says one OAuth failure came from using the public key instead of the application secret.",
+      "requires": [
+        "config_check"
+      ],
+      "actor": "agent",
+      "agentPrep": "Prepare a secrets-storage plan and a checklist that distinguishes the public key from the client secret.",
+      "observed": false,
+      "evidence": {
+        "label": "documented",
+        "sourceIds": [
+          "s1",
+          "s12"
+        ]
+      }
+    },
+    {
+      "order": 4,
+      "title": "Configure the bot scope and invite link",
+      "estimate": "15-45 minutes",
+      "detail": "Use the bot scope so the bot is added to the guild the installer selects. The applications.commands scope is included by default with it.",
+      "requires": [
+        "config_check"
+      ],
+      "actor": "agent",
+      "observed": false,
+      "evidence": {
+        "label": "documented",
+        "sourceIds": [
+          "s1"
+        ]
+      }
+    },
+    {
+      "order": 5,
+      "title": "Enable the Message Content intent in the Developer Portal",
+      "estimate": "5-15 minutes",
+      "detail": "On the app's Bot page, under Privileged Gateway Intents, toggle on Message Content. This works without applying while the app has under 10,000 unique users. Enable only what the bot actually needs.",
+      "requires": [
+        "config_check"
+      ],
+      "actor": "agent",
+      "observed": false,
+      "evidence": {
+        "label": "documented",
+        "sourceIds": [
+          "s5",
+          "s15"
+        ]
+      }
+    },
+    {
+      "order": 6,
+      "title": "Build the bot to read and post messages",
+      "estimate": "Depends on scope of the agent",
+      "detail": "Without the intent, the app cannot access message content fields. Make sure server owners clearly consent to the bot acting in their servers.",
+      "requires": [
+        "code_writing"
+      ],
+      "actor": "agent",
+      "observed": false,
+      "evidence": {
+        "label": "documented",
+        "sourceIds": [
+          "s5",
+          "s8"
+        ]
+      }
+    },
+    {
+      "order": 7,
+      "title": "Watch the unique-user count and prepare use case documentation",
+      "estimate": "2-6 hours",
+      "detail": "At 10,000 unique users the app or team owner is notified by email or system DM, and the Developer Portal shows a message. Draft answers on app functionality, the Message Content use case, and data practices.",
+      "requires": [
+        "text_drafting"
+      ],
+      "actor": "agent",
+      "agentPrep": "Draft the Message Content justification, a description of current functionality, and a data practices summary.",
+      "observed": false,
+      "evidence": {
+        "label": "documented",
+        "sourceIds": [
+          "s15"
+        ]
+      }
+    },
+    {
+      "order": 8,
+      "title": "Submit the Privileged Intent application within 90 days",
+      "estimate": "30-60 minutes",
+      "detail": "Submit through the Developer Portal within 90 days of the notification. If you miss the window, intent access is removed, though you can still apply later.",
+      "requires": [
+        "manual_submission"
+      ],
+      "actor": "you",
+      "observed": false,
+      "evidence": {
+        "label": "documented",
+        "sourceIds": [
+          "s15"
+        ]
+      }
+    },
+    {
+      "order": 9,
+      "title": "Wait for Discord's review decision",
+      "estimate": "Unknown; likely weeks",
+      "detail": "The app keeps working with the requested intents and can keep joining servers during review. No source states the review duration or whether it is manual.",
+      "requires": [
+        "provider_review_wait"
+      ],
+      "actor": "provider_wait",
+      "observed": false,
+      "evidence": {
+        "label": "documented",
+        "sourceIds": [
+          "s5",
+          "s15"
+        ]
+      }
+    },
+    {
+      "order": 10,
+      "title": "Reapply each year to keep access",
+      "estimate": "1-3 hours per year",
+      "detail": "After the annual notification you have 90 days to reapply. Keep your use case documentation current.",
+      "requires": [
+        "text_drafting",
+        "manual_submission"
+      ],
+      "actor": "you",
+      "agentPrep": "Keep a refreshed copy of the use case and data practices text ready.",
+      "observed": false,
+      "evidence": {
+        "label": "documented",
+        "sourceIds": [
+          "s5",
+          "s15"
+        ]
+      }
+    },
+    {
+      "order": 11,
+      "title": "Optional: verify the bot with a qualifying ID",
+      "estimate": "Unknown",
+      "detail": "A Developer Team owner aged 16 or over submits a qualifying ID to Stripe from the Developer Portal. After approval, the team fills out and submits the verification application. The sources do not say whether verification is required for this use case.",
+      "requires": [
+        "identity_or_business_verification",
+        "manual_submission"
+      ],
+      "actor": "you",
+      "agentPrep": "Move the app to a Developer Team and make sure the team owner has a qualifying ID ready.",
+      "observed": false,
+      "evidence": {
+        "label": "documented",
+        "sourceIds": [
+          "s16"
+        ]
+      }
+    }
+  ],
+  "scopesAndNuances": [
+    {
+      "text": "The bot scope puts the bot in the selected guild. Some OAuth2 scopes need Discord approval, and requesting them without approval may cause errors or undocumented behavior.",
+      "evidence": {
+        "label": "documented",
+        "sourceIds": [
+          "s1"
+        ]
+      }
+    },
+    {
+      "text": "The three Privileged Intents are Guild Presences, Guild Members and Message Content. Your use case needs Message Content only, so do not request the others unless needed.",
+      "evidence": {
+        "label": "documented",
+        "sourceIds": [
+          "s5"
+        ]
+      }
+    },
+    {
+      "text": "As of June 10, 2026, the review threshold is based on unique users who can see the app across all its servers, not server count. A bot in a few large servers can hit the threshold sooner than a bot in many small ones.",
+      "evidence": {
+        "label": "documented",
+        "sourceIds": [
+          "s5",
+          "s15"
+        ]
+      }
+    },
+    {
+      "text": "Token and revocation endpoints accept only application/x-www-form-urlencoded, not JSON.",
+      "evidence": {
+        "label": "documented",
+        "sourceIds": [
+          "s1"
+        ]
+      }
+    },
+    {
+      "text": "Scopes such as applications.builds.upload are for approved partners only, via a Discord account representative. They are not needed for this use case.",
+      "evidence": {
+        "label": "documented",
+        "sourceIds": [
+          "s1"
+        ]
+      }
+    },
+    {
+      "text": "A community report says the Developer Portal's display of public key and secret is confusing. A real secret is short and alphanumeric, not the long hash-like key.",
+      "evidence": {
+        "label": "reported",
+        "sourceIds": [
+          "s12"
+        ]
+      }
+    },
+    {
+      "text": "The provider's published OAuth metadata lists: PKCE: S256; no registration endpoint is listed.",
+      "evidence": {
+        "label": "tested",
+        "sourceIds": [],
+        "testNote": "The metadata document at https://discord.com/.well-known/oauth-authorization-server was read on 2026-10-29.",
+        "observationRef": "https://discord.com/.well-known/oauth-authorization-server"
+      }
+    }
+  ],
+  "blockers": [
+    {
+      "problem": "The 90-day window to apply after the 10,000-user notification passes without an application.",
+      "fix": "Submit the Privileged Intent application in the Developer Portal. You can apply again at any time to request access back.",
+      "evidence": {
+        "label": "documented",
+        "sourceIds": [
+          "s15"
+        ]
+      }
+    },
+    {
+      "problem": "The bot cannot see message content.",
+      "fix": "Check that Message Content is toggled on in the Bot page or approved for the app. Without it, the app has no access to those fields.",
+      "evidence": {
+        "label": "documented",
+        "sourceIds": [
+          "s5"
+        ]
+      }
+    },
+    {
+      "problem": "The intended verifying team owner is under 16 or has no qualifying ID.",
+      "fix": "Add a Developer Team owner aged 16 or over with a qualifying ID, such as a co-developer, parent or guardian. They must apply from their own account, and ownership cannot be transferred after verification.",
+      "evidence": {
+        "label": "documented",
+        "sourceIds": [
+          "s16"
+        ]
+      }
+    },
+    {
+      "problem": "An OAuth token request fails.",
+      "fix": "Check that you are using the application secret, not the public key. Reset the secret under your app's OAuth2 page if needed.",
+      "evidence": {
+        "label": "reported",
+        "sourceIds": [
+          "s12"
+        ]
+      }
+    }
+  ],
+  "handoff": {
+    "agentCanDo": [
+      {
+        "text": "Step 2: Read the OAuth2 and Developer Policy docs",
+        "evidence": {
+          "label": "tested",
+          "sourceIds": [
+            "s1",
+            "s8"
+          ],
+          "testNote": "Only reachability was observed: a read-only GET of this page on 2026-10-29 was classified \"public\" (host docs.discord.com).",
+          "observationRef": "https://docs.discord.com/developers/topics/oauth2"
+        }
+      },
+      {
+        "text": "Step 3: Register the application and save credentials",
+        "evidence": {
+          "label": "documented",
+          "sourceIds": [
+            "s1",
+            "s12"
+          ]
+        }
+      },
+      {
+        "text": "Step 4: Configure the bot scope and invite link",
+        "evidence": {
+          "label": "documented",
+          "sourceIds": [
+            "s1"
+          ]
+        }
+      },
+      {
+        "text": "Step 5: Enable the Message Content intent in the Developer Portal",
+        "evidence": {
+          "label": "documented",
+          "sourceIds": [
+            "s5",
+            "s15"
+          ]
+        }
+      },
+      {
+        "text": "Step 6: Build the bot to read and post messages",
+        "evidence": {
+          "label": "documented",
+          "sourceIds": [
+            "s5",
+            "s8"
+          ]
+        }
+      },
+      {
+        "text": "Step 7: Watch the unique-user count and prepare use case documentation",
+        "evidence": {
+          "label": "documented",
+          "sourceIds": [
+            "s15"
+          ]
+        }
+      },
+      {
+        "text": "Step 10 (prep): Keep a refreshed copy of the use case and data practices text ready.",
+        "evidence": {
+          "label": "documented",
+          "sourceIds": [
+            "s5",
+            "s15"
+          ]
+        }
+      },
+      {
+        "text": "Step 11 (prep): Move the app to a Developer Team and make sure the team owner has a qualifying ID ready.",
+        "evidence": {
+          "label": "documented",
+          "sourceIds": [
+            "s16"
+          ]
+        }
+      }
+    ],
+    "youMustDo": [
+      {
+        "text": "Step 1: Sign in with a Discord account (needs: login_or_account)",
+        "evidence": {
+          "label": "documented",
+          "sourceIds": [
+            "s1"
+          ]
+        }
+      },
+      {
+        "text": "Step 8: Submit the Privileged Intent application within 90 days (needs: manual_submission)",
+        "evidence": {
+          "label": "documented",
+          "sourceIds": [
+            "s15"
+          ]
+        }
+      },
+      {
+        "text": "Step 10: Reapply each year to keep access (needs: manual_submission)",
+        "evidence": {
+          "label": "documented",
+          "sourceIds": [
+            "s5",
+            "s15"
+          ]
+        }
+      },
+      {
+        "text": "Step 11: Optional: verify the bot with a qualifying ID (needs: identity_or_business_verification, manual_submission)",
+        "evidence": {
+          "label": "documented",
+          "sourceIds": [
+            "s16"
+          ]
+        }
+      }
+    ],
+    "providerWait": [
+      {
+        "text": "Step 9: Wait for Discord's review decision",
+        "evidence": {
+          "label": "documented",
+          "sourceIds": [
+            "s5",
+            "s15"
+          ]
+        }
+      }
+    ]
+  },
+  "tested": {
+    "unverified": [
+      "Whether Discord reviews the Message Content intent before the app reaches 10,000 unique users.",
+      "Whether the review for apps over 10,000 users is done by a human or automated.",
+      "Any published turnaround time for Privileged Intent review or bot verification.",
+      "Whether bot verification is required for this use case, and what it adds beyond the intent review.",
+      "Whether Composio's managed Discord app can cover a bot with Message Content in customer servers.",
+      "Weakly supported (self-check): A Discord account is needed to register an application in the Developer Portal and get a client ID and client secret.",
+      "Weakly supported (self-check): At 10,000+ unique users, use case documentation is required. The form asks for current app functionality, the use case for each requested in",
+      "Weakly supported (self-check): The Developer Policy requires explicit permission before changing a user's account or starting processes on a user's or server's behalf.",
+      "Weakly supported (self-check): The bot scope puts the bot in the selected guild. Some OAuth2 scopes need Discord approval, and requesting them without approval may cause e",
+      "Weakly supported (self-check): Your bot passes 10,000 unique users and needs Privileged Intent access. The application is made in the Developer Portal for the specific app",
+      "Weakly supported (self-check): Sign in with a Discord account. You need a Discord account to register a developer application. Any verification prompts Discord shows for t",
+      "Weakly supported (self-check): Read the OAuth2 and Developer Policy docs. Review the OAuth2 flows, the bot scope, and the policy on user permission and server permission. ",
+      "Weakly supported (self-check): Configure the bot scope and invite link. Use the bot scope so the bot is added to the guild the installer selects. The applications.commands",
+      "Weakly supported (self-check): Enable the Message Content intent in the Developer Portal. On the app's Bot page, under Privileged Gateway Intents, toggle on Message Conten",
+      "Weakly supported (self-check): Build the bot to read and post messages. Without the intent, the app cannot access message content fields. Make sure server owners clearly c",
+      "Weakly supported (self-check): Wait for Discord's review decision. The app keeps working with the requested intents and can keep joining servers during review. No source s",
+      "Weakly supported (self-check): Reapply each year to keep access. After the annual notification you have 90 days to reapply. Keep your use case documentation current.",
+      "Not observed: anything beyond the end of the public path (js shell unclear at https://discord.com/developers/home).",
+      "No account was used: steps after the first sign-in are inferred from documentation, not observed.",
+      "Research gap (not found): rate_limits",
+      "Research gap (not found): community_reports"
+    ]
+  },
+  "sources": [
+    {
+      "id": "s1",
+      "title": "OAuth2 - Documentation - Discord",
+      "url": "https://docs.discord.com/developers/topics/oauth2",
+      "publisher": "official",
+      "retrievedAt": "2026-10-29"
+    },
+    {
+      "id": "s2",
+      "title": "Server Member Applications – Discord",
+      "url": "https://support.discord.com/hc/en-us/articles/29729107418519-Server-Member-Applications",
+      "publisher": "official",
+      "retrievedAt": "2026-10-29"
+    },
+    {
+      "id": "s3",
+      "title": "Safety Library",
+      "url": "https://discord.com/safety-library",
+      "publisher": "official",
+      "retrievedAt": "2026-10-29"
+    },
+    {
+      "id": "s4",
+      "title": "How Can Users Discover and Play My Activity? – Developers",
+      "url": "https://support-dev.discord.com/hc/en-us/articles/21204493235991-How-Can-Users-Discover-and-Play-My-Activity",
+      "publisher": "official",
+      "retrievedAt": "2026-10-29"
+    },
+    {
+      "id": "s5",
+      "title": "Getting Started with Privileged Intent Review - Documentation - Discord",
+      "url": "https://docs.discord.com/developers/gateway/getting-started-with-privileged-intent-review",
+      "publisher": "official",
+      "retrievedAt": "2026-10-29"
+    },
+    {
+      "id": "s6",
+      "title": "Terms of Service | Discord",
+      "url": "https://discord.com/terms",
+      "publisher": "official",
+      "retrievedAt": "2026-10-29"
+    },
+    {
+      "id": "s7",
+      "title": "[RESOLVED] Age Verification Not Completing Successfully",
+      "url": "https://support.discord.com/hc/en-us/articles/38512923241623--RESOLVED-Age-Verification-Not-Completing-Successfully",
+      "publisher": "official",
+      "retrievedAt": "2026-10-29"
+    },
+    {
+      "id": "s8",
+      "title": "Discord Developer Policy – Developers",
+      "url": "https://support-dev.discord.com/hc/en-us/articles/8563934450327-Discord-Developer-Policy",
+      "publisher": "official",
+      "retrievedAt": "2026-10-29"
+    },
+    {
+      "id": "s9",
+      "title": "Discord Launches Teen Default Experience Globally",
+      "url": "https://discord.com/press-releases/discord-launches-teen-by-default-settings-globally",
+      "publisher": "official",
+      "retrievedAt": "2026-10-29"
+    },
+    {
+      "id": "s10",
+      "title": "Discord Developer Terms of Service",
+      "url": "https://support-dev.discord.com/hc/en-us/articles/8562894815383-Discord-Developer-Terms-of-Service",
+      "publisher": "official",
+      "retrievedAt": "2026-10-29"
+    },
+    {
+      "id": "s11",
+      "title": "Discord age verification rolls out today with changes spurred by user backlash - Ars Technica",
+      "url": "https://arstechnica.com/tech-policy/2026/09/discord-age-verification-rolls-out-today-with-changes-spurred-by-user-backlash",
+      "publisher": "third_party",
+      "retrievedAt": "2026-10-29"
+    },
+    {
+      "id": "s12",
+      "title": "Discord oauth fails to complete · requarks/wiki · Discussion #5415 · GitHub",
+      "url": "https://github.com/requarks/wiki/discussions/5415",
+      "publisher": "community",
+      "retrievedAt": "2026-10-29"
+    },
+    {
+      "id": "s13",
+      "title": "Composio: Managed OAuth apps (directory)",
+      "url": "https://docs.composio.dev/toolkits/managed-auth.md",
+      "publisher": "official",
+      "retrievedAt": "2026-10-29"
+    },
+    {
+      "id": "s14",
+      "title": "Discord Parental Controls Review - Is It Safe? | Protect Young Eyes",
+      "url": "https://www.protectyoungeyes.com/apps/discord-parental-controls",
+      "publisher": "third_party",
+      "retrievedAt": "2026-10-29"
+    },
+    {
+      "id": "s15",
+      "title": "Changes to Privileged Intent Access for Discord Apps – Developers",
+      "url": "https://support-dev.discord.com/hc/en-us/articles/40281523410967-Changes-to-Privileged-Intent-Access-for-Discord-Apps",
+      "publisher": "official",
+      "retrievedAt": "2026-10-29"
+    },
+    {
+      "id": "s16",
+      "title": "An Update on Verifications for Users Under 16 – Developers",
+      "url": "https://support-dev.discord.com/hc/en-us/articles/6276106082583-An-Update-on-Verifications-for-Users-Under-16",
+      "publisher": "official",
+      "retrievedAt": "2026-10-29"
+    }
+  ],
+  "research": {
+    "method": "fixed",
+    "actionsUsed": 15,
+    "pageReads": 17,
+    "seconds": 87,
+    "checklist": [
+      {
+        "item": "registration",
+        "status": "covered",
+        "sourceIds": [
+          "s1",
+          "s2",
+          "s4",
+          "s12",
+          "s15"
+        ]
+      },
+      {
+        "item": "review_process",
+        "status": "covered",
+        "sourceIds": [
+          "s1",
+          "s2",
+          "s4",
+          "s5",
+          "s7",
+          "s11",
+          "s14",
+          "s15",
+          "s16"
+        ]
+      },
+      {
+        "item": "scopes_restrictions",
+        "status": "covered",
+        "sourceIds": [
+          "s1"
+        ]
+      },
+      {
+        "item": "timing_evidence",
+        "status": "covered",
+        "sourceIds": [
+          "s4",
+          "s5",
+          "s7",
+          "s15"
+        ]
+      },
+      {
+        "item": "requirements",
+        "status": "covered",
+        "sourceIds": [
+          "s2",
+          "s8",
+          "s10",
+          "s12"
+        ]
+      },
+      {
+        "item": "rate_limits",
+        "status": "not_found",
+        "sourceIds": []
+      },
+      {
+        "item": "community_reports",
+        "status": "not_found",
+        "sourceIds": []
+      },
+      {
+        "item": "composio_status",
+        "status": "covered",
+        "sourceIds": [
+          "s13"
+        ]
+      }
+    ],
+    "steps": [
+      {
+        "action": "read",
+        "target": "https://www.protectyoungeyes.com/apps/discord-parental-controls",
+        "reason": "Follow-up: whether the review is automated, manual or a security assessment"
+      },
+      {
+        "action": "read",
+        "target": "https://support-dev.discord.com/hc/en-us/articles/40281523410967-Changes-to-Privileged-Intent-Access-for-Discord-Apps",
+        "reason": "Follow-up: how many business days or weeks the app review takes"
+      },
+      {
+        "action": "read",
+        "target": "https://support-dev.discord.com/hc/en-us/articles/6276106082583-An-Update-on-Verifications-for-Users-Under-16",
+        "reason": "Follow-up: whether business verification or a legal entity is required"
+      }
+    ]
+  },
+  "nextAction": "Sign in with a Discord account, register the application, add the bot scope, and toggle on the Message Content intent to prototype under 10,000 users.",
+  "warnings": [
+    "Skipped off-topic page: https://discord.com/privacy",
+    "Skipped off-topic page: https://docs.discord.com/developers/topics/rate-limits",
+    "Could not read https://www.reddit.com/r/discordapp/comments/1mlqfl2/how_long_does_discord_take_to_review_age; not used as a source",
+    "Self-check: 0 claim(s) downgraded, 12 flagged as weak"
+  ]
+}
