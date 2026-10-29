@@ -93,9 +93,12 @@ export function mergeAttempt(draft: GuideShape, rawLog: AttemptLog, opts: MergeO
   }
 
   // ---- corrections ----
-  const ref = (log.steps.find((a) => a.outcome === "differs_from_docs") ?? log.steps[0]).id;
+  const defaultRef = (log.steps.find((a) => a.outcome === "differs_from_docs") ?? log.steps[0]).id;
+  const stepIds = new Set(log.steps.map((a) => a.id));
   const pools: Claim[][] = [g.requirements, g.scopesAndNuances];
   for (const c of log.corrections) {
+    // A correction may name the attempt step that showed it (sourceId); otherwise the first step that differed from the docs.
+    const ref = c.sourceId && stepIds.has(c.sourceId) ? c.sourceId : defaultRef;
     const text = `${c.observed} (Docs said: ${c.docClaim})`;
     const evidence = { label: "tested" as const, sourceIds: [], testNote: `Observed in a signed-in walkthrough on ${log.date}; this corrects the documentation.`, observationRef: ref };
     const dc = norm(c.docClaim);

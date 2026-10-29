@@ -237,7 +237,7 @@
     "timeToProduction": {
       "none": true,
       "evidence": {
-        "label": "documented",
+        "label": "unverified",
         "sourceIds": [
           "s3",
           "s6"
@@ -369,7 +369,7 @@
     {
       "order": 1,
       "title": "Decide between an OAuth app and a GitHub App",
-      "estimate": "15-60 minutes",
+      "estimate": "15-60 minutes (our estimate; no source states this)",
       "detail": "GitHub recommends considering a GitHub App instead (fine-grained permissions, short-lived tokens, higher scaling rate limits). This guide covers the OAuth app route you asked for.",
       "url": "https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/authorizing-oauth-apps",
       "requires": [
@@ -380,13 +380,11 @@
       "observed": true,
       "traceHop": 1,
       "evidence": {
-        "label": "tested",
+        "label": "documented",
         "sourceIds": [
           "s1",
           "s5"
-        ],
-        "testNote": "Only reachability was observed: a read-only GET of this page on 2026-10-29 was classified \"public\" (host docs.github.com).",
-        "observationRef": "https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/authorizing-oauth-apps"
+        ]
       }
     },
     {
@@ -404,7 +402,7 @@
         "sourceIds": [
           "s2"
         ],
-        "testNote": "Observed in a signed-in walkthrough on 2026-10-29: Signed in already, no re-authentication, 2FA, CAPTCHA or email prompt appeared (whether the email was already verified was not checked). The OAuth Apps list was empty.",
+        "testNote": "Observed in the walkthrough on 2026-10-29: already signed in, no extra prompt appeared. The verified-email requirement is documented only; email verification was not checked.",
         "observationRef": "gh-1"
       }
     },
@@ -450,7 +448,7 @@
     {
       "order": 5,
       "title": "Implement the authorization flow and choose scopes",
-      "estimate": "2-8 hours",
+      "estimate": "2-8 hours (our estimate; no source states this)",
       "detail": "Use the web application (authorization code) flow, or the device flow for headless apps; the implicit grant is not supported. Request only the scopes needed for repos, issues, PRs and org access. Add offline_access to opt in to 8-hour tokens with refresh tokens. Cache tokens to avoid hitting the ten-token and sign-in limits.",
       "requires": [
         "code_writing",
@@ -491,7 +489,7 @@
     {
       "order": 7,
       "title": "Test with a real user and org",
-      "estimate": "1-4 hours",
+      "estimate": "1-4 hours (our estimate; no source states this)",
       "detail": "Authorize with a test account, confirm repo, issue and PR reads, and confirm the app can see (or is blocked from) org resources before and after approval.",
       "requires": [
         "config_check"
@@ -552,14 +550,12 @@
       }
     },
     {
-      "text": "The registration form has 'Expire user access tokens' ticked by default, which provides refresh tokens. The offline_access scope was not tested. (Docs said: Access tokens can expire after eight hours with a refresh token that expires after six months without use. Requesting offline_access opts in per sign-in. Existing non-expiring tokens are not changed when expiry is later enforced.)",
+      "text": "The registration form has 'Expire user access tokens' ticked by default (observed; GitHub's creating-an-OAuth-app page says the same). Expiring tokens last eight hours with a refresh token that expires after six months without use, and offline_access opts in per sign-in (documented; not tested).",
       "evidence": {
-        "label": "tested",
+        "label": "documented",
         "sourceIds": [
           "s1"
-        ],
-        "testNote": "Observed in a signed-in walkthrough on 2026-10-29; this corrects the documentation.",
-        "observationRef": "gh-2"
+        ]
       }
     },
     {
@@ -584,9 +580,11 @@
       "text": "The Client ID is shown at once; a client secret is created only after clicking 'Generate a new client secret'. (Docs said: The app gets a unique Client ID and Client Secret.)",
       "evidence": {
         "label": "tested",
-        "sourceIds": [],
+        "sourceIds": [
+          "s6"
+        ],
         "testNote": "Observed in a signed-in walkthrough on 2026-10-29; this corrects the documentation.",
-        "observationRef": "gh-2"
+        "observationRef": "gh-4"
       }
     }
   ],
@@ -719,14 +717,20 @@
       "Weakly supported (self-check): You need control over token settings such as expiring tokens, or your own rate-limit budget and app-level settings.",
       "Weakly supported (self-check): Request organization owner approval where restrictions are enabled. When access restrictions are on, members request owner approval for the ",
       "Not observed: anything beyond the end of the public path (dead end at https://docs.github.com/en/apps/creating-github-apps/about-creating-github-apps/migrating-oauth-apps-to-github-apps).",
-      "Steps 1, 5, 6, 7 were not walked through (the walkthrough stopped at the client-secret step (guide step 4): no secret was generated; steps 5 to 7 were not attempted); they stay as documented, not observed."
+      "Steps 1, 5, 6, 7 were not walked through (the walkthrough stopped at the client-secret step (guide step 4): no secret was generated; steps 5 to 7 were not attempted); they stay as documented, not observed.",
+      "Time to production: no GitHub review is described for registering or using an OAuth app, but organizations with access restrictions need an owner's approval and GitHub gives no timeline. 'None' reflects the docs not mentioning a review."
     ]
   },
   "changelog": [
     "2026-10-29: signed-in walkthrough merged (level L3).",
     "2026-10-29: corrected \"An Authorization callback URL that you own and control, since ownership of it pr\" to \"The form labels it 'Redirect URIs': up to 10 are allowed, with an optional wildc\" after the walkthrough.",
     "2026-10-29: corrected \"Access tokens can expire after eight hours with a refresh token that expires aft\" to \"The registration form has 'Expire user access tokens' ticked by default, which p\" after the walkthrough.",
-    "2026-10-29: corrected \"The app gets a unique Client ID and Client Secret.\" to \"The Client ID is shown at once; a client secret is created only after clicking '\" after the walkthrough."
+    "2026-10-29: corrected \"The app gets a unique Client ID and Client Secret.\" to \"The Client ID is shown at once; a client secret is created only after clicking '\" after the walkthrough.",
+    "2026-10-29: verification: time to production downgraded from documented to unverified (it rested on the docs not mentioning a review; org approval has no stated timeline).",
+    "2026-10-29: verification: step 1, 5 and 7 time ranges marked as our estimates (no source gives them).",
+    "2026-10-29: verification: step 1 changed from tested to documented (the observation only showed the page was reachable, not the decision content).",
+    "2026-10-29: verification: token-expiry claim reworded; expiry on by default is documented, so it is no longer shown as a correction.",
+    "2026-10-29: verification: step 2's tested note now says email verification was not checked."
   ],
   "sources": [
     {

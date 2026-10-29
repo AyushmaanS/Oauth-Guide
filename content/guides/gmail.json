@@ -243,7 +243,7 @@
   "verdict": {
     "difficulty": "hard",
     "difficultyReason": "A third-party security assessment is required. This holds whatever the unknown details turn out to be.",
-    "useCase": "An AI agent (hosted SaaS/server-side) that reads and sends Gmail on behalf of other customers' Google accounts, using restricted Gmail scopes",
+    "useCase": "An AI agent (hosted SaaS/server-side) that reads and sends Gmail on behalf of other customers' Google accounts. Reading uses restricted scopes (such as gmail.readonly or gmail.modify); gmail.send alone is only sensitive.",
     "timeToCredentials": {
       "estimate": true,
       "minHours": 1,
@@ -258,7 +258,7 @@
       "estimate": true,
       "minDays": 28,
       "maxDays": 120,
-      "basis": "Our estimate: a security assessment class is typically four to twelve weeks or more. Google's help page says verification may take several months depending on data sensitivity but gives no number.",
+      "basis": "Our estimate (unverified): Google's restricted-scope page says verification \"can potentially take several weeks\" and its unverified-apps page says \"several months\" depending on data sensitivity. Neither gives a duration for the third-party security assessment; the four-to-twelve-week figure is not sourced.",
       "evidence": {
         "label": "unverified",
         "sourceIds": []
@@ -340,7 +340,7 @@
           "s10"
         ],
         "testNote": "Observed in a signed-in walkthrough on 2026-10-29; this corrects the documentation.",
-        "observationRef": "gm-5"
+        "observationRef": "gm-1"
       }
     },
     {
@@ -401,7 +401,7 @@
     {
       "order": 1,
       "title": "Sign in and create or select a Google Cloud project",
-      "estimate": "10–30 minutes",
+      "estimate": "10–30 minutes (unverified estimate; the walkthrough did not time this step)",
       "detail": "You need a Google Cloud account and a project. The console prompts you to create a project if none is selected.",
       "url": "https://support.google.com/cloud/answer/15549257?hl=en",
       "requires": [
@@ -426,7 +426,7 @@
     {
       "order": 2,
       "title": "Configure the OAuth consent screen (app registration)",
-      "estimate": "30–90 minutes",
+      "estimate": "30–90 minutes (unverified estimate; the owner finished the wizard off-screen)",
       "detail": "In Google Auth Platform enter the app name and support email, choose the External audience, add a contact email, and agree to the API Services User Data Policy. A client cannot be created until this is done.",
       "url": "https://developers.google.com/workspace/guides/configure-oauth-consent",
       "requires": [
@@ -471,7 +471,7 @@
     {
       "order": 4,
       "title": "Create a Web application OAuth client",
-      "estimate": "1 min (approximate, one walkthrough)",
+      "estimate": "15–30 minutes (unverified estimate; the walkthrough only opened the create-client form, about 1 minute, and created no client)",
       "detail": "On the Clients page choose CREATE CLIENT and select Web application. Add your redirect URIs and origins. The client secret is shown only once after creation, so store it in a secret manager.",
       "url": "https://support.google.com/cloud/answer/15549257?hl=en",
       "requires": [
@@ -493,7 +493,7 @@
     {
       "order": 5,
       "title": "Build and test the agent with test users",
-      "estimate": "Days to weeks",
+      "estimate": "Days to weeks (unverified estimate)",
       "detail": "You can keep building and testing while verification is pending. Use the test users added to the consent screen.",
       "requires": [
         "code_writing"
@@ -512,7 +512,7 @@
     {
       "order": 6,
       "title": "Prepare verification materials",
-      "estimate": "1–3 days",
+      "estimate": "1–3 days (unverified estimate)",
       "detail": "Review the restricted-scope requirements and the API Services User Data Policy. Make sure scope use is minimal and accurately declared. The sources do not list the exact form fields or demo requirements.",
       "url": "https://developers.google.com/identity/protocols/oauth2/production-readiness/restricted-scope-verification",
       "requires": [
@@ -523,18 +523,16 @@
       "agentPrep": "Draft scope justifications, a data-handling description and a privacy policy that matches actual data use.",
       "observed": true,
       "evidence": {
-        "label": "tested",
+        "label": "documented",
         "sourceIds": [
           "s2"
-        ],
-        "testNote": "Only reachability was observed: a read-only GET of this page on 2026-10-29 was classified \"public\" (host developers.google.com).",
-        "observationRef": "https://developers.google.com/identity/protocols/oauth2/production-readiness/restricted-scope-verification"
+        ]
       }
     },
     {
       "order": 7,
       "title": "Request OAuth app verification from Google",
-      "estimate": "1–3 hours",
+      "estimate": "1–3 hours (unverified estimate)",
       "detail": "Submit the app for verification with the restricted scopes declared on the consent screen. Verification is needed before launching a user-facing app.",
       "url": "https://support.google.com/cloud/answer/7454865?hl=en",
       "requires": [
@@ -544,13 +542,11 @@
       "agentPrep": "Assemble the prepared justifications and links in one place.",
       "observed": true,
       "evidence": {
-        "label": "tested",
+        "label": "documented",
         "sourceIds": [
           "s9",
           "s2"
-        ],
-        "testNote": "Only reachability was observed: a read-only GET of this page on 2026-10-29 was classified \"public\" (host support.google.com).",
-        "observationRef": "https://support.google.com/cloud/answer/7454865?hl=en"
+        ]
       }
     },
     {
@@ -574,7 +570,7 @@
     {
       "order": 9,
       "title": "Complete the third-party security assessment",
-      "estimate": "Likely 4–12+ weeks",
+      "estimate": "Likely 4–12+ weeks (unverified estimate; Google and the App Defense Alliance pages state no duration)",
       "detail": "If restricted-scope data is stored or transmitted via your servers, a Google-approved third party must assess the app, and the assessment recurs annually. The sources give no duration, cost or vendor list.",
       "url": "https://developers.google.com/identity/protocols/oauth2/production-readiness/restricted-scope-verification",
       "requires": [
@@ -585,18 +581,16 @@
       "agentPrep": "Document the architecture, data flows, storage, encryption and access controls.",
       "observed": true,
       "evidence": {
-        "label": "tested",
+        "label": "documented",
         "sourceIds": [
           "s2"
-        ],
-        "testNote": "Only reachability was observed: a read-only GET of this page on 2026-10-29 was classified \"public\" (host developers.google.com).",
-        "observationRef": "https://developers.google.com/identity/protocols/oauth2/production-readiness/restricted-scope-verification"
+        ]
       }
     },
     {
       "order": 10,
       "title": "Move to production and onboard customers",
-      "estimate": "1–2 hours",
+      "estimate": "1–2 hours (unverified estimate)",
       "detail": "After verification, publish the app to production so the unverified-app screen and user cap no longer apply, then onboard customers.",
       "requires": [
         "config_check"
@@ -670,12 +664,12 @@
       }
     },
     {
-      "text": "In the console, gmail.readonly was listed under 'restricted scopes' when declared on 2026-10-29. The scope picker only lists scopes of enabled APIs, so scopes may need to be pasted. (Docs said: The sources do not say which individual Gmail scopes are classified as restricted. Check Google's OAuth API verification FAQ scope list for the exact scopes you plan to request.)",
+      "text": "Google's Gmail scopes page classifies gmail.readonly, gmail.modify, gmail.compose, gmail.metadata, gmail.insert and mail.google.com as restricted; gmail.send is sensitive (not restricted) and gmail.labels is non-sensitive. The console listed gmail.readonly under 'restricted scopes' on 2026-10-29. The scope picker only lists scopes of enabled APIs, so scopes may need to be pasted.",
       "evidence": {
-        "label": "tested",
-        "sourceIds": [],
-        "testNote": "Observed in a signed-in walkthrough on 2026-10-29; this corrects the documentation.",
-        "observationRef": "gm-5"
+        "label": "documented",
+        "sourceIds": [
+          "s15"
+        ]
       }
     },
     {
@@ -888,7 +882,6 @@
       "Whether a registered legal business entity or verified business is required for restricted Gmail scope verification.",
       "The cost, vendor choice and exact duration of the third-party security assessment.",
       "The exact verification form fields, demo video requirements and typical review turnaround.",
-      "Which exact Gmail scopes are classified as restricted.",
       "Whether and how a Composio-managed app's verification status or user limits apply to your own customers.",
       "All time and effort ranges are our estimates unless a source gave a figure. Google only says verification may take several months.",
       "Weakly supported (self-check): Agree to the Google API Services User Data Policy during consent screen setup.",
@@ -909,7 +902,11 @@
   "changelog": [
     "2026-10-29: signed-in walkthrough merged (level L3).",
     "2026-10-29: corrected \"A Google Cloud account and a Google Cloud project.\" to \"A Google account with 2-step verification turned on was needed before Cloud woul\" after the walkthrough.",
-    "2026-10-29: corrected \"The sources do not say which individual Gmail scopes are classified as restricte\" to \"In the console, gmail.readonly was listed under 'restricted scopes' when declare\" after the walkthrough."
+    "2026-10-29: corrected \"The sources do not say which individual Gmail scopes are classified as restricte\" to \"In the console, gmail.readonly was listed under 'restricted scopes' when declare\" after the walkthrough.",
+    "2026-10-29: verification: time-to-production basis corrected (Google gives qualitative ranges, several weeks to several months, but no figure for the security assessment).",
+    "2026-10-29: verification: step time ranges marked as unverified estimates; step 4's walkthrough time withdrawn because no client was created.",
+    "2026-10-29: verification: steps 6, 7 and 9 changed from tested to documented (the observation only showed the page was reachable).",
+    "2026-10-29: verification: restricted-scope list now sourced from Google's scopes page; send-only access is sensitive, not restricted, so the security assessment applies to read access."
   ],
   "sources": [
     {
@@ -1009,6 +1006,14 @@
       "url": "https://support.google.com/business/answer/7107242?hl=en",
       "publisher": "official",
       "retrievedAt": "2026-10-29"
+    },
+    {
+      "id": "s15",
+      "title": "Choose Google Workspace Gmail API scopes",
+      "url": "https://developers.google.com/workspace/gmail/api/auth/scopes",
+      "publisher": "official",
+      "retrievedAt": "2026-10-29T00:00:00.000Z",
+      "excerpt": "Lists which Gmail scopes are non-sensitive, sensitive or restricted."
     }
   ],
   "research": {

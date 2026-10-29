@@ -80,6 +80,11 @@ describe("mergeAttempt", () => {
     expect(claim!.evidence.label).toBe("tested");
     expect(r.guide.changelog?.[0]).toContain("2026-11-02");
   });
+  it("a correction can name the attempt step that showed it", () => {
+    const l = log({ corrections: [{ docClaim: "A free developer account on the provider's site (fake).", observed: "It also asks for two-factor setup.", sourceId: "a2" }] });
+    const g = mergeAttempt(draft(), l).guide;
+    expect(g.requirements.find((c) => c.text.includes("two-factor"))?.evidence.observationRef).toBe("a2");
+  });
   it("a correction that matches no claim becomes a new tested note, never lost", () => {
     const l = log({ corrections: [{ docClaim: "Something no claim mentions.", observed: "It actually needs a homepage URL." }] });
     const g = mergeAttempt(draft(), l).guide;
