@@ -1,0 +1,79 @@
+{
+  "performedBy": "owner_with_claude_code",
+  "date": "2026-10-29",
+  "accountType": "free",
+  "browserProfile": "separate",
+  "steps": [
+    {
+      "id": "sp-1",
+      "guideStepOrder": 1,
+      "action": "Opened developer.spotify.com/dashboard in the project browser profile",
+      "observation": "Redirected to login; the owner signed in. Then the Developer Terms checkbox, and 'verify your email address before you can create an app' (Create app disabled). The owner did all three.",
+      "outcome": "stopped_human_required",
+      "tags": [
+        "login_or_account",
+        "legal_acceptance",
+        "email_or_phone_verification"
+      ]
+    },
+    {
+      "id": "sp-2",
+      "guideStepOrder": 3,
+      "action": "Opened the Create app form on a free account",
+      "observation": "Fields: name*, description*, website, redirect URIs*, API/SDK boxes (Web API greyed out), a Premium upgrade banner, and a Developer Terms and Design Guidelines box the owner ticked.",
+      "outcome": "differs_from_docs",
+      "tags": [
+        "config_check",
+        "legal_acceptance"
+      ]
+    },
+    {
+      "id": "sp-3",
+      "guideStepOrder": 3,
+      "action": "The owner clicked Save; the agent read the app's Basic Information page",
+      "observation": "The app was created on a free account in Development mode, refresh token lifetime 180 days. The Client ID is shown; the secret is behind 'View client secret' and was not viewed.",
+      "outcome": "completed",
+      "tags": [
+        "config_check"
+      ]
+    },
+    {
+      "id": "sp-4",
+      "guideStepOrder": 4,
+      "action": "Added the redirect URI http://127.0.0.1:3000/callback in the form",
+      "observation": "A loopback address was accepted and listed. The docs say plain localhost is rejected; that was not tested here.",
+      "outcome": "completed",
+      "tags": [
+        "config_check"
+      ]
+    },
+    {
+      "id": "sp-5",
+      "action": "Cleanup: the test app was not deleted during the session",
+      "observation": "The app still exists until the owner deletes it; no secret was ever viewed, so none needs removing. The account also keeps the verified email and accepted terms.",
+      "outcome": "stopped_human_required",
+      "tags": []
+    }
+  ],
+  "stoppedAt": "before viewing the client secret or using the Web API (greyed out on a free account): guide steps 1, 3 and 4 were observed, steps 2 and 5 to 9 were not attempted",
+  "stoppedBecause": [
+    "email_or_phone_verification",
+    "legal_acceptance"
+  ],
+  "corrections": [
+    {
+      "docClaim": "A Spotify developer account to create and manage Client IDs in the Spotify dashboard. The captured sources show only that developers manage Client IDs through the dashboard, not the exact sign-up requirements.",
+      "observed": "A Spotify account (a free one worked) plus accepting the Developer Terms and a verified email address before Create app turns on. On a free account a Premium banner shows and Web API is greyed out.",
+      "sourceId": "sp-1"
+    },
+    {
+      "docClaim": "New apps run in Development Mode.",
+      "observed": "The new app was created in Development mode, with a 180-day refresh token lifetime shown on its page.",
+      "sourceId": "sp-3"
+    }
+  ],
+  "cleanup": {
+    "appsDeleted": false,
+    "secretsRemoved": true
+  }
+}

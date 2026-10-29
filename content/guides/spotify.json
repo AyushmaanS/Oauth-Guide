@@ -8,8 +8,8 @@
   "pipelineVersion": "0.3.0",
   "modelUsed": "anthropic/claude-sonnet-5.5",
   "complete": true,
-  "attemptLevel": "L2",
-  "attemptLevelReason": "Gate probed: 6 page(s) requested read-only on 2026-10-29; public path followed for 5 page(s) (depth limit). No account was used.",
+  "attemptLevel": "L3",
+  "attemptLevelReason": "Signed-in walkthrough on 2026-10-29 (free account, separate browser profile) stopped at before viewing the client secret or using the Web API (greyed out on a free account): guide steps 1, 3 and 4 were observed, steps 2 and 5 to 9 were not attempted, because a human is needed for: email_or_phone_verification, legal_acceptance. Spotify's terms are ambiguous on an agent driving the dashboard (allowed-leaning); the owner ran this single walkthrough on a free account knowingly (decision D-018).",
   "probe": [
     {
       "url": "https://developer.spotify.com/documentation/web-api/concepts/quota-modes",
@@ -253,6 +253,85 @@
       "No registration endpoint is listed, so manual console registration is likely still needed."
     ]
   },
+  "attempt": {
+    "performedBy": "owner_with_claude_code",
+    "date": "2026-10-29",
+    "accountType": "free",
+    "browserProfile": "separate",
+    "steps": [
+      {
+        "id": "sp-1",
+        "guideStepOrder": 1,
+        "action": "Opened developer.spotify.com/dashboard in the project browser profile",
+        "observation": "Redirected to login; the owner signed in. Then the Developer Terms checkbox, and 'verify your email address before you can create an app' (Create app disabled). The owner did all three.",
+        "outcome": "stopped_human_required",
+        "tags": [
+          "login_or_account",
+          "legal_acceptance",
+          "email_or_phone_verification"
+        ]
+      },
+      {
+        "id": "sp-2",
+        "guideStepOrder": 3,
+        "action": "Opened the Create app form on a free account",
+        "observation": "Fields: name*, description*, website, redirect URIs*, API/SDK boxes (Web API greyed out), a Premium upgrade banner, and a Developer Terms and Design Guidelines box the owner ticked.",
+        "outcome": "differs_from_docs",
+        "tags": [
+          "config_check",
+          "legal_acceptance"
+        ]
+      },
+      {
+        "id": "sp-3",
+        "guideStepOrder": 3,
+        "action": "The owner clicked Save; the agent read the app's Basic Information page",
+        "observation": "The app was created on a free account in Development mode, refresh token lifetime 180 days. The Client ID is shown; the secret is behind 'View client secret' and was not viewed.",
+        "outcome": "completed",
+        "tags": [
+          "config_check"
+        ]
+      },
+      {
+        "id": "sp-4",
+        "guideStepOrder": 4,
+        "action": "Added the redirect URI http://127.0.0.1:3000/callback in the form",
+        "observation": "A loopback address was accepted and listed. The docs say plain localhost is rejected; that was not tested here.",
+        "outcome": "completed",
+        "tags": [
+          "config_check"
+        ]
+      },
+      {
+        "id": "sp-5",
+        "action": "Cleanup: the test app was not deleted during the session",
+        "observation": "The app still exists until the owner deletes it; no secret was ever viewed, so none needs removing. The account also keeps the verified email and accepted terms.",
+        "outcome": "stopped_human_required",
+        "tags": []
+      }
+    ],
+    "stoppedAt": "before viewing the client secret or using the Web API (greyed out on a free account): guide steps 1, 3 and 4 were observed, steps 2 and 5 to 9 were not attempted",
+    "stoppedBecause": [
+      "email_or_phone_verification",
+      "legal_acceptance"
+    ],
+    "corrections": [
+      {
+        "docClaim": "A Spotify developer account to create and manage Client IDs in the Spotify dashboard. The captured sources show only that developers manage Client IDs through the dashboard, not the exact sign-up requirements.",
+        "observed": "A Spotify account (a free one worked) plus accepting the Developer Terms and a verified email address before Create app turns on. On a free account a Premium banner shows and Web API is greyed out.",
+        "sourceId": "sp-1"
+      },
+      {
+        "docClaim": "New apps run in Development Mode.",
+        "observed": "The new app was created in Development mode, with a 180-day refresh token lifetime shown on its page.",
+        "sourceId": "sp-3"
+      }
+    ],
+    "cleanup": {
+      "appsDeleted": false,
+      "secretsRemoved": true
+    }
+  },
   "verdict": {
     "difficulty": "hard",
     "difficultyReason": "Our estimate: Required review takes weeks. Sources do not settle every factor, so it could be anywhere from easy to hard.",
@@ -375,12 +454,14 @@
   },
   "requirements": [
     {
-      "text": "A Spotify developer account to create and manage Client IDs in the Spotify dashboard. The captured sources show only that developers manage Client IDs through the dashboard, not the exact sign-up requirements.",
+      "text": "A Spotify account (a free one worked) plus accepting the Developer Terms and a verified email address before Create app turns on. On a free account a Premium banner shows and Web API is greyed out. (Docs said: A Spotify developer account to create and manage Client IDs in the Spotify dashboard. The captured sources show only that developers manage Client IDs through the dashboard, not the exact sign-up requirements.)",
       "evidence": {
-        "label": "documented",
+        "label": "tested",
         "sourceIds": [
           "s6"
-        ]
+        ],
+        "testNote": "Observed in a signed-in walkthrough on 2026-10-29; this corrects the documentation.",
+        "observationRef": "sp-1"
       }
     },
     {
@@ -416,16 +497,20 @@
       "estimate": "5-30 minutes",
       "detail": "Sign in with a Spotify account to reach the developer dashboard, where Client IDs are created. The captured sources do not detail account verification steps.",
       "requires": [
-        "login_or_account"
+        "login_or_account",
+        "legal_acceptance",
+        "email_or_phone_verification"
       ],
       "actor": "you",
       "agentPrep": "List which Spotify account will own the app so the right person signs in.",
-      "observed": false,
+      "observed": true,
       "evidence": {
-        "label": "unverified",
+        "label": "tested",
         "sourceIds": [
           "s6"
-        ]
+        ],
+        "testNote": "Observed in a signed-in walkthrough on 2026-10-29: Redirected to login; the owner signed in. Then the Developer Terms checkbox, and 'verify your email address before you can create an app' (Create app disabled). The owner did all three.",
+        "observationRef": "sp-1"
       }
     },
     {
@@ -456,16 +541,19 @@
       "estimate": "10-30 minutes",
       "detail": "Create the app in the dashboard. Creating a Client ID also generates a Client Secret. New apps run in Development Mode, whose quota is counted per developer account.",
       "requires": [
-        "config_check"
+        "config_check",
+        "legal_acceptance"
       ],
-      "actor": "agent",
-      "observed": false,
+      "actor": "you",
+      "observed": true,
       "evidence": {
-        "label": "documented",
+        "label": "tested",
         "sourceIds": [
           "s6",
           "s9"
-        ]
+        ],
+        "testNote": "Observed in a signed-in walkthrough on 2026-10-29: Fields: name*, description*, website, redirect URIs*, API/SDK boxes (Web API greyed out), a Premium upgrade banner, and a Developer Terms and Design Guidelines box the owner ticked.",
+        "observationRef": "sp-2"
       }
     },
     {
@@ -474,15 +562,16 @@
       "estimate": "10-20 minutes",
       "detail": "Register the callback URL your agent's backend will use for the Authorization Code flow. The captured sources do not show the dashboard fields or redirect URI rules, so check the Redirect URIs docs.",
       "requires": [
-        "config_check",
-        "docs_reading"
+        "config_check"
       ],
       "actor": "agent",
       "agentPrep": "Decide the exact callback URL, using https where it is not local.",
-      "observed": false,
+      "observed": true,
       "evidence": {
-        "label": "unverified",
-        "sourceIds": []
+        "label": "tested",
+        "sourceIds": [],
+        "testNote": "Observed in a signed-in walkthrough on 2026-10-29: A loopback address was accepted and listed. The docs say plain localhost is rejected; that was not tested here.",
+        "observationRef": "sp-4"
       }
     },
     {
@@ -636,6 +725,24 @@
         "testNote": "The metadata document at https://accounts.spotify.com/.well-known/openid-configuration was read on 2026-10-29.",
         "observationRef": "https://accounts.spotify.com/.well-known/openid-configuration"
       }
+    },
+    {
+      "text": "The new app was created in Development mode, with a 180-day refresh token lifetime shown on its page. (Docs said: New apps run in Development Mode.)",
+      "evidence": {
+        "label": "tested",
+        "sourceIds": [],
+        "testNote": "Observed in a signed-in walkthrough on 2026-10-29; this corrects the documentation.",
+        "observationRef": "sp-3"
+      }
+    },
+    {
+      "text": "On a free (non-Premium) account the dashboard still let us create an app, but a Premium upgrade banner showed and the Web API checkbox was greyed out. Spotify's docs say Premium is needed for the Web API in development mode; whether a free-account app can call the Web API was not tested.",
+      "evidence": {
+        "label": "tested",
+        "sourceIds": [],
+        "testNote": "Observed on the Create app form during the walkthrough on 2026-10-29.",
+        "observationRef": "sp-2"
+      }
     }
   ],
   "blockers": [
@@ -667,10 +774,12 @@
       {
         "text": "Step 1 (prep): List which Spotify account will own the app so the right person signs in.",
         "evidence": {
-          "label": "unverified",
+          "label": "tested",
           "sourceIds": [
             "s6"
-          ]
+          ],
+          "testNote": "Observed in a signed-in walkthrough on 2026-10-29: Redirected to login; the owner signed in. Then the Developer Terms checkbox, and 'verify your email address before you can create an app' (Create app disabled). The owner did all three.",
+          "observationRef": "sp-1"
         }
       },
       {
@@ -685,20 +794,12 @@
         }
       },
       {
-        "text": "Step 3: Create the app and obtain Client ID and Secret",
-        "evidence": {
-          "label": "documented",
-          "sourceIds": [
-            "s6",
-            "s9"
-          ]
-        }
-      },
-      {
         "text": "Step 4: Register the redirect URI",
         "evidence": {
-          "label": "unverified",
-          "sourceIds": []
+          "label": "tested",
+          "sourceIds": [],
+          "testNote": "Observed in a signed-in walkthrough on 2026-10-29: A loopback address was accepted and listed. The docs say plain localhost is rejected; that was not tested here.",
+          "observationRef": "sp-4"
         }
       },
       {
@@ -742,12 +843,26 @@
     ],
     "youMustDo": [
       {
-        "text": "Step 1: Sign in to the Spotify developer dashboard (needs: login_or_account)",
+        "text": "Step 1: Sign in to the Spotify developer dashboard (needs: login_or_account, legal_acceptance, email_or_phone_verification)",
         "evidence": {
-          "label": "unverified",
+          "label": "tested",
           "sourceIds": [
             "s6"
-          ]
+          ],
+          "testNote": "Observed in a signed-in walkthrough on 2026-10-29: Redirected to login; the owner signed in. Then the Developer Terms checkbox, and 'verify your email address before you can create an app' (Create app disabled). The owner did all three.",
+          "observationRef": "sp-1"
+        }
+      },
+      {
+        "text": "Step 3: Create the app and obtain Client ID and Secret (needs: legal_acceptance)",
+        "evidence": {
+          "label": "tested",
+          "sourceIds": [
+            "s6",
+            "s9"
+          ],
+          "testNote": "Observed in a signed-in walkthrough on 2026-10-29: Fields: name*, description*, website, redirect URIs*, API/SDK boxes (Web API greyed out), a Premium upgrade banner, and a Developer Terms and Design Guidelines box the owner ticked.",
+          "observationRef": "sp-2"
         }
       },
       {
@@ -784,11 +899,18 @@
       "Weakly supported (self-check): Sign in to the Spotify developer dashboard. Sign in with a Spotify account to reach the developer dashboard, where Client IDs are created. T",
       "Weakly supported (self-check): Requests return 429 with reason QUOTA_EXCEEDED while the app is in Development Mode. -> Reduce call volume and cache library and playlist re",
       "Not observed: anything beyond the end of the public path (depth limit at https://developer.spotify.com/documentation/web-api/concepts/authorization).",
-      "No account was used: steps after the first sign-in are inferred from documentation, not observed.",
       "Research gap (not found): timing_evidence",
-      "Research gap (not found): community_reports"
+      "Research gap (not found): community_reports",
+      "Steps 2, 5, 6, 7, 8, 9 were not walked through (the walkthrough stopped at before viewing the client secret or using the Web API (greyed out on a free account): guide steps 1, 3 and 4 were observed, steps 2 and 5 to 9 were not attempted); they stay as documented, not observed.",
+      "Cleanup was incomplete after the walkthrough: a test app may still exist."
     ]
   },
+  "changelog": [
+    "2026-10-29: signed-in walkthrough merged (level L3).",
+    "2026-10-29: corrected \"A Spotify developer account to create and manage Client IDs in the Spotify dashb\" to \"A Spotify account (a free one worked) plus accepting the Developer Terms and a v\" after the walkthrough.",
+    "2026-10-29: corrected \"New apps run in Development Mode.\" to \"The new app was created in Development mode, with a 180-day refresh token lifeti\" after the walkthrough.",
+    "2026-10-29: added the free-account observation (app creation allowed, Web API greyed out) and Spotify's terms status; the test app still awaits deletion by the owner."
+  ],
   "sources": [
     {
       "id": "s1",
