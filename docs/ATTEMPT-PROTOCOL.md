@@ -1,6 +1,6 @@
 # Signed-in walkthrough protocol (APPROVED by owner 2026-10-29)
 
-Source: engineering spec 6.9. Status: **not approved yet. No walkthrough may start until the owner approves this file and gives per-provider consent in `docs/DECISIONS.md`.**
+Source: engineering spec 6.9. Status: **approved by the owner on 2026-10-29. Each walkthrough still needs a per-provider consent line in `docs/DECISIONS.md` before it starts.**
 
 A "walkthrough" means Claude Code drives the owner's real, signed-in browser through a provider's developer console, following a library guide's steps, to see what really happens. It acts in the owner's real account, so these rules are strict.
 
