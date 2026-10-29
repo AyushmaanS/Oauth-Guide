@@ -38,7 +38,7 @@ async function one(item: (typeof SET)[number]) {
     if (!g) { row.outcome = "no guide"; row.errors = r.errors; row.pass = item.expect === "graceful"; return row; }
     const labels = [...g.steps.map((s) => s.evidence.label), ...g.requirements.map((c) => c.evidence.label), ...g.scopesAndNuances.map((c) => c.evidence.label)];
     Object.assign(row, {
-      outcome: "guide", difficulty: g.verdict.difficulty, complete: g.complete, method: g.research.method, sources: g.sources.length,
+      outcome: "guide", difficulty: g.verdict.difficulty, confidence: g.verdict.difficultyConfidence, range: g.verdict.difficultyRange, inferred: g.verdict.inference?.length ?? 0, checkFirst: g.verdict.checkFirst, estimates: [g.verdict.timeToCredentials, g.verdict.timeToProduction, g.verdict.humanEffortHours].filter((r) => "estimate" in r && (r as { estimate?: boolean }).estimate).length, trace: g.research.steps, complete: g.complete, method: g.research.method, sources: g.sources.length,
       official: g.sources.filter((s) => s.publisher === "official").length, steps: g.steps.length,
       covered: g.research.checklist.filter((c) => c.status === "covered").length, unverifiedClaims: labels.filter((l) => l === "unverified").length, claims: labels.length,
       warnings: g.warnings.length, warningList: g.warnings.map((w) => w.slice(0, 160)), factors: g.verdict.factors, summary: g.verdict.summary.slice(0, 140),
@@ -60,7 +60,7 @@ async function main() {
     for (let it = queue.shift(); it; it = queue.shift()) {
       const row = await one(it);
       out.push(row);
-      console.log(`${row.pass ? "PASS" : "FAIL"} ${String(row.app).padEnd(16)} ${String(row.seconds).padStart(4)}s ${String(row.outcome)} ${row.difficulty ?? ""} src=${row.sources ?? "-"}/${row.official ?? "-"}off cov=${row.covered ?? "-"} llm=${row.llmCalls ?? "-"} ${row.method ?? ""}`);
+      console.log(`${row.pass ? "PASS" : "FAIL"} ${String(row.app).padEnd(16)} ${String(row.seconds).padStart(4)}s ${String(row.outcome)} ${row.difficulty ?? ""}/${row.confidence ?? "-"} inf=${row.inferred ?? "-"} src=${row.sources ?? "-"}/${row.official ?? "-"}off cov=${row.covered ?? "-"} llm=${row.llmCalls ?? "-"} ${row.method ?? ""}`);
     }
   }));
   fs.mkdirSync(".cache", { recursive: true });

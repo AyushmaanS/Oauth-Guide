@@ -5,7 +5,7 @@ import {
   type Evidence,
   type GuideShape,
 } from "@/lib/schema/guide";
-import { computeDifficulty } from "@/lib/rubric";
+import { resolveDifficulty } from "@/lib/rubric";
 import { applyOwners, deriveHandoff } from "@/lib/handoff";
 
 export interface ValidateOptions {
@@ -142,9 +142,24 @@ export function validateGuide(input: GuideShape, opts: ValidateOptions = {}): Va
   fix(g.verdict.humanEffortHours.evidence, "verdict.humanEffortHours");
 
   // 2. difficulty is always recomputed from factors
-  const d = computeDifficulty(g.verdict.factors);
+  // Stated facts = completed factors with inferred ones put back to "unknown".
+  const completed = g.verdict.factors;
+  const stated = { ...completed, specialRequirements: [...completed.specialRequirements] } as Record<string, unknown>;
+  for (const [k, b] of Object.entries(g.verdict.factorBasis ?? {})) if (b === "inferred") stated[k] = "unknown";
+  const d = resolveDifficulty(stated as unknown as typeof completed, completed);
   g.verdict.difficulty = d.difficulty;
   g.verdict.difficultyReason = d.reason;
+  g.verdict.difficultyConfidence = d.confidence;
+  g.verdict.difficultyRange = d.range;
+
+  // Estimated ranges are always unverified; unsourced, unmarked ranges show no numbers.
+  for (const r of [g.verdict.timeToCredentials, g.verdict.humanEffortHours, g.verdict.timeToProduction]) {
+    if ("none" in r) continue;
+    if (r.estimate) r.evidence = { label: "unverified", sourceIds: [] };
+    else if (r.evidence.label === "unverified" && r.evidence.sourceIds.length === 0) {
+      delete r.minDays; delete r.maxDays; delete r.minHours; delete r.maxHours;
+    }
+  }
 
   // 8. owners and the handoff table come from tags, never from the model
   g.steps = applyOwners(g.steps);

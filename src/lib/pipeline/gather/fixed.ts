@@ -2,6 +2,7 @@ import type { ChecklistId, Source } from "@/lib/schema/guide";
 import type { PageLike } from "./types-local";
 import { classifyPublisher, isHttps, normalizeUrl } from "./sources";
 import { coverageFromTexts } from "./checklist";
+import { QUESTIONS, fill, type QuestionId } from "../questions";
 import { COMPOSIO_URL, lookupComposio } from "../composio";
 import type { Ctx, Deps, Gathered, Resolved, PipelineMode } from "../types";
 
@@ -10,23 +11,16 @@ export interface QuerySpec {
   target: ChecklistId;
 }
 
-/** Deterministic wide gather (spec 6.1 step 2). Deep: ~12 queries; fast fallback: one per required item. */
+/** Deterministic wide gather (spec 6.1 step 2). Every query is a template aimed at one specific question (see questions.ts). */
 export function buildQueries(app: string, mode: PipelineMode): QuerySpec[] {
-  const all: QuerySpec[] = [
-    { target: "registration", q: `${app} register OAuth app create developer application` },
-    { target: "review_process", q: `${app} OAuth app verification review approval process` },
-    { target: "scopes_restrictions", q: `${app} OAuth scopes restricted sensitive scopes testing mode limits` },
-    { target: "timing_evidence", q: `${app} OAuth app review how long approval takes` },
-    { target: "requirements", q: `${app} OAuth app requirements privacy policy domain verification` },
-    { target: "rate_limits", q: `${app} API rate limits OAuth apps` },
-    { target: "community_reports", q: `${app} OAuth app review rejected stackoverflow reddit` },
-    { target: "registration", q: `${app} OAuth client id client secret setup guide` },
-    { target: "review_process", q: `${app} app review submission requirements demo video` },
-    { target: "scopes_restrictions", q: `${app} OAuth unverified app warning user cap` },
-    { target: "timing_evidence", q: `${app} app approval timeline weeks rejected delay` },
-    { target: "community_reports", q: `${app} OAuth verification took weeks forum` },
-    { target: "review_process", q: `${app} OAuth third-party security assessment required restricted scopes` },
-  ];
+  const all: QuerySpec[] = [];
+  const ids = Object.keys(QUESTIONS) as QuestionId[];
+  // Two passes so that fast mode (first 7) still covers every required question once.
+  for (let pass = 0; pass < 2; pass++)
+    for (const id of ids) {
+      const t = QUESTIONS[id].templates[pass];
+      if (t) all.push({ target: id, q: fill(t, app) });
+    }
   return mode === "deep" ? all : all.slice(0, 7).filter((x) => x.target !== "rate_limits");
 }
 
@@ -141,6 +135,7 @@ export async function fixedGather(app: Resolved, mode: PipelineMode, deps: Deps,
     checklist: coverageFromTexts(sources.map((x) => ({ id: x.id, publisher: x.publisher, text: texts.get(x.id) ?? "" })), composio),
     composio,
     method: "fixed",
+    queries: queries.map((x) => x.q),
     searches: queries.length,
     pageReads: pages.size,
     warnings,

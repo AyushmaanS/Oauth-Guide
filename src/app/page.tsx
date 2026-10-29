@@ -7,6 +7,8 @@ export default function Home() {
     slug: g.slug,
     appName: g.appName,
     difficulty: g.verdict.difficulty,
+    confidence: g.verdict.difficultyConfidence,
+    range: g.verdict.difficultyRange,
     summary: g.verdict.summary,
     attemptLevel: g.attemptLevel,
     isFixture: g.slug.endsWith("-fixture"),

@@ -10,7 +10,7 @@ export type PipelineEvent =
   | { type: "stage_start"; stage: string; label: string }
   | { type: "stage_done"; stage: string }
   | { type: "source_found"; title: string; url: string }
-  | { type: "agent_step"; n: number; action: "search" | "read"; target: string; reason: string }
+  | { type: "agent_step"; n: number; action: "search" | "read"; target: string; reason: string; question?: string }
   | { type: "checklist"; items: { item: ChecklistId; status: "pending" | "covered" | "partial" | "not_found" }[] }
   | { type: "warning"; message: string }
   | { type: "complete"; slug: string };
@@ -55,6 +55,8 @@ export interface Gathered {
   pageReads: number;
   warnings: string[];
   method: "agent" | "fixed" | "fixed_fallback";
+  /** Every search query issued, so follow-up rounds never repeat one. */
+  queries: string[];
   /** Agent trace (truncated), shown in "How this was researched". */
   agentSteps?: { action: "search" | "read"; target: string; reason: string }[];
 }

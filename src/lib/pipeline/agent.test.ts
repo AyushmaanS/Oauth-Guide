@@ -34,8 +34,9 @@ function setup(script: (string | Error)[], over: { search?: SearchProvider["sear
   const ctx: Ctx = { emit: (e) => events.push(e.type), deadline: Date.now() + 60_000 };
   return { deps, ctx, prompts, events, extracted, searched };
 }
-const search = (q: string, targets: string[] = []) => JSON.stringify({ action: "search", query: q, reason: "r", targets });
-const read = (url: string, targets: string[] = []) => JSON.stringify({ action: "read", url, reason: "r", targets });
+const LF = "number of business days the app review takes";
+const search = (q: string, targets: string[] = ["review_process"], lookingFor = LF) => JSON.stringify({ action: "search", query: q, lookingFor, targets });
+const read = (url: string, targets: string[] = ["registration"], lookingFor = LF) => JSON.stringify({ action: "read", url, lookingFor, targets });
 const finish = JSON.stringify({ action: "finish", reason: "done" });
 
 describe("research agent", () => {
@@ -51,7 +52,7 @@ describe("research agent", () => {
   it("enforces the action budget", async () => {
     let n = 0;
     const t = setup([]);
-    t.deps.llm = { complete: async () => search(`unique query ${n++}`) };
+    t.deps.llm = { complete: async () => search(`Example app review approval wait number ${n++}`) };
     await agentGather(app, t.deps, t.ctx, "m", { ...budgets, maxActions: 5 }).catch(() => {});
     expect(t.searched.length).toBeLessThanOrEqual(5);
   });
@@ -65,7 +66,7 @@ describe("research agent", () => {
     expect(t.extracted.length).toBe(2);
   });
   it("enforces the seconds budget", async () => {
-    const t = setup([search("q1")]);
+    const t = setup([search("Example app review approval wait")]);
     const g = agentGather(app, t.deps, t.ctx, "m", { ...budgets, maxSeconds: 0 });
     await expect(g).rejects.toBeInstanceOf(AgentFailure); // nothing read, nothing usable
     expect(t.prompts.length).toBe(0);
@@ -82,14 +83,14 @@ describe("research agent", () => {
     expect(t.extracted).toContain("https://developers.example.com/new");
   });
   it("rejects repeated queries and repeated URLs", async () => {
-    const t = setup([search("same thing"), search("same thing"), read(DOCS), read(DOCS), finish]);
+    const t = setup([search("Example app review approval same thing"), search("Example app review approval same thing"), read(DOCS), read(DOCS), finish]);
     await agentGather(app, t.deps, t.ctx, "m", budgets);
-    expect(t.searched.filter((q) => q === "same thing").length).toBe(1);
+    expect(t.searched.filter((q) => q === "Example app review approval same thing").length).toBe(1);
     expect(t.extracted.filter((u) => u === DOCS).length).toBe(1);
   });
   it("rejects not_found without a targeted attempt, then accepts it after one", async () => {
-    const nf = (item: string) => JSON.stringify({ action: "search", query: `q ${item}`, reason: "r", targets: [], coverage: [{ item, status: "not_found", sourceIds: [] }] });
-    const t = setup([read(DOCS, ["requirements"]), nf("timing_evidence"), search("timing evidence q", ["timing_evidence"]), nf("timing_evidence"), finish]);
+    const nf = (item: string, q: string) => JSON.stringify({ action: "search", query: q, lookingFor: LF, targets: ["review_process"], coverage: [{ item, status: "not_found", sourceIds: [] }] });
+    const t = setup([read(DOCS, ["requirements"]), nf("timing_evidence", "Example app review approval first"), search("Example app review how many days approval takes", ["timing_evidence"]), nf("timing_evidence", "Example app review approval second"), finish]);
     const g = await agentGather(app, t.deps, t.ctx, "m", budgets);
     expect(g.warnings.join()).toContain("not found without a targeted attempt");
     expect(g.warnings.filter((w) => w.includes("timing_evidence")).length).toBe(1);
@@ -104,7 +105,7 @@ describe("research agent", () => {
     expect(g.sources.length).toBe(1);
   });
   it("treats tool errors as observations, never crashes", async () => {
-    const t = setup([search("q1"), read(DOCS, ["registration"]), finish], { search: async () => { throw new Error("tavily down"); } });
+    const t = setup([search("Example app review approval wait"), read(DOCS, ["registration"]), finish], { search: async () => { throw new Error("tavily down"); } });
     const g = await agentGather(app, t.deps, t.ctx, "m", budgets).catch((e) => e);
     // no search results means no readable URL on the allow-list except official domains; the docs URL is official
     expect(g instanceof AgentFailure || g.sources.length >= 0).toBe(true);
@@ -112,11 +113,11 @@ describe("research agent", () => {
   });
   it("stops on its own once every required item is resolved", async () => {
     const cov = (items: string[]) => items.map((item) => ({ item, status: "covered", sourceIds: ["s1"] }));
-    const turn1 = JSON.stringify({ action: "read", url: DOCS, reason: "r", targets: ["registration"], coverage: [] });
-    const turn2 = JSON.stringify({ action: "search", query: "more", reason: "r", targets: ["review_process"], coverage: cov(["registration", "review_process", "scopes_restrictions", "timing_evidence", "requirements"]) });
-    const t = setup([turn1, turn2, search("should never run")]);
+    const turn1 = JSON.stringify({ action: "read", url: DOCS, lookingFor: LF, targets: ["registration"], coverage: [] });
+    const turn2 = JSON.stringify({ action: "search", query: "Example app review approval more", lookingFor: LF, targets: ["review_process"], coverage: cov(["registration", "review_process", "scopes_restrictions", "timing_evidence", "requirements"]) });
+    const t = setup([turn1, turn2, search("Example app review approval should never run")]);
     await agentGather(app, t.deps, t.ctx, "m", budgets);
-    expect(t.searched).not.toContain("should never run");
+    expect(t.searched).not.toContain("Example app review approval should never run");
   });
   it("prompt-injection fixture: a page that says to read an attacker URL changes nothing", async () => {
     const evil = "https://evil.test/exfil";
@@ -126,7 +127,7 @@ describe("research agent", () => {
     });
     const g = await agentGather(app, t.deps, t.ctx, "m", budgets);
     expect(fetched).toEqual([DOCS]);
-    expect(Object.keys(g).sort()).toEqual(["agentSteps", "checklist", "composio", "method", "pageReads", "searches", "sources", "texts", "warnings"]);
+    expect(Object.keys(g).sort()).toEqual(["agentSteps", "checklist", "composio", "method", "pageReads", "queries", "searches", "sources", "texts", "warnings"]);
     // the hostile text reached the model only inside an untrusted block
     const withPage = t.prompts.find((p) => p.includes("IGNORE PREVIOUS INSTRUCTIONS"))!;
     // every occurrence sits between an opening and its closing marker
@@ -135,6 +136,27 @@ describe("research agent", () => {
     expect(open).toBe(close);
     const spans = [...withPage.matchAll(/<<<UNTRUSTED_SOURCE[\s\S]*?<<<END_UNTRUSTED_SOURCE>>>/g)].map((m) => [m.index!, m.index! + m[0].length]);
     for (const m of withPage.matchAll(/IGNORE PREVIOUS INSTRUCTIONS/g)) expect(spans.some(([a, b]) => m.index! > a && m.index! < b)).toBe(true);
+  });
+  it("rejects vague lookingFor, generic queries, queries without the app name, and off-question queries", async () => {
+    const t = setup([
+      search("Example app review approval wait", ["review_process"], "more information"),
+      search("Example OAuth", ["review_process"]),
+      search("how do approvals take long generally", ["timing_evidence"]),
+      search("Example app registration free account", ["timing_evidence"]),
+      finish,
+    ]);
+    await agentGather(app, t.deps, t.ctx, "m", budgets).catch(() => {});
+    const rejections = t.prompts.filter((p) => p.includes("Rejected:")).length;
+    expect(rejections).toBeGreaterThanOrEqual(3);
+    expect(t.searched.filter((q) => q.includes("more information") || q === "Example OAuth")).toEqual([]);
+    expect(t.searched).not.toContain("how do approvals take long generally");
+    expect(t.searched).not.toContain("Example app registration free account");
+  });
+  it("an action with no target question is an invalid output", async () => {
+    const t = setup(["{\"action\":\"search\",\"query\":\"Example app review approval wait\",\"lookingFor\":\"number of business days review takes\",\"targets\":[]}", read(DOCS), finish]);
+    const g = await agentGather(app, t.deps, t.ctx, "m", budgets);
+    expect(t.searched.filter((q) => q === "Example app review approval wait").length).toBe(0);
+    expect(g.sources.length).toBe(1);
   });
   it("keeps off-topic pages out of the sources", async () => {
     const t = setup([read(DOCS), finish], { extract: async (urls) => urls.map((u) => ({ url: u, text: "A long page about cooking pasta with no relevant words. ".repeat(10) })) });

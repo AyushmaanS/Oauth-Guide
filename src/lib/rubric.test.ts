@@ -35,3 +35,46 @@ describe("computeDifficulty", () => {
   it("easy: account needed", () => expect(d({ registrationFriction: "account_needed" })).toBe("easy"));
   it("always returns a reason", () => expect(computeDifficulty(base).reason.length).toBeGreaterThan(5));
 });
+
+import { difficultyBounds, resolveDifficulty, unknownFactorKeys } from "./rubric";
+
+describe("bounds and resolution under partial information", () => {
+  const unk: Factors = { ...base, registrationFriction: "account_needed", reviewRequired: "unknown", reviewDepth: "unknown", waitMagnitude: "unknown", businessEntityRequired: "unknown" };
+  it("review unknown spans easy to hard, never gated", () => {
+    const b = difficultyBounds(unk);
+    expect(b.best).toBe("easy");
+    expect(b.worst).toBe("hard");
+    expect(b.unknown).toEqual(["reviewRequired", "reviewDepth", "waitMagnitude", "businessEntityRequired"]);
+  });
+  it("is established when best and worst agree despite unknowns (review stated none)", () => {
+    const r = resolveDifficulty({ ...base, reviewRequired: "none", reviewDepth: "unknown", waitMagnitude: "unknown" });
+    expect(r.difficulty).toBe("easy");
+    expect(r.confidence).toBe("established");
+    expect(r.reason).toContain("whatever the unknown");
+  });
+  it("stated gated stays gated even with other unknowns", () => {
+    const r = resolveDifficulty({ ...unk, businessEntityRequired: "yes" });
+    expect(r.difficulty).toBe("gated");
+    expect(r.confidence).toBe("established");
+  });
+  it("unresolved without inference: unknown label but a range", () => {
+    const r = resolveDifficulty(unk);
+    expect(r.difficulty).toBe("unknown");
+    expect(r.confidence).toBe("unresolved");
+    expect(r.range).toEqual({ best: "easy", worst: "hard" });
+    expect(r.reason).toContain("easy to hard");
+  });
+  it("uses inferred values to give an estimated label", () => {
+    const completed: Factors = { ...unk, reviewRequired: "for_public_use", reviewDepth: "manual", waitMagnitude: "days", businessEntityRequired: "no" };
+    const r = resolveDifficulty(unk, completed);
+    expect(r.difficulty).toBe("moderate");
+    expect(r.confidence).toBe("estimated");
+    expect(r.reason).toContain("Our estimate");
+  });
+  it("security assessment stated, wait unknown: hard, established", () => {
+    const r = resolveDifficulty({ ...base, reviewRequired: "for_sensitive_scopes", reviewDepth: "security_assessment", waitMagnitude: "unknown" });
+    expect(r.difficulty).toBe("hard");
+    expect(r.confidence).toBe("established");
+  });
+  it("lists unknown keys", () => expect(unknownFactorKeys(unk)).toContain("reviewDepth"));
+});

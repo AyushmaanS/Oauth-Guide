@@ -4,6 +4,9 @@ import { validateGuide } from "@/lib/validate";
 import { extractFactors } from "./factors";
 import { fixedGather } from "./gather/fixed";
 import { agentGather } from "./gather/agent";
+import { followupGather } from "./gather/followup";
+import { inferFactors, type Inferred } from "./infer";
+import { difficultyBounds, unknownFactorKeys } from "@/lib/rubric";
 import { classifyPublisher, isHttps, normalizeUrl } from "./gather/sources";
 import { PIPELINE_VERSION } from "./prompts/common";
 import { InputError, resolveApp, validateInput } from "./resolve";
@@ -116,6 +119,9 @@ export async function runPipeline(args: RunArgs): Promise<PipelineResult> {
   const ctx: Ctx = { emit: args.ctx?.emit ?? (() => {}), deadline: args.ctx?.deadline ?? started + DEFAULT_BUDGET_MS[mode] };
   const softWarnings: string[] = [];
   const expired = () => Date.now() > ctx.deadline;
+  const elapsed = () => (Date.now() - started) / 1000;
+  // Live mode keeps to ~2 minutes: optional stages are skipped when the run is already long (deep mode has no soft limit).
+  const late = (seconds: number) => mode === "fast" && elapsed() > seconds;
   const stage = async <T>(name: string, label: string, fn: () => Promise<T>): Promise<T> => {
     ctx.emit({ type: "stage_start", stage: name, label });
     const r = await fn();
@@ -191,19 +197,45 @@ export async function runPipeline(args: RunArgs): Promise<PipelineResult> {
     factors = { useCase: "Registering your own OAuth app for a product that connects your customers' accounts", factors: { ...UNKNOWN_FACTORS, specialRequirements: [] }, claims: [] };
   }
 
+  // Second research round: one precise follow-up question per factor the first round left unknown.
+  const unknownAfterFirst = unknownFactorKeys(factors.factors);
+  if (unknownAfterFirst.length && !expired() && !late(80) && gathered.sources.length) {
+    try {
+      const added = await stage("followup", "Asking follow-up questions about what is still unknown", () => followupGather(app, unknownAfterFirst, gathered!, deps, ctx));
+      if (added > 0 && !expired() && !late(100)) {
+        const again = await stage("factors2", "Re-checking the difficulty factors with the new sources", () => extractFactors(app, gathered!, deps, model));
+        factors = { ...again, useCase: factors.useCase || again.useCase };
+      }
+    } catch (e) {
+      softWarnings.push(`Follow-up research did not complete: ${(e as Error).message}`);
+    }
+  }
+
+  // Inference: only when the stated facts leave the label open (best and worst case differ).
+  let est: Inferred | undefined;
+  const bounds = difficultyBounds(factors.factors);
+  if (bounds.best !== bounds.worst && !expired()) {
+    try {
+      est = await stage("infer", "Estimating what the sources leave open", () => inferFactors(app, factors.factors, factors.useCase, gathered!, deps, model));
+    } catch (e) {
+      softWarnings.push(`Estimation step failed (${(e as Error).message}); showing a range instead of an estimate`);
+    }
+  }
+  ctx.emit({ type: "checklist", items: gathered.checklist.filter((c) => c.item !== "composio_status").map((c) => ({ item: c.item, status: c.status })) });
+
   let draft: GuideShape;
   try {
     if (expired()) throw new Error("deadline reached before synthesis");
-    const synth = await stage("synthesize", "Drafting the guide", () => synthesize(app, factors, gathered!, deps, model));
-    draft = assemble({ app, mode: mode === "deep" ? "library" : "live", model, f: factors, s: synth, g: gathered, seconds: (Date.now() - started) / 1000, now, extraWarnings: softWarnings });
+    const synth = await stage("synthesize", "Drafting the guide", () => synthesize(app, factors, gathered!, deps, model, est));
+    draft = assemble({ app, mode: mode === "deep" ? "library" : "live", model, f: factors, s: synth, g: gathered, seconds: (Date.now() - started) / 1000, now, extraWarnings: softWarnings, stated: factors.factors, est });
   } catch (e) {
     const g = minimalGuide(app, mode, model, now, `The guide could not be fully written for ${app.appName}; sources are listed below.`, gathered.sources, false);
     g.warnings.push(...softWarnings, ...gathered.warnings, `Synthesis failed: ${(e as Error).message}`);
-    g.research = { method: "fixed", actionsUsed: gathered.searches, pageReads: gathered.pageReads, seconds: Math.round((Date.now() - started) / 1000), checklist: gathered.checklist };
+    g.research = { method: gathered.method, actionsUsed: gathered.searches, pageReads: gathered.pageReads, seconds: Math.round((Date.now() - started) / 1000), checklist: gathered.checklist };
     return finish(g);
   }
 
-  if (mode === "deep" || !expired()) {
+  if (mode === "deep" || (!expired() && !late(110))) {
     try {
       const r = await stage("selfcheck", "Challenging unsupported claims", () => selfCheck(draft, gathered!, deps, model));
       if (r.downgraded || r.weak) draft.warnings.push(`Self-check: ${r.downgraded} claim(s) downgraded, ${r.weak} flagged as weak`);

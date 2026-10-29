@@ -3,6 +3,7 @@ import { callJson } from "@/lib/llm";
 import { AGENT_SYSTEM, AgentTurn } from "../prompts/agent";
 import { wrapUntrusted, classifyPublisher, hostOf, isHttps, normalizeUrl } from "./sources";
 import { ALL_CHECKLIST, REQUIRED_CHECKLIST, coverageFromTexts } from "./checklist";
+import { QUESTIONS, fill, validateLookingFor, validateQuery, type QuestionId } from "../questions";
 import { attachComposio, isRelevant } from "./fixed";
 import type { Ctx, Deps, Gathered, Resolved } from "../types";
 import { z } from "zod";
@@ -13,14 +14,18 @@ export interface AgentBudgets {
   maxSeconds: number;
 }
 export const budgetsFromEnv = (): AgentBudgets => ({
-  maxActions: Number(process.env.AGENT_MAX_ACTIONS) || 8,
+  maxActions: Number(process.env.AGENT_MAX_ACTIONS) || 7,
   maxPageReads: Number(process.env.AGENT_MAX_PAGE_READS) || 6,
-  maxSeconds: Number(process.env.AGENT_MAX_SECONDS) || 75,
+  maxSeconds: Number(process.env.AGENT_MAX_SECONDS) || 55,
 });
 
 type Status = "pending" | "covered" | "partial" | "not_found";
 const norm = (q: string) => q.toLowerCase().replace(/\s+/g, " ").trim();
-const SEEDS = (app: string) => [`${app} OAuth app registration documentation`, `${app} developer app review approval`];
+// Seeds are specific questions too (registration and review), not generic searches.
+const SEEDS = (app: string): { q: string; target: QuestionId }[] => [
+  { q: fill(QUESTIONS.registration.templates[0], app), target: "registration" },
+  { q: fill(QUESTIONS.review_process.templates[0], app), target: "review_process" },
+];
 
 export class AgentFailure extends Error {}
 
@@ -59,9 +64,10 @@ export async function agentGather(app: Resolved, deps: Deps, ctx: Ctx, model: st
       if (!seen.has(k)) seen.set(k, { url: k, title: h.title, snippet: h.snippet, read: readUrls.has(k) });
     }
   };
+  const questionOf = (targets: ChecklistId[]) => targets.filter((t): t is QuestionId => t !== "composio_status").map((t) => QUESTIONS[t].question).join(" / ").slice(0, 200);
   const doSearch = async (q: string, targets: ChecklistId[], reason: string): Promise<string> => {
     n++;
-    ctx.emit({ type: "agent_step", n, action: "search", target: q, reason });
+    ctx.emit({ type: "agent_step", n, action: "search", target: q, reason, question: questionOf(targets) });
     steps.push({ action: "search", target: q, reason: reason.slice(0, 200) });
     queries.add(norm(q));
     searches++;
@@ -76,7 +82,7 @@ export async function agentGather(app: Resolved, deps: Deps, ctx: Ctx, model: st
   };
   const doRead = async (url: string, targets: ChecklistId[], reason: string): Promise<string> => {
     n++;
-    ctx.emit({ type: "agent_step", n, action: "read", target: url, reason });
+    ctx.emit({ type: "agent_step", n, action: "read", target: url, reason, question: questionOf(targets) });
     steps.push({ action: "read", target: url, reason: reason.slice(0, 200) });
     readUrls.add(url);
     reads++;
@@ -99,10 +105,10 @@ export async function agentGather(app: Resolved, deps: Deps, ctx: Ctx, model: st
   };
 
   // Seeding (rule 4): two deterministic searches so the agent starts with material.
-  for (const q of SEEDS(app.appName)) {
+  for (const seed of SEEDS(app.appName)) {
     if (overBudget()) break;
     actions++;
-    await doSearch(q, q.includes("review") ? ["review_process"] : ["registration"], "seed search");
+    await doSearch(seed.q, [seed.target], `Seed: ${QUESTIONS[seed.target].question.slice(0, 120)}`);
   }
   for (const u of app.docsUrls.slice(0, 1)) addHits([{ url: u, title: "Docs entry (from resolve)", snippet: "" }]);
   emitChecklist();
@@ -163,18 +169,19 @@ export async function agentGather(app: Resolved, deps: Deps, ctx: Ctx, model: st
     if (turn.action === "finish") break;
     actions++;
     if (turn.action === "search") {
-      if (queries.has(norm(turn.query))) {
-        last = `Rejected: repeated search query "${turn.query}".`;
-        continue;
-      }
-      last = await doSearch(turn.query, turn.targets, turn.reason);
+      const bad = validateLookingFor(turn.lookingFor) ?? validateQuery(turn.query, app, turn.targets.filter((t): t is QuestionId => t !== "composio_status"));
+      if (bad) last = `Rejected: ${bad}.`;
+      else if (queries.has(norm(turn.query))) last = `Rejected: repeated search query "${turn.query}".`;
+      else last = await doSearch(turn.query, turn.targets, turn.lookingFor);
     } else {
+      const badRead = validateLookingFor(turn.lookingFor);
       const url = normalizeUrl(turn.url);
-      if (!isHttps(url)) last = "Rejected: only https URLs can be read.";
+      if (badRead) last = `Rejected: ${badRead}.`;
+      else if (!isHttps(url)) last = "Rejected: only https URLs can be read.";
       else if (readUrls.has(url)) last = `Rejected: already read ${url}.`;
       else if (reads >= budgets.maxPageReads) last = "Rejected: page-read budget used up.";
       else if (!seen.has(url) && !onProviderDomain(url)) last = `Rejected: ${url} did not appear in search results and is not on an official provider domain.`;
-      else last = await doRead(url, turn.targets, turn.reason);
+      else last = await doRead(url, turn.targets, turn.lookingFor);
     }
     if (process.env.AGENT_DEBUG) console.error(`[agent] ${turn.action} -> ${last.replace(/\s+/g, " ").slice(0, 160)}`);
   }
@@ -190,6 +197,7 @@ export async function agentGather(app: Resolved, deps: Deps, ctx: Ctx, model: st
     checklist: coverageFromTexts(sources.map((x) => ({ id: x.id, publisher: x.publisher, text: texts.get(x.id) ?? "" })), composio),
     composio,
     method: "agent",
+    queries: [...queries],
     agentSteps: steps.slice(0, 20),
     searches,
     pageReads: reads,

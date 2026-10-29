@@ -129,3 +129,24 @@ Owner chose the bounded research agent as the default for live generation, prefe
 Deep mode (library) still uses the fixed gather; `GATHER_MODE=fixed` forces the fixed gather in live mode; the agent falls back to the fixed gather automatically if it fails twice (`method: "fixed_fallback"`).
 The README must report the comparison honestly: the agent was not shown to be better, and it is the default by product choice. Re-run the comparison with more apps and repeats in Sprint 7 if time allows.
 Verified after the switch: 134 tests pass; Zoom and Spotify smoke runs pass with `agent` as method.
+
+## D-014 Relaxing "Unknown": bounds, follow-up questions, inference, estimated ranges (owner request after live testing)
+Problem: unfamiliar apps came out "Unknown" (6 of 8 in D-012) with no insight for the reader.
+
+**How a label is decided now**
+1. Factors stated by sources are extracted (unknown allowed).
+2. **Follow-up round** (`gather/followup.ts`): up to 3 factors still unknown each get ONE precise question, one targeted search and one page read; if a new page is found, factors are re-extracted.
+3. **Bounds** (`rubric.ts`): unknown factors are completed once as plausibly good and once as plausibly bad as the stated facts allow. Gated is never assumed from missing information. If both completions give the same label, the label is **established** ("holds whatever the unknown details turn out to be"): no model guess involved.
+4. Otherwise an **inference step** (`infer.ts`, one model call) estimates only the unknown factors. Code enforces: stated facts are never overwritten; values must be valid; paid/business account, partnership contract, security assessment and "business entity required" are accepted only with a cited source (else capped at the next most cautious value); confidence cannot be "high" without a source; no review implies no depth or wait.
+5. The label is then computed from stated + inferred values and marked **estimated**, with the best-to-worst range, the reasoning ("Our estimates"), the established facts, what is still unknown, and 2-3 "what to check first" questions (code requires each to name the app, end in "?" and not be vague). If the estimate step fails, the label stays "Unknown" but the plausible range is shown.
+6. Time ranges: sourced numbers keep their evidence labels. With no source the model may give a wide range marked `estimate: true`; code forces it to Unverified, prefixes the basis with "Our estimate:", and the UI shows "≈" and an "Estimate" chip. Unmarked unsourced ranges still lose their numbers. Owner approved showing estimated time ranges on live guides.
+
+**Question quality (all agent and follow-up steps)** (`questions.ts`): the checklist is now seven specific, closed questions. Every agent action must (a) target 1-3 question ids, (b) state `lookingFor`, one concrete fact (vague values such as "more information" are rejected), and (c) for searches, use a query that names the app, contains a term belonging to the targeted question, and is not generic. Violations are rejected in code and cost an action. The fixed-gather and follow-up query templates are tested to satisfy the same rules. Seeds are question-based, not generic.
+
+**Results (6 unfamiliar apps, concurrency 3):** 0 of 6 "Unknown" (was 6 of 8 before): all got a label marked estimated, with reasoning and check-first questions. Agent queries and `lookingFor` values read as specific ("number of business days Dropbox says its production app review takes"). 4 of 6 met the old coherence bar; the misses were X (docs site extracts poorly, 1 source) and Zoom (154 s, over the 150 s bar).
+
+**Costs and limits (honest):**
+- Estimated labels are guesses with visible reasoning; they can be wrong (for example Atlassian came out "hard (estimate)" with a plausible range of easy to hard). That is why they are always marked and never counted as documented.
+- Runs take longer: about 100-150 s with 3 runs in parallel (earlier 55-80 s). To stay near 2 minutes the research agent budget was cut to 7 actions / 55 s, the follow-up round is skipped once the run passes 80 s, and the self-check is skipped past 110 s (it was skipped for 4 of 6 apps in the last run, so those guides carry the warning "Self-check skipped"). Deep mode has no soft limits.
+- Some "check first" questions are still loosely worded; the code only checks form.
+- Library guides were not regenerated; run `npm run guide` again in Sprint 6 so they pick up the new fields.

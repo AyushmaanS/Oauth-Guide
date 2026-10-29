@@ -46,3 +46,76 @@ export function computeDifficulty(f: Factors): RubricResult {
   // 5. Easy: instant or account-only registration and no required review.
   return { difficulty: "easy", reason: "Credentials are available on a normal account with no required review." };
 }
+
+
+// ---------------------------------------------------------------------------------------------
+// Partial information: best/worst-case bounds (Sprint 4b). Nothing is invented: unknown factors are
+// completed twice, once as plausibly good as the facts allow and once as plausibly bad, and the label is
+// only "established" if both completions agree. Gated is never assumed from missing information.
+// ---------------------------------------------------------------------------------------------
+import type { FactorKey } from "@/lib/schema/guide";
+
+export const INFERABLE: FactorKey[] = ["registrationFriction", "reviewRequired", "reviewDepth", "waitMagnitude", "businessEntityRequired"];
+const ORDER: Difficulty[] = ["easy", "moderate", "hard", "gated"];
+
+export const unknownFactorKeys = (f: Factors): FactorKey[] => INFERABLE.filter((k) => f[k] === "unknown");
+
+function complete(f: Factors, mode: "best" | "worst"): Factors {
+  const g: Factors = { ...f, specialRequirements: [...f.specialRequirements] };
+  const best = mode === "best";
+  if (g.registrationFriction === "unknown") g.registrationFriction = best ? "instant" : "account_needed";
+  if (g.reviewRequired === "unknown") g.reviewRequired = best ? "none" : "for_sensitive_scopes";
+  if (g.businessEntityRequired === "unknown") g.businessEntityRequired = "no";
+  if (g.reviewRequired === "none") {
+    if (g.reviewDepth === "unknown") g.reviewDepth = "none";
+    if (g.waitMagnitude === "unknown") g.waitMagnitude = "none";
+  } else {
+    if (g.reviewDepth === "unknown") g.reviewDepth = best ? "automated" : "manual";
+    if (g.waitMagnitude === "unknown") g.waitMagnitude = best ? "hours" : "weeks";
+  }
+  return g;
+}
+
+export interface Bounds {
+  best: Difficulty;
+  worst: Difficulty;
+  unknown: FactorKey[];
+}
+
+export function difficultyBounds(f: Factors): Bounds {
+  const a = computeDifficulty(complete(f, "best")).difficulty;
+  const b = computeDifficulty(complete(f, "worst")).difficulty;
+  const [best, worst] = ORDER.indexOf(a) <= ORDER.indexOf(b) ? [a, b] : [b, a];
+  return { best, worst, unknown: unknownFactorKeys(f) };
+}
+
+export interface Resolution extends RubricResult {
+  confidence: "established" | "estimated" | "unresolved";
+  range: { best: Difficulty; worst: Difficulty };
+}
+
+/**
+ * Final label. `stated` has unknowns left as "unknown"; `completed` additionally has inferred values.
+ * 1. best == worst  -> established, whatever the unknowns turn out to be.
+ * 2. else, if inferred values exist -> label from the completed factors, marked estimated.
+ * 3. else unresolved: label "unknown" but the best-to-worst range is shown.
+ */
+export function resolveDifficulty(stated: Factors, completed?: Factors): Resolution {
+  const b = difficultyBounds(stated);
+  const range = { best: b.best, worst: b.worst };
+  if (b.best === b.worst) {
+    const r = computeDifficulty(complete(stated, "best"));
+    return {
+      difficulty: b.best,
+      confidence: "established",
+      range,
+      reason: b.unknown.length ? `${r.reason} This holds whatever the unknown details turn out to be.` : r.reason,
+    };
+  }
+  if (completed && unknownFactorKeys(completed).length < b.unknown.length) {
+    const r = computeDifficulty(completed);
+    if (r.difficulty !== "unknown")
+      return { difficulty: r.difficulty, confidence: "estimated", range, reason: `Our estimate: ${r.reason} Sources do not settle every factor, so it could be anywhere from ${b.best} to ${b.worst}.` };
+  }
+  return { difficulty: "unknown", confidence: "unresolved", range, reason: `The sources do not settle it: it could be anywhere from ${b.best} to ${b.worst}.` };
+}

@@ -17,7 +17,10 @@
       "httpStatus": 200,
       "finalHost": "developers.example.com",
       "classification": "public",
-      "signals": ["status:200", "text:substantive"]
+      "signals": [
+        "status:200",
+        "text:substantive"
+      ]
     },
     {
       "url": "https://developers.example.com/docs/register-an-app",
@@ -25,7 +28,10 @@
       "httpStatus": 200,
       "finalHost": "developers.example.com",
       "classification": "public",
-      "signals": ["status:200", "text:substantive"]
+      "signals": [
+        "status:200",
+        "text:substantive"
+      ]
     },
     {
       "url": "https://developers.example.com/console",
@@ -33,16 +39,41 @@
       "httpStatus": 302,
       "finalHost": "accounts.example.com",
       "classification": "login_redirect",
-      "signals": ["redirect:/login", "password_input"]
+      "signals": [
+        "redirect:/login",
+        "password_input"
+      ]
     }
   ],
   "flowTrace": {
     "startUrl": "https://developers.example.com/docs",
     "checkedAt": "2026-01-01T00:00:00.000Z",
     "hops": [
-      { "n": 1, "url": "https://developers.example.com/docs", "title": "Developer docs (fixture)", "classification": "public", "chosenBy": "start" },
-      { "n": 2, "url": "https://developers.example.com/docs/register-an-app", "title": "Register an app (fixture)", "classification": "public", "viaLinkText": "Register an app", "chosenBy": "rule", "matchedStepOrder": 3 },
-      { "n": 3, "url": "https://developers.example.com/console", "title": "Sign in (fixture)", "classification": "login_redirect", "viaLinkText": "Open the console", "chosenBy": "rule", "matchedStepOrder": 2 }
+      {
+        "n": 1,
+        "url": "https://developers.example.com/docs",
+        "title": "Developer docs (fixture)",
+        "classification": "public",
+        "chosenBy": "start"
+      },
+      {
+        "n": 2,
+        "url": "https://developers.example.com/docs/register-an-app",
+        "title": "Register an app (fixture)",
+        "classification": "public",
+        "viaLinkText": "Register an app",
+        "chosenBy": "rule",
+        "matchedStepOrder": 3
+      },
+      {
+        "n": 3,
+        "url": "https://developers.example.com/console",
+        "title": "Sign in (fixture)",
+        "classification": "login_redirect",
+        "viaLinkText": "Open the console",
+        "chosenBy": "rule",
+        "matchedStepOrder": 2
+      }
     ],
     "endedAt": "gate",
     "endedReason": "FAKE FIXTURE: the console redirected to a sign-in page, so the public path ends here."
@@ -54,11 +85,21 @@
     "issuer": "https://accounts.example.com",
     "authorizationEndpoint": "https://accounts.example.com/authorize",
     "tokenEndpoint": "https://accounts.example.com/token",
-    "scopesListed": ["profile", "email", "read:items"],
-    "pkceMethods": ["S256"],
-    "tokenEndpointAuthMethods": ["client_secret_post"],
+    "scopesListed": [
+      "profile",
+      "email",
+      "read:items"
+    ],
+    "pkceMethods": [
+      "S256"
+    ],
+    "tokenEndpointAuthMethods": [
+      "client_secret_post"
+    ],
     "dynamicRegistration": "not_listed",
-    "notes": ["FAKE FIXTURE: no registration endpoint listed, so manual console registration is still needed."]
+    "notes": [
+      "FAKE FIXTURE: no registration endpoint listed, so manual console registration is still needed."
+    ]
   },
   "attempt": {
     "performedBy": "owner_with_claude_code",
@@ -66,14 +107,67 @@
     "accountType": "free",
     "browserProfile": "separate",
     "steps": [
-      { "id": "a1", "guideStepOrder": 2, "action": "Opened console sign-up page", "observation": "Sign-up needs an email code. Stopped and handed back to the owner (fake).", "outcome": "stopped_human_required", "tags": ["login_or_account", "email_or_phone_verification"], "minutes": 4 },
-      { "id": "a2", "guideStepOrder": 2, "action": "Owner finished sign-up; agent resumed", "observation": "Console dashboard loaded for the new free account (fake).", "outcome": "completed", "tags": ["login_or_account"], "minutes": 3 },
-      { "id": "a3", "guideStepOrder": 3, "action": "Created app named oauthpath-test-20260101 with a placeholder redirect URI", "observation": "App created instantly; no review prompt. Docs said a review might apply (fake).", "outcome": "differs_from_docs", "tags": ["config_check"], "minutes": 5 },
-      { "id": "a4", "guideStepOrder": 4, "action": "Opened the credentials tab", "observation": "Client ID and secret issued immediately. Secret not copied anywhere (fake).", "outcome": "completed", "tags": ["config_check"], "minutes": 2 },
-      { "id": "a5", "guideStepOrder": 5, "action": "Opened the 'Submit for review' page", "observation": "Page asks for a demo video upload and business details. Not submitted (fake).", "outcome": "stopped_human_required", "tags": ["manual_submission"], "minutes": 2 }
+      {
+        "id": "a1",
+        "guideStepOrder": 2,
+        "action": "Opened console sign-up page",
+        "observation": "Sign-up needs an email code. Stopped and handed back to the owner (fake).",
+        "outcome": "stopped_human_required",
+        "tags": [
+          "login_or_account",
+          "email_or_phone_verification"
+        ],
+        "minutes": 4
+      },
+      {
+        "id": "a2",
+        "guideStepOrder": 2,
+        "action": "Owner finished sign-up; agent resumed",
+        "observation": "Console dashboard loaded for the new free account (fake).",
+        "outcome": "completed",
+        "tags": [
+          "login_or_account"
+        ],
+        "minutes": 3
+      },
+      {
+        "id": "a3",
+        "guideStepOrder": 3,
+        "action": "Created app named oauthpath-test-20260101 with a placeholder redirect URI",
+        "observation": "App created instantly; no review prompt. Docs said a review might apply (fake).",
+        "outcome": "differs_from_docs",
+        "tags": [
+          "config_check"
+        ],
+        "minutes": 5
+      },
+      {
+        "id": "a4",
+        "guideStepOrder": 4,
+        "action": "Opened the credentials tab",
+        "observation": "Client ID and secret issued immediately. Secret not copied anywhere (fake).",
+        "outcome": "completed",
+        "tags": [
+          "config_check"
+        ],
+        "minutes": 2
+      },
+      {
+        "id": "a5",
+        "guideStepOrder": 5,
+        "action": "Opened the 'Submit for review' page",
+        "observation": "Page asks for a demo video upload and business details. Not submitted (fake).",
+        "outcome": "stopped_human_required",
+        "tags": [
+          "manual_submission"
+        ],
+        "minutes": 2
+      }
     ],
     "stoppedAt": "Submit for review page",
-    "stoppedBecause": ["manual_submission"],
+    "stoppedBecause": [
+      "manual_submission"
+    ],
     "minutesToCredentials": 14,
     "corrections": [
       {
@@ -82,29 +176,46 @@
         "sourceId": "s1"
       }
     ],
-    "cleanup": { "appsDeleted": true, "secretsRemoved": true }
+    "cleanup": {
+      "appsDeleted": true,
+      "secretsRemoved": true
+    }
   },
   "verdict": {
     "difficulty": "moderate",
     "useCase": "FAKE: an agent acting for your customers on ExampleApp",
-    "difficultyReason": "FAKE FIXTURE: account needed, manual review for public use, a few special requirements, wait measured in days.",
+    "difficultyReason": "Our estimate: FAKE FIXTURE: a review is required, with a wait measured in days. Sources do not settle every factor, so it could be anywhere from moderate to hard.",
     "timeToCredentials": {
       "minHours": 0.25,
       "maxHours": 0.5,
       "basis": "FAKE: measured in the sample walkthrough (14 minutes of work).",
-      "evidence": { "label": "tested", "sourceIds": [], "testNote": "Fake sample walkthrough on 2026-01-01 reached issued credentials in 14 minutes.", "observationRef": "a4" }
+      "evidence": {
+        "label": "tested",
+        "sourceIds": [],
+        "testNote": "Fake sample walkthrough on 2026-01-01 reached issued credentials in 14 minutes.",
+        "observationRef": "a4"
+      }
     },
     "timeToProduction": {
       "minDays": 3,
       "maxDays": 5,
       "basis": "FAKE: the fixture docs claim 3-5 business days.",
-      "evidence": { "label": "documented", "sourceIds": ["s2"] }
+      "evidence": {
+        "label": "documented",
+        "sourceIds": [
+          "s2"
+        ]
+      }
     },
     "humanEffortHours": {
+      "estimate": true,
       "minHours": 2,
       "maxHours": 6,
-      "basis": "FAKE: includes recording a demo video and writing a privacy policy.",
-      "evidence": { "label": "unverified", "sourceIds": [] }
+      "basis": "Our estimate: FAKE: includes recording a demo video and writing a privacy policy.",
+      "evidence": {
+        "label": "unverified",
+        "sourceIds": []
+      }
     },
     "summary": "FAKE FIXTURE: you get working credentials in about 15 minutes, but going public takes a manual review of several days.",
     "biggestLaunchRisk": "FAKE FIXTURE: a rejected review because the privacy policy is missing.",
@@ -116,22 +227,88 @@
       "waitBasis": "documented",
       "waitMagnitude": "days",
       "businessEntityRequired": "no",
-      "specialRequirements": ["privacy policy URL", "demo video"]
-    }
+      "specialRequirements": [
+        "privacy policy URL",
+        "demo video"
+      ]
+    },
+    "difficultyConfidence": "estimated",
+    "difficultyRange": {
+      "best": "moderate",
+      "worst": "hard"
+    },
+    "factorBasis": {
+      "registrationFriction": "stated",
+      "reviewRequired": "stated",
+      "reviewDepth": "stated",
+      "waitMagnitude": "inferred",
+      "businessEntityRequired": "stated"
+    },
+    "inference": [
+      {
+        "factor": "waitMagnitude",
+        "value": "days",
+        "confidence": "low",
+        "rationale": "FAKE: typically manual reviews of this kind take days, not weeks. No source states the wait for this use case.",
+        "sourceIds": []
+      }
+    ],
+    "checkFirst": [
+      "FAKE: Does ExampleApp review apps before accounts outside the developer's own can install them?",
+      "FAKE: How many business days does ExampleApp's review take for restricted scopes?"
+    ]
   },
   "managedVsOwn": {
     "composioManaged": "unknown",
     "managedCovers": [
-      { "text": "FAKE: a managed app would let you prototype without registering.", "evidence": { "label": "unverified", "sourceIds": [] } }
+      {
+        "text": "FAKE: a managed app would let you prototype without registering.",
+        "evidence": {
+          "label": "unverified",
+          "sourceIds": []
+        }
+      }
     ],
     "youNeedOwnWhen": [
-      { "text": "FAKE: you need your own app for your own branding and for review-gated scopes.", "evidence": { "label": "documented", "sourceIds": ["s1"] } }
+      {
+        "text": "FAKE: you need your own app for your own branding and for review-gated scopes.",
+        "evidence": {
+          "label": "documented",
+          "sourceIds": [
+            "s1"
+          ]
+        }
+      }
     ]
   },
   "requirements": [
-    { "text": "A free developer account on the provider's site (fake).", "evidence": { "label": "tested", "sourceIds": [], "testNote": "Sample walkthrough created a free account on 2026-01-01 (fake).", "observationRef": "a2" } },
-    { "text": "A public privacy policy URL before submitting for review (fake).", "evidence": { "label": "documented", "sourceIds": ["s2"] } },
-    { "text": "HTTPS redirect URIs in production (fake).", "evidence": { "label": "reported", "sourceIds": ["s3"] } }
+    {
+      "text": "A free developer account on the provider's site (fake).",
+      "evidence": {
+        "label": "tested",
+        "sourceIds": [],
+        "testNote": "Sample walkthrough created a free account on 2026-01-01 (fake).",
+        "observationRef": "a2"
+      }
+    },
+    {
+      "text": "A public privacy policy URL before submitting for review (fake).",
+      "evidence": {
+        "label": "documented",
+        "sourceIds": [
+          "s2"
+        ]
+      }
+    },
+    {
+      "text": "HTTPS redirect URIs in production (fake).",
+      "evidence": {
+        "label": "reported",
+        "sourceIds": [
+          "s3"
+        ]
+      }
+    }
   ],
   "steps": [
     {
@@ -140,11 +317,18 @@
       "estimate": "10 min",
       "detail": "FAKE: read the registration and review pages before starting.",
       "url": "https://developers.example.com/docs",
-      "requires": ["docs_reading"],
+      "requires": [
+        "docs_reading"
+      ],
       "actor": "agent",
       "observed": true,
       "traceHop": 1,
-      "evidence": { "label": "tested", "sourceIds": [], "testNote": "GET of the docs page returned a public page on 2026-01-01 (fake).", "observationRef": "https://developers.example.com/docs" }
+      "evidence": {
+        "label": "tested",
+        "sourceIds": [],
+        "testNote": "GET of the docs page returned a public page on 2026-01-01 (fake).",
+        "observationRef": "https://developers.example.com/docs"
+      }
     },
     {
       "order": 2,
@@ -152,12 +336,20 @@
       "estimate": "10 min",
       "detail": "FAKE: sign up and confirm your email with the code you receive.",
       "url": "https://developers.example.com/console",
-      "requires": ["login_or_account", "email_or_phone_verification"],
+      "requires": [
+        "login_or_account",
+        "email_or_phone_verification"
+      ],
       "actor": "you",
       "agentPrep": "Agent can open the sign-up page and list what you will need.",
       "observed": true,
       "traceHop": 3,
-      "evidence": { "label": "tested", "sourceIds": [], "testNote": "Console redirected to sign-in on 2026-01-01; sample walkthrough stopped at the email code (fake).", "observationRef": "a1" }
+      "evidence": {
+        "label": "tested",
+        "sourceIds": [],
+        "testNote": "Console redirected to sign-in on 2026-01-01; sample walkthrough stopped at the email code (fake).",
+        "observationRef": "a1"
+      }
     },
     {
       "order": 3,
@@ -165,70 +357,185 @@
       "estimate": "5 min",
       "detail": "FAKE: give the app a name and a redirect URI.",
       "url": "https://developers.example.com/docs/register-an-app",
-      "requires": ["config_check"],
+      "requires": [
+        "config_check"
+      ],
       "actor": "agent",
       "observed": true,
       "traceHop": 2,
-      "evidence": { "label": "tested", "sourceIds": [], "testNote": "Sample walkthrough created a test app on 2026-01-01 (fake).", "observationRef": "a3" }
+      "evidence": {
+        "label": "tested",
+        "sourceIds": [],
+        "testNote": "Sample walkthrough created a test app on 2026-01-01 (fake).",
+        "observationRef": "a3"
+      }
     },
     {
       "order": 4,
       "title": "Copy your client ID and secret into environment variables",
       "estimate": "5 min",
       "detail": "FAKE: store the secret in your secret manager, never in code.",
-      "requires": ["config_check", "code_writing"],
+      "requires": [
+        "config_check",
+        "code_writing"
+      ],
       "actor": "agent",
       "observed": true,
-      "evidence": { "label": "tested", "sourceIds": [], "testNote": "Credentials were issued immediately in the sample walkthrough (fake).", "observationRef": "a4" }
+      "evidence": {
+        "label": "tested",
+        "sourceIds": [],
+        "testNote": "Credentials were issued immediately in the sample walkthrough (fake).",
+        "observationRef": "a4"
+      }
     },
     {
       "order": 5,
       "title": "Prepare and submit the review form",
       "estimate": "2-6 h",
       "detail": "FAKE: write the scope justification, record a demo video, and submit.",
-      "requires": ["text_drafting", "manual_submission"],
+      "requires": [
+        "text_drafting",
+        "manual_submission"
+      ],
       "actor": "you",
       "agentPrep": "Agent can draft the scope justification and a privacy-policy checklist.",
       "observed": true,
-      "evidence": { "label": "tested", "sourceIds": [], "testNote": "Sample walkthrough reached the submit page and stopped there (fake).", "observationRef": "a5" }
+      "evidence": {
+        "label": "tested",
+        "sourceIds": [],
+        "testNote": "Sample walkthrough reached the submit page and stopped there (fake).",
+        "observationRef": "a5"
+      }
     },
     {
       "order": 6,
       "title": "Wait for the provider's review",
       "estimate": "3-5 business days",
       "detail": "FAKE: the docs state a typical review window.",
-      "requires": ["provider_review_wait"],
+      "requires": [
+        "provider_review_wait"
+      ],
       "actor": "provider_wait",
       "observed": false,
-      "evidence": { "label": "documented", "sourceIds": ["s2"] }
+      "evidence": {
+        "label": "documented",
+        "sourceIds": [
+          "s2"
+        ]
+      }
     }
   ],
   "scopesAndNuances": [
-    { "text": "FAKE: apps in testing mode allow up to 100 test users.", "evidence": { "label": "documented", "sourceIds": ["s1"] } },
-    { "text": "FAKE: community members report tokens expiring faster in testing mode.", "evidence": { "label": "reported", "sourceIds": ["s3"] } }
+    {
+      "text": "FAKE: apps in testing mode allow up to 100 test users.",
+      "evidence": {
+        "label": "documented",
+        "sourceIds": [
+          "s1"
+        ]
+      }
+    },
+    {
+      "text": "FAKE: community members report tokens expiring faster in testing mode.",
+      "evidence": {
+        "label": "reported",
+        "sourceIds": [
+          "s3"
+        ]
+      }
+    }
   ],
   "blockers": [
     {
       "problem": "FAKE: review rejected for a missing privacy policy.",
       "fix": "Publish a privacy policy at a public HTTPS URL and resubmit.",
       "contact": "FAKE: the provider's developer support form",
-      "evidence": { "label": "reported", "sourceIds": ["s3"] }
+      "evidence": {
+        "label": "reported",
+        "sourceIds": [
+          "s3"
+        ]
+      }
     }
   ],
   "handoff": {
     "agentCanDo": [
-      { "text": "Step 1: Read the developer docs", "evidence": { "label": "tested", "sourceIds": [], "testNote": "GET of the docs page returned a public page on 2026-01-01 (fake).", "observationRef": "https://developers.example.com/docs" } },
-      { "text": "Step 2 (prep): Agent can open the sign-up page and list what you will need.", "evidence": { "label": "tested", "sourceIds": [], "testNote": "Console redirected to sign-in on 2026-01-01; sample walkthrough stopped at the email code (fake).", "observationRef": "a1" } },
-      { "text": "Step 3: Register your app", "evidence": { "label": "tested", "sourceIds": [], "testNote": "Sample walkthrough created a test app on 2026-01-01 (fake).", "observationRef": "a3" } },
-      { "text": "Step 4: Copy your client ID and secret into environment variables", "evidence": { "label": "tested", "sourceIds": [], "testNote": "Credentials were issued immediately in the sample walkthrough (fake).", "observationRef": "a4" } },
-      { "text": "Step 5 (prep): Agent can draft the scope justification and a privacy-policy checklist.", "evidence": { "label": "tested", "sourceIds": [], "testNote": "Sample walkthrough reached the submit page and stopped there (fake).", "observationRef": "a5" } }
+      {
+        "text": "Step 1: Read the developer docs",
+        "evidence": {
+          "label": "tested",
+          "sourceIds": [],
+          "testNote": "GET of the docs page returned a public page on 2026-01-01 (fake).",
+          "observationRef": "https://developers.example.com/docs"
+        }
+      },
+      {
+        "text": "Step 2 (prep): Agent can open the sign-up page and list what you will need.",
+        "evidence": {
+          "label": "tested",
+          "sourceIds": [],
+          "testNote": "Console redirected to sign-in on 2026-01-01; sample walkthrough stopped at the email code (fake).",
+          "observationRef": "a1"
+        }
+      },
+      {
+        "text": "Step 3: Register your app",
+        "evidence": {
+          "label": "tested",
+          "sourceIds": [],
+          "testNote": "Sample walkthrough created a test app on 2026-01-01 (fake).",
+          "observationRef": "a3"
+        }
+      },
+      {
+        "text": "Step 4: Copy your client ID and secret into environment variables",
+        "evidence": {
+          "label": "tested",
+          "sourceIds": [],
+          "testNote": "Credentials were issued immediately in the sample walkthrough (fake).",
+          "observationRef": "a4"
+        }
+      },
+      {
+        "text": "Step 5 (prep): Agent can draft the scope justification and a privacy-policy checklist.",
+        "evidence": {
+          "label": "tested",
+          "sourceIds": [],
+          "testNote": "Sample walkthrough reached the submit page and stopped there (fake).",
+          "observationRef": "a5"
+        }
+      }
     ],
     "youMustDo": [
-      { "text": "Step 2: Create a developer account (needs: login_or_account, email_or_phone_verification)", "evidence": { "label": "tested", "sourceIds": [], "testNote": "Console redirected to sign-in on 2026-01-01; sample walkthrough stopped at the email code (fake).", "observationRef": "a1" } },
-      { "text": "Step 5: Prepare and submit the review form (needs: manual_submission)", "evidence": { "label": "tested", "sourceIds": [], "testNote": "Sample walkthrough reached the submit page and stopped there (fake).", "observationRef": "a5" } }
+      {
+        "text": "Step 2: Create a developer account (needs: login_or_account, email_or_phone_verification)",
+        "evidence": {
+          "label": "tested",
+          "sourceIds": [],
+          "testNote": "Console redirected to sign-in on 2026-01-01; sample walkthrough stopped at the email code (fake).",
+          "observationRef": "a1"
+        }
+      },
+      {
+        "text": "Step 5: Prepare and submit the review form (needs: manual_submission)",
+        "evidence": {
+          "label": "tested",
+          "sourceIds": [],
+          "testNote": "Sample walkthrough reached the submit page and stopped there (fake).",
+          "observationRef": "a5"
+        }
+      }
     ],
     "providerWait": [
-      { "text": "Step 6: Wait for the provider's review", "evidence": { "label": "documented", "sourceIds": ["s2"] } }
+      {
+        "text": "Step 6: Wait for the provider's review",
+        "evidence": {
+          "label": "documented",
+          "sourceIds": [
+            "s2"
+          ]
+        }
+      }
     ]
   },
   "tested": {
@@ -241,9 +548,28 @@
     ]
   },
   "sources": [
-    { "id": "s1", "title": "ExampleApp developer docs: register an app (fake)", "url": "https://developers.example.com/docs/register-an-app", "publisher": "official", "retrievedAt": "2026-01-01", "excerpt": "FAKE excerpt for UI development only." },
-    { "id": "s2", "title": "ExampleApp app review policy (fake)", "url": "https://developers.example.com/docs/app-review", "publisher": "official", "retrievedAt": "2026-01-01" },
-    { "id": "s3", "title": "Community thread about ExampleApp review (fake)", "url": "https://forum.example.org/t/exampleapp-review", "publisher": "community", "retrievedAt": "2026-01-01" }
+    {
+      "id": "s1",
+      "title": "ExampleApp developer docs: register an app (fake)",
+      "url": "https://developers.example.com/docs/register-an-app",
+      "publisher": "official",
+      "retrievedAt": "2026-01-01",
+      "excerpt": "FAKE excerpt for UI development only."
+    },
+    {
+      "id": "s2",
+      "title": "ExampleApp app review policy (fake)",
+      "url": "https://developers.example.com/docs/app-review",
+      "publisher": "official",
+      "retrievedAt": "2026-01-01"
+    },
+    {
+      "id": "s3",
+      "title": "Community thread about ExampleApp review (fake)",
+      "url": "https://forum.example.org/t/exampleapp-review",
+      "publisher": "community",
+      "retrievedAt": "2026-01-01"
+    }
   ],
   "research": {
     "method": "fixed",
@@ -251,16 +577,63 @@
     "pageReads": 3,
     "seconds": 0,
     "checklist": [
-      { "item": "registration", "status": "covered", "sourceIds": ["s1"] },
-      { "item": "review_process", "status": "covered", "sourceIds": ["s2"] },
-      { "item": "scopes_restrictions", "status": "partial", "sourceIds": ["s1"] },
-      { "item": "timing_evidence", "status": "covered", "sourceIds": ["s2", "s3"] },
-      { "item": "requirements", "status": "covered", "sourceIds": ["s2"] },
-      { "item": "rate_limits", "status": "not_found", "sourceIds": [] },
-      { "item": "community_reports", "status": "covered", "sourceIds": ["s3"] },
-      { "item": "composio_status", "status": "not_found", "sourceIds": [] }
+      {
+        "item": "registration",
+        "status": "covered",
+        "sourceIds": [
+          "s1"
+        ]
+      },
+      {
+        "item": "review_process",
+        "status": "covered",
+        "sourceIds": [
+          "s2"
+        ]
+      },
+      {
+        "item": "scopes_restrictions",
+        "status": "partial",
+        "sourceIds": [
+          "s1"
+        ]
+      },
+      {
+        "item": "timing_evidence",
+        "status": "covered",
+        "sourceIds": [
+          "s2",
+          "s3"
+        ]
+      },
+      {
+        "item": "requirements",
+        "status": "covered",
+        "sourceIds": [
+          "s2"
+        ]
+      },
+      {
+        "item": "rate_limits",
+        "status": "not_found",
+        "sourceIds": []
+      },
+      {
+        "item": "community_reports",
+        "status": "covered",
+        "sourceIds": [
+          "s3"
+        ]
+      },
+      {
+        "item": "composio_status",
+        "status": "not_found",
+        "sourceIds": []
+      }
     ]
   },
   "nextAction": "FAKE FIXTURE: create your developer account, then register a test app.",
-  "warnings": ["This is a hand-written fake fixture for UI development. Nothing in it is real."]
+  "warnings": [
+    "This is a hand-written fake fixture for UI development. Nothing in it is real."
+  ]
 }

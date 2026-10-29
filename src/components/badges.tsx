@@ -8,11 +8,32 @@ const DIFF: Record<Difficulty, { text: string; cls: string }> = {
   unknown: { text: "Unknown", cls: "bg-gray-100 text-gray-900 border-gray-500 border-dashed" },
 };
 
-export function DifficultyBadge({ difficulty, large }: { difficulty: Difficulty; large?: boolean }) {
+const cap = (s: string) => s[0].toUpperCase() + s.slice(1);
+
+export function DifficultyBadge({
+  difficulty,
+  large,
+  confidence,
+  range,
+}: {
+  difficulty: Difficulty;
+  large?: boolean;
+  confidence?: "established" | "estimated" | "unresolved";
+  range?: { best: Difficulty; worst: Difficulty };
+}) {
   const d = DIFF[difficulty];
+  const size = large ? "px-3 py-1 text-xl" : "px-2 py-0.5 text-xs";
+  if (difficulty === "unknown" && range && range.best !== range.worst)
+    return (
+      <span title="The sources do not settle the difficulty; this is the plausible range." className={`inline-block rounded border border-dashed border-gray-600 bg-gray-100 font-semibold text-gray-900 ${size}`}>
+        {cap(range.best)} to {range.worst}
+      </span>
+    );
   return (
-    <span className={`inline-block rounded border font-semibold ${d.cls} ${large ? "px-3 py-1 text-xl" : "px-2 py-0.5 text-xs"}`}>
+    <span title={confidence === "estimated" ? "Our estimate: some factors are inferred, not stated by sources." : undefined}
+      className={`inline-block rounded border font-semibold ${d.cls} ${confidence === "estimated" ? "border-dashed" : ""} ${size}`}>
       {d.text}
+      {confidence === "estimated" && <span className={large ? "ml-2 text-sm font-medium" : "ml-1 font-medium"}>(estimate)</span>}
     </span>
   );
 }

@@ -8,6 +8,8 @@ export interface LibraryItem {
   slug: string;
   appName: string;
   difficulty: Difficulty;
+  confidence?: "established" | "estimated" | "unresolved";
+  range?: { best: Difficulty; worst: Difficulty };
   summary: string;
   attemptLevel: string;
   isFixture: boolean;
@@ -27,7 +29,7 @@ export function LibraryBrowser({ items }: { items: LibraryItem[] }) {
             <Link href={`/guide/${i.slug}`} className="block h-full rounded border border-gray-300 p-4 hover:border-gray-900">
               <div className="flex items-center justify-between gap-2">
                 <span className="font-semibold">{i.appName}</span>
-                <DifficultyBadge difficulty={i.difficulty} />
+                <DifficultyBadge difficulty={i.difficulty} confidence={i.confidence} range={i.range} />
               </div>
               <p className="mt-2 text-sm text-gray-800">{i.summary}</p>
               <p className="mt-2 text-xs text-gray-700">Attempt level {i.attemptLevel}{i.isFixture ? " · fake fixture" : ""}</p>

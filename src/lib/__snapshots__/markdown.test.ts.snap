@@ -5,20 +5,27 @@ exports[`guideToMarkdown > matches the snapshot 1`] = `
 
 *Library (deep research) · generated 2026-01-01 · attempt level L3: FAKE FIXTURE: the sample walkthrough stopped at the review-submission step, which only a human may do.*
 
-## Verdict: MODERATE
+## Verdict: MODERATE (estimate)
 
 FAKE FIXTURE: you get working credentials in about 15 minutes, but going public takes a manual review of several days.
 
-*For use case:* FAKE: an agent acting for your customers on ExampleApp. *Why this label:* FAKE FIXTURE: account needed, manual review for public use, a few special requirements, wait measured in days.
+*For use case:* FAKE: an agent acting for your customers on ExampleApp. *Why this label:* Our estimate: FAKE FIXTURE: a review is required, with a wait measured in days. Sources do not settle every factor, so it could be anywhere from moderate to hard.
 
 - **Time to first credentials:** 0.25–0.5 hours — FAKE: measured in the sample walkthrough (14 minutes of work). (**Tested** — Fake sample walkthrough on 2026-01-01 reached issued credentials in 14 minutes.)
 
 - **Time to production / approval:** 3–5 days — FAKE: the fixture docs claim 3-5 business days. (**Documented** [2])
 
-- **Your effort:** 2–6 hours — FAKE: includes recording a demo video and writing a privacy policy. (**Unverified**)
+- **Your effort:** ≈ 2–6 hours (estimate) — Our estimate: FAKE: includes recording a demo video and writing a privacy policy. (**Unverified**)
 
 
 **Biggest risk to your launch date:** FAKE FIXTURE: a rejected review because the privacy policy is missing.
+
+### Our estimates (not stated by any source)
+- waitMagnitude: likely **days** (low confidence). FAKE: typically manual reviews of this kind take days, not weeks. No source states the wait for this use case.
+
+### What to check first
+1. FAKE: Does ExampleApp review apps before accounts outside the developer's own can install them?
+2. FAKE: How many business days does ExampleApp's review take for restricted scopes?
 
 ## Managed OAuth vs your own app
 Composio-managed: unknown

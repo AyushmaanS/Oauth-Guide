@@ -6,7 +6,7 @@ const ev = (e: Evidence) => {
   return `**${e.label[0].toUpperCase()}${e.label.slice(1)}**${refs ? " " + refs : ""}${e.testNote ? ` — ${e.testNote}` : ""}`;
 };
 const claims = (list: Claim[]) => (list.length ? list.map((c) => `- ${c.text} (${ev(c.evidence)})`).join("\n") : "- None recorded.");
-const range = (label: string, r: Range) => `- **${label}:** ${formatRange(r)} — ${r.basis} (${ev(r.evidence)})`;
+const range = (label: string, r: Range) => `- **${label}:** ${formatRange(r)}${r.estimate ? " (estimate)" : ""} — ${r.basis} (${ev(r.evidence)})`;
 
 /** Pure, deterministic export of a guide as readable markdown with evidence labels and sources. */
 export function guideToMarkdown(g: Guide): string {
@@ -17,7 +17,10 @@ export function guideToMarkdown(g: Guide): string {
     `*${g.mode === "library" ? "Library (deep research)" : "Live-generated"} · generated ${g.generatedAt.slice(0, 10)} · attempt level ${g.attemptLevel}: ${g.attemptLevelReason}*`,
   );
   if (!g.complete) out.push("> **Incomplete guide.** Some stages did not finish; treat missing parts as unverified.");
-  out.push(`## Verdict: ${v.difficulty.toUpperCase()}`);
+  const head = v.difficulty === "unknown" && v.difficultyRange && v.difficultyRange.best !== v.difficultyRange.worst
+    ? `UNCLEAR (${v.difficultyRange.best} to ${v.difficultyRange.worst})`
+    : `${v.difficulty.toUpperCase()}${v.difficultyConfidence === "estimated" ? " (estimate)" : ""}`;
+  out.push(`## Verdict: ${head}`);
   out.push(`${v.summary}\n\n*For use case:* ${v.useCase}. *Why this label:* ${v.difficultyReason}`);
   out.push(range("Time to first credentials", v.timeToCredentials));
   out.push(
@@ -27,6 +30,9 @@ export function guideToMarkdown(g: Guide): string {
   );
   out.push(range("Your effort", v.humanEffortHours));
   out.push(`\n**Biggest risk to your launch date:** ${v.biggestLaunchRisk}`);
+  if (v.inference?.length)
+    out.push(`### Our estimates (not stated by any source)\n` + v.inference.map((i) => `- ${i.factor}: likely **${i.value}** (${i.confidence} confidence). ${i.rationale}${i.sourceIds.length ? ` Based on ${i.sourceIds.map((id) => `[${id.replace(/^s/, "")}]`).join("")}.` : ""}`).join("\n"));
+  if (v.checkFirst?.length) out.push(`### What to check first\n` + v.checkFirst.map((q, i) => `${i + 1}. ${q}`).join("\n"));
   out.push(`## Managed OAuth vs your own app\nComposio-managed: ${g.managedVsOwn.composioManaged}\n\n**Managed covers**\n${claims(g.managedVsOwn.managedCovers)}\n\n**You need your own app when**\n${claims(g.managedVsOwn.youNeedOwnWhen)}`);
   out.push(`## Before you start\n${claims(g.requirements)}`);
   out.push(

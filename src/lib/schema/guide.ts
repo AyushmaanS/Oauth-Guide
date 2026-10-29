@@ -48,6 +48,8 @@ export const Factors = z.strictObject({
 export type Factors = z.infer<typeof Factors>;
 
 export const Range = z.strictObject({
+  /** True when the numbers are our own estimate, not from a source. Always labelled unverified. */
+  estimate: z.boolean().optional(),
   minDays: z.number().optional(),
   maxDays: z.number().optional(),
   minHours: z.number().optional(),
@@ -60,6 +62,10 @@ export type Range = z.infer<typeof Range>;
 export const Difficulty = z.enum(["easy", "moderate", "hard", "gated", "unknown"]);
 export type Difficulty = z.infer<typeof Difficulty>;
 
+/** Factors the inference stage may fill when sources do not say (never docsQuality, waitBasis or special requirements). */
+export const FactorKey = z.enum(["registrationFriction", "reviewRequired", "reviewDepth", "waitMagnitude", "businessEntityRequired"]);
+export type FactorKey = z.infer<typeof FactorKey>;
+
 export const Verdict = z.strictObject({
   difficulty: Difficulty, // computed by rubric.ts, never by the LLM
   difficultyReason: z.string(),
@@ -70,7 +76,26 @@ export const Verdict = z.strictObject({
   humanEffortHours: Range,
   summary: z.string().min(1),
   biggestLaunchRisk: z.string().min(1),
+  /** The factors the label was computed from: stated by sources, plus inferred values (see factorBasis). */
   factors: Factors,
+  /** established: holds whatever the unknown factors are; estimated: uses inferred values; unresolved: only a range. */
+  difficultyConfidence: z.enum(["established", "estimated", "unresolved"]).optional(),
+  /** Best and worst label if every unknown factor went its best or worst plausible way. Gated is never assumed. */
+  difficultyRange: z.strictObject({ best: Difficulty, worst: Difficulty }).optional(),
+  factorBasis: z.partialRecord(FactorKey, z.enum(["stated", "inferred", "unknown"])).optional(),
+  inference: z
+    .array(
+      z.strictObject({
+        factor: FactorKey,
+        value: z.string(),
+        confidence: z.enum(["low", "medium", "high"]),
+        rationale: z.string().max(260),
+        sourceIds: z.array(z.string()),
+      }),
+    )
+    .optional(),
+  /** Concrete questions to answer first; answering them would change or confirm the label. */
+  checkFirst: z.array(z.string().max(240)).max(4).optional(),
 });
 export type Verdict = z.infer<typeof Verdict>;
 
@@ -344,6 +369,8 @@ export const Guide = GuideShape.superRefine((g, ctx) => {
         issue(`${path}: "tested" needs an observationRef that exists in probe, trace, metadata or attempt`);
     }
   }
+  for (const inf of g.verdict.inference ?? [])
+    for (const id of inf.sourceIds) if (!sourceById.has(id)) issue(`verdict.inference: unknown source id "${id}"`);
   for (const c of g.research.checklist)
     for (const id of c.sourceIds) if (!sourceById.has(id)) issue(`research.checklist: unknown source id "${id}"`);
 

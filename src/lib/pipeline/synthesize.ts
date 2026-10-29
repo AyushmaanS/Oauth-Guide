@@ -1,15 +1,16 @@
 import { z } from "zod";
 import { callJson } from "@/lib/llm";
-import type { Evidence, GuideShape, Range } from "@/lib/schema/guide";
+import type { Evidence, Factors, GuideShape, Range } from "@/lib/schema/guide";
 import { applyOwners, deriveHandoff } from "@/lib/handoff";
-import { computeDifficulty } from "@/lib/rubric";
+import { resolveDifficulty } from "@/lib/rubric";
+import type { Inferred } from "./infer";
 import { SYNTH_SYSTEM, SynthOut } from "./prompts/synthesize";
 import { PIPELINE_VERSION, sourceBundle } from "./prompts/common";
 import { normalizeUrl } from "./gather/sources";
 import type { FactorsOut } from "./prompts/factors";
 import type { Deps, Gathered, Resolved } from "./types";
 
-export async function synthesize(app: Resolved, f: FactorsOut, g: Gathered, deps: Deps, model: string): Promise<SynthOut> {
+export async function synthesize(app: Resolved, f: FactorsOut, g: Gathered, deps: Deps, model: string, est?: Inferred): Promise<SynthOut> {
   const known = new Set(g.sources.map((s) => s.id));
   const out = await callJson({
     llm: deps.llm,
@@ -17,7 +18,9 @@ export async function synthesize(app: Resolved, f: FactorsOut, g: Gathered, deps
     system: SYNTH_SYSTEM,
     user: [
       `App: ${app.appName} (provider site ${app.providerSite}). Use case for this guide: ${f.useCase}`,
-      `FACTORS (already decided, for context): ${JSON.stringify(f.factors)}`,
+      `FACTORS (already decided, for context): ${JSON.stringify(est?.completed ?? f.factors)}`,
+      est && est.inference.length ? `ESTIMATED (not stated by sources; our estimates, with reasoning): ${JSON.stringify(est.inference)}` : "",
+      est && est.checkFirst.length ? `OPEN QUESTIONS: ${JSON.stringify(est.checkFirst)}` : "",
       `CANDIDATE CLAIMS from the factor stage: ${JSON.stringify(f.claims)}`,
       `Composio managed OAuth status (computed by code): ${g.composio.value}${g.composio.sourceId ? ` (source ${g.composio.sourceId})` : ""}`,
       `Output JSON schema:\n${JSON.stringify(z.toJSONSchema(SynthOut))}`,
@@ -32,11 +35,20 @@ export async function synthesize(app: Resolved, f: FactorsOut, g: Gathered, deps
 }
 
 const ev = (e: { label: Evidence["label"]; sourceIds: string[] }): Evidence => ({ label: e.label, sourceIds: e.sourceIds });
-/** A range with no supporting source shows no numbers: an unsourced figure is a guess, so it is stripped (code rule). */
+/**
+ * Range rules (code): sourced numbers keep their evidence. An unsourced range keeps its numbers ONLY if it is
+ * explicitly marked as our estimate, in which case it is always labelled unverified and its basis says so.
+ */
 export const range = (r: z.infer<typeof SynthOut>["humanEffortHours"]): Range => {
   const evidence = ev(r.evidence);
-  if (evidence.label === "unverified" && evidence.sourceIds.length === 0) return { basis: r.basis, evidence };
-  return { ...r, evidence };
+  const sourced = evidence.sourceIds.length > 0 && evidence.label !== "unverified";
+  const { estimate, ...nums } = r;
+  if (sourced) return { ...nums, evidence };
+  if (estimate === true && (nums.minDays !== undefined || nums.maxDays !== undefined || nums.minHours !== undefined || nums.maxHours !== undefined)) {
+    const basis = /^our estimate/i.test(nums.basis) ? nums.basis : `Our estimate: ${nums.basis}`;
+    return { ...nums, estimate: true, basis, evidence: { label: "unverified", sourceIds: [] } };
+  }
+  return { basis: nums.basis, evidence: { label: "unverified", sourceIds: evidence.sourceIds } };
 };
 
 export interface AssembleArgs {
@@ -49,6 +61,9 @@ export interface AssembleArgs {
   seconds: number;
   now: Date;
   extraWarnings: string[];
+  /** Factors as stated by sources (unknowns kept) and the inference result, if any. */
+  stated?: Factors;
+  est?: Inferred;
 }
 
 /** Compose a Guide draft from stage outputs. Code, not the model, sets everything not in the synth schema. */
@@ -75,7 +90,9 @@ export function assemble(a: AssembleArgs): GuideShape {
       evidence: ev(st.evidence),
     };
   });
-  const d = computeDifficulty(f.factors);
+  const stated = a.stated ?? f.factors;
+  const completed = a.est?.completed ?? f.factors;
+  const d = resolveDifficulty(stated, completed);
   const claims = (list: z.infer<typeof SynthOut>["requirements"]) => list.map((c) => ({ text: c.text, evidence: ev(c.evidence) }));
   const owned = applyOwners(steps);
   return {
@@ -100,7 +117,10 @@ export function assemble(a: AssembleArgs): GuideShape {
       humanEffortHours: range(s.humanEffortHours),
       summary: s.summary,
       biggestLaunchRisk: s.biggestLaunchRisk,
-      factors: f.factors,
+      factors: completed,
+      difficultyConfidence: d.confidence,
+      difficultyRange: d.range,
+      ...(a.est ? { factorBasis: a.est.basis, inference: a.est.inference, checkFirst: a.est.checkFirst } : {}),
     },
     managedVsOwn: {
       composioManaged: g.composio.value,

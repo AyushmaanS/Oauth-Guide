@@ -38,22 +38,24 @@ const synthJson = (over: any = {}) => ({
   ...over,
 });
 
-function mocks(opts: { resolve?: any; synth?: any; failSearch?: boolean; failSynth?: boolean; selfcheck?: any } = {}) {
+function mocks(opts: { resolve?: any; synth?: any; failSearch?: boolean; failSynth?: boolean; selfcheck?: any; factors?: any; infer?: any; extraHit?: boolean } = {}) {
   const calls: string[] = [];
   const llm: LlmClient = {
     async complete({ system }) {
       if (system.includes("identify which software product")) { calls.push("resolve"); return JSON.stringify(opts.resolve ?? resolveJson); }
-      if (system.includes("extract difficulty factors")) { calls.push("factors"); return JSON.stringify(factorsJson); }
+      if (system.includes("extract difficulty factors")) { calls.push("factors"); return JSON.stringify(opts.factors ?? factorsJson); }
+      if (system.includes("estimate difficulty factors")) { calls.push("infer"); return JSON.stringify(opts.infer ?? { inferences: [], checkFirst: [] }); }
       if (system.includes("body of a verdict-first guide")) { calls.push("synth"); if (opts.failSynth) return "not json at all"; return JSON.stringify(opts.synth ?? synthJson()); }
       if (system.includes("skeptical reviewer")) { calls.push("selfcheck"); return JSON.stringify(opts.selfcheck ?? { results: [] }); }
       throw new Error("unexpected prompt");
     },
   };
   const search: SearchProvider = {
-    async search() {
+    async search(q) {
       calls.push("search");
       if (opts.failSearch) throw new Error("tavily down");
-      return [{ url: DOCS, title: "Register an app", snippet: "s" }, { url: FORUM, title: "Review took weeks", snippet: "s" }];
+      const hits = [{ url: DOCS, title: "Register an app", snippet: "s" }, { url: FORUM, title: "Review took weeks", snippet: "s" }];
+      return opts.extraHit && /must be approved before other users can install|approval how many business days or weeks|security assessment steps/.test(q) ? [...hits, { url: "https://docs.example.com/oauth/review-times", title: "Review times", snippet: "s" }] : hits;
     },
     async extract(urls) {
       return urls.map((u) => ({ url: u, title: u.includes("stack") ? "Example review took weeks" : "Register an app", text: u.includes("stack") ? `Example OAuth review took weeks. Example Example Example. ${OAUTH_TEXT}` : OAUTH_TEXT }));
@@ -218,4 +220,116 @@ describe("callJson", () => {
   });
   it("extractJson treats undefined values as absent", () => expect(extractJson('{"a":1,"b":undefined,"c":{"d":undefined}}')).toEqual({ a: 1, c: {} }));
   it("extractJson tolerates surrounding prose", () => expect(extractJson('Sure! {"a":1} done')).toEqual({ a: 1 }));
+});
+
+describe("partial information: follow-up round, bounds and inference", () => {
+  const unknownFactors = {
+    ...factorsJson,
+    factors: { ...factorsJson.factors, reviewRequired: "unknown", reviewDepth: "unknown", waitMagnitude: "unknown" },
+  };
+  const inferJson = {
+    inferences: [
+      { factor: "reviewRequired", value: "for_public_use", confidence: "medium", rationale: "Typically apps used by other customers need provider review before public use.", sourceIds: ["s1"] },
+      { factor: "reviewDepth", value: "manual", confidence: "low", rationale: "Typically a manual check for public apps.", sourceIds: [] },
+      { factor: "waitMagnitude", value: "days", confidence: "low", rationale: "Typically days for a manual review.", sourceIds: [] },
+    ],
+    checkFirst: ["Does Example review apps before accounts outside the developer's own can install them?", "Is it hard?"],
+  };
+  const synthEstimate = synthJson({
+    timeToProduction: { minDays: 3, maxDays: 14, estimate: true, basis: "Typical manual review.", evidence: ev("unverified", []) },
+    timeToCredentials: { minHours: 0.2, maxHours: 1, estimate: true, basis: "Our estimate: short form.", evidence: ev("unverified", []) },
+  });
+
+  it("runs follow-up questions and the inference step when the label is open, and marks the label estimated", async () => {
+    const { deps, calls } = mocks({ factors: unknownFactors, infer: inferJson, synth: synthEstimate });
+    const events: string[] = [];
+    const r = await runPipeline({ query: "Example", mode: "deep", models, deps, ctx: { emit: (e) => events.push(e.type === "stage_start" ? e.stage : e.type) } });
+    const g = r.guide!;
+    expect(r.errors).toEqual([]);
+    expect(events).toContain("followup");
+    expect(calls).toContain("infer");
+    expect(g.verdict.difficulty).toBe("moderate");
+    expect(g.verdict.difficultyConfidence).toBe("estimated");
+    expect(g.verdict.difficultyRange).toEqual({ best: "easy", worst: "hard" });
+    expect(g.verdict.factorBasis?.reviewRequired).toBe("inferred");
+    expect(g.verdict.inference?.length).toBe(3);
+    expect(g.verdict.checkFirst).toEqual(["Does Example review apps before accounts outside the developer's own can install them?"]);
+  });
+  it("keeps numbers for an estimated range, forces it unverified, and prefixes the basis", async () => {
+    const { deps } = mocks({ factors: unknownFactors, infer: inferJson, synth: synthEstimate });
+    const g = (await runPipeline({ query: "Example", mode: "deep", models, deps })).guide!;
+    const prod = g.verdict.timeToProduction as any;
+    expect(prod.estimate).toBe(true);
+    expect(prod.maxDays).toBe(14);
+    expect(prod.evidence.label).toBe("unverified");
+    expect(prod.basis.startsWith("Our estimate")).toBe(true);
+    expect(g.verdict.timeToCredentials.minHours).toBe(0.2);
+  });
+  it("falls back to an unresolved range when the estimation step fails", async () => {
+    const { deps } = mocks({ factors: unknownFactors, infer: undefined });
+    const orig = deps.llm.complete.bind(deps.llm);
+    deps.llm.complete = async (a) => { if (a.system.includes("estimate difficulty factors")) throw new Error("boom"); return orig(a); };
+    const g = (await runPipeline({ query: "Example", mode: "deep", models, deps })).guide!;
+    expect(g.verdict.difficulty).toBe("unknown");
+    expect(g.verdict.difficultyConfidence).toBe("unresolved");
+    expect(g.verdict.difficultyRange).toEqual({ best: "easy", worst: "hard" });
+    expect(g.warnings.join()).toContain("Estimation step failed");
+  });
+  it("skips follow-up and inference entirely when the stated facts settle the label", async () => {
+    const settled = { ...factorsJson, factors: { ...factorsJson.factors, reviewRequired: "none", reviewDepth: "unknown", waitMagnitude: "unknown" } };
+    const { deps, calls } = mocks({ factors: settled, synth: synthJson({ timeToProduction: { none: true, evidence: ev("documented", ["s1"]) } }) });
+    const g = (await runPipeline({ query: "Example", mode: "deep", models, deps })).guide!;
+    expect(calls).not.toContain("infer");
+    expect(g.verdict.difficulty).toBe("easy");
+    expect(g.verdict.difficultyConfidence).toBe("established");
+  });
+  it("live mode skips the follow-up round and self-check when the run is already long; deep mode does not", async () => {
+    for (const mode of ["fast", "deep"] as const) {
+      let t = 0;
+      const spy = vi.spyOn(Date, "now").mockImplementation(() => 1_000_000_000_000 + t);
+      const { deps, calls } = mocks({ factors: unknownFactors, infer: inferJson, synth: synthEstimate });
+      const orig = deps.llm.complete.bind(deps.llm);
+      deps.llm.complete = async (a) => { const r = await orig(a); if (a.system.includes("extract difficulty factors")) t += 115_000; return r; };
+      const events: string[] = [];
+      await runPipeline({ query: "Example", mode, models, deps, ctx: { deadline: 1_000_000_000_000 + 3_600_000, emit: (e) => events.push(e.type === "stage_start" ? e.stage : e.type) } });
+      spy.mockRestore();
+      if (mode === "fast") { expect(events).not.toContain("followup"); expect(calls).not.toContain("selfcheck"); }
+      else { expect(events).toContain("followup"); expect(calls).toContain("selfcheck"); }
+    }
+  });
+  it("a follow-up that finds a new page triggers a second factor extraction", async () => {
+    const { deps, calls } = mocks({ factors: unknownFactors, infer: inferJson, extraHit: true });
+    await runPipeline({ query: "Example", mode: "deep", models, deps });
+    expect(calls.filter((c) => c === "factors").length).toBe(2);
+  });
+  it("estimates never overwrite stated facts, and gated-driving values need a source", async () => {
+    const { applyInference } = await import("./infer");
+    const stated = { ...factorsJson.factors, reviewRequired: "for_public_use", reviewDepth: "unknown", waitMagnitude: "unknown", businessEntityRequired: "unknown", registrationFriction: "unknown" } as any;
+    const out = applyInference(stated, {
+      inferences: [
+        { factor: "reviewRequired", value: "none", confidence: "high", rationale: "tries to overwrite a stated fact", sourceIds: [] },
+        { factor: "reviewDepth", value: "security_assessment", confidence: "high", rationale: "no source supports this value", sourceIds: [] },
+        { factor: "businessEntityRequired", value: "yes", confidence: "high", rationale: "no source supports this either", sourceIds: [] },
+        { factor: "registrationFriction", value: "paid_or_business_account", confidence: "high", rationale: "with a source this is allowed", sourceIds: ["s1"] },
+        { factor: "waitMagnitude", value: "fortnight", confidence: "low", rationale: "not an allowed value", sourceIds: [] },
+      ],
+      checkFirst: [],
+    }, new Set(["s1"]), "Example");
+    expect(out.completed.reviewRequired).toBe("for_public_use");
+    expect(out.completed.reviewDepth).toBe("manual");
+    expect(out.completed.businessEntityRequired).toBe("no");
+    expect(out.completed.registrationFriction).toBe("paid_or_business_account");
+    expect(out.completed.waitMagnitude).toBe("unknown");
+    expect(out.inference.find((i) => i.factor === "reviewDepth")?.confidence).toBe("medium");
+    expect(out.basis.reviewRequired).toBe("stated");
+    expect(out.basis.waitMagnitude).toBe("unknown");
+  });
+  it("no review inferred forces depth and wait to none", async () => {
+    const { applyInference } = await import("./infer");
+    const stated = { ...factorsJson.factors, reviewRequired: "unknown", reviewDepth: "unknown", waitMagnitude: "unknown" } as any;
+    const out = applyInference(stated, { inferences: [{ factor: "reviewRequired", value: "none", confidence: "medium", rationale: "Own-account use needs no review.", sourceIds: [] }, { factor: "reviewDepth", value: "manual", confidence: "low", rationale: "contradicts", sourceIds: [] }], checkFirst: [] }, new Set(), "Example");
+    expect(out.completed.reviewDepth).toBe("none");
+    expect(out.completed.waitMagnitude).toBe("none");
+    expect(out.inference.find((i) => i.factor === "reviewDepth")?.value).toBe("none");
+  });
 });
