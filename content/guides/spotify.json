@@ -333,8 +333,8 @@
     }
   },
   "verdict": {
-    "difficulty": "hard",
-    "difficultyReason": "Our estimate: Required review takes weeks. Sources do not settle every factor, so it could be anywhere from easy to hard.",
+    "difficulty": "gated",
+    "difficultyReason": "A registered business entity is required for this use case. This holds whatever the unknown details turn out to be.",
     "useCase": "An agent that reads a user's Spotify library and playlists and controls playback on their behalf, using the Web API Authorization Code flow",
     "timeToCredentials": {
       "estimate": true,
@@ -347,13 +347,13 @@
       }
     },
     "timeToProduction": {
-      "estimate": true,
-      "minDays": 7,
-      "maxDays": 28,
-      "basis": "Our estimate: the factors suggest a manual review for public use with a wait of weeks, but no source states a turnaround time. A single-user agent on your own account may not need this at all.",
+      "maxDays": 42,
+      "basis": "Spotify's quota-modes page says the extended-quota review can take up to six weeks, and that it accepts applications only from organizations (not individuals) with at least 250,000 monthly active users. The minimum wait is not stated.",
       "evidence": {
-        "label": "unverified",
-        "sourceIds": []
+        "label": "documented",
+        "sourceIds": [
+          "s1"
+        ]
       }
     },
     "humanEffortHours": {
@@ -366,8 +366,8 @@
         "sourceIds": []
       }
     },
-    "summary": "Spotify requires you to register your own app; Composio lists no managed Spotify app. Creating the app looks quick. The sources don't say whether serving other users needs a manual review. Plan for a wait of weeks (our estimate).",
-    "biggestLaunchRisk": "Development Mode is quota-limited, and the captured sources do not say how to get past it for other users' accounts. An unknown review could delay public launch by weeks.",
+    "summary": "Spotify requires you to register your own app; Composio lists no managed Spotify app. Registering takes minutes, but a Development Mode app needs a Premium owner and supports only 5 allowlisted users. Serving more users needs extended quota, which Spotify accepts only from registered organizations with at least 250,000 monthly active users, after a review of up to six weeks.",
+    "biggestLaunchRisk": "Extended quota is the hard gate: Spotify accepts applications only from organizations with at least 250,000 monthly active users, and the review can take up to six weeks. Until then you are limited to 5 allowlisted users and a Premium app owner.",
     "factors": {
       "registrationFriction": "account_needed",
       "reviewRequired": "for_public_use",
@@ -375,32 +375,22 @@
       "docsQuality": "partial",
       "waitBasis": "unknown",
       "waitMagnitude": "weeks",
-      "businessEntityRequired": "no",
+      "businessEntityRequired": "yes",
       "specialRequirements": []
     },
-    "difficultyConfidence": "estimated",
+    "difficultyConfidence": "established",
     "difficultyRange": {
-      "best": "easy",
-      "worst": "hard"
+      "best": "gated",
+      "worst": "gated"
     },
     "factorBasis": {
       "registrationFriction": "stated",
-      "reviewRequired": "inferred",
+      "reviewRequired": "stated",
       "reviewDepth": "inferred",
-      "waitMagnitude": "inferred",
-      "businessEntityRequired": "inferred"
+      "waitMagnitude": "stated",
+      "businessEntityRequired": "stated"
     },
     "inference": [
-      {
-        "factor": "reviewRequired",
-        "value": "for_public_use",
-        "confidence": "medium",
-        "rationale": "The sources show a 'Development Mode' with per-developer-account quotas (s1, s9), and the sources suggest moving beyond it typically requires provider approval before other users' accounts can be served. An agent acting only on the developer's own account woul",
-        "sourceIds": [
-          "s1",
-          "s9"
-        ]
-      },
       {
         "factor": "reviewDepth",
         "value": "manual",
@@ -410,31 +400,9 @@
           "s1",
           "s9"
         ]
-      },
-      {
-        "factor": "waitMagnitude",
-        "value": "weeks",
-        "confidence": "low",
-        "rationale": "Typically, manual extended-quota or public-use reviews take days to weeks; choosing the more cautious value. No captured source states a turnaround time, so this is an unverified estimate.",
-        "sourceIds": []
-      },
-      {
-        "factor": "businessEntityRequired",
-        "value": "no",
-        "confidence": "low",
-        "rationale": "No source says a business entity is required for registering a Web API app; the dashboard registration appears to need only a developer account (s4, s10). Only the separate Open Access partner program is described as partner-approved (s6), and it is not part o",
-        "sourceIds": [
-          "s4",
-          "s6",
-          "s10"
-        ]
       }
     ],
-    "checkFirst": [
-      "Does Spotify require an application for extended quota before accounts other than the developer's own can authorize the app beyond Development Mode?",
-      "Does Spotify limit Development Mode apps to a fixed number of allow-listed user accounts, so that only the developer's own account is needed for this agent?",
-      "Does Spotify require a registered business or organization to apply for extended quota mode for a Web API app?"
-    ]
+    "checkFirst": []
   },
   "managedVsOwn": {
     "composioManaged": "no",
@@ -483,10 +451,21 @@
       }
     },
     {
-      "text": "No source states that a business entity is required to register a Web API app. This is not confirmed either way.",
+      "text": "Registering a Development Mode app has no stated business requirement, but extended quota (needed to serve more than the allowlisted users) is accepted only from organizations with at least 250,000 monthly active users.",
       "evidence": {
-        "label": "unverified",
-        "sourceIds": []
+        "label": "documented",
+        "sourceIds": [
+          "s1"
+        ]
+      }
+    },
+    {
+      "text": "The Development Mode app owner must have Spotify Premium for the app to function. On a free account we could still create the app, but the Web API option was greyed out.",
+      "evidence": {
+        "label": "documented",
+        "sourceIds": [
+          "s1"
+        ]
       }
     }
   ],
@@ -494,7 +473,7 @@
     {
       "order": 1,
       "title": "Sign in to the Spotify developer dashboard",
-      "estimate": "5-30 minutes",
+      "estimate": "5-30 minutes (our estimate; unverified)",
       "detail": "Sign in with a Spotify account to reach the developer dashboard, where Client IDs are created. The captured sources do not detail account verification steps.",
       "requires": [
         "login_or_account",
@@ -516,7 +495,7 @@
     {
       "order": 2,
       "title": "Read the Apps and Quota modes docs",
-      "estimate": "20-60 minutes",
+      "estimate": "20-60 minutes (our estimate; unverified)",
       "detail": "Check how Development Mode limits work and what the docs say about moving beyond it. The captured text of these pages is mostly navigation, so confirm details on the live pages.",
       "url": "https://developer.spotify.com/documentation/web-api/concepts/quota-modes",
       "requires": [
@@ -527,18 +506,16 @@
       "observed": true,
       "traceHop": 1,
       "evidence": {
-        "label": "tested",
+        "label": "documented",
         "sourceIds": [
           "s1"
-        ],
-        "testNote": "Only reachability was observed: a read-only GET of this page on 2026-10-29 was classified \"public\" (host developer.spotify.com).",
-        "observationRef": "https://developer.spotify.com/documentation/web-api/concepts/quota-modes"
+        ]
       }
     },
     {
       "order": 3,
       "title": "Create the app and obtain Client ID and Secret",
-      "estimate": "10-30 minutes",
+      "estimate": "10-30 minutes (our estimate; unverified)",
       "detail": "Create the app in the dashboard. Creating a Client ID also generates a Client Secret. New apps run in Development Mode, whose quota is counted per developer account.",
       "requires": [
         "config_check",
@@ -559,8 +536,8 @@
     {
       "order": 4,
       "title": "Register the redirect URI",
-      "estimate": "10-20 minutes",
-      "detail": "Register the callback URL your agent's backend will use for the Authorization Code flow. The captured sources do not show the dashboard fields or redirect URI rules, so check the Redirect URIs docs.",
+      "estimate": "10-20 minutes (our estimate; unverified)",
+      "detail": "Register the callback URL your agent's backend will use for the Authorization Code flow. Use HTTPS unless it is a loopback address; a loopback address must be an explicit IP (http://127.0.0.1:PORT or http://[::1]:PORT), and 'localhost' is not allowed. The loopback address was accepted in our walkthrough.",
       "requires": [
         "config_check"
       ],
@@ -569,7 +546,9 @@
       "observed": true,
       "evidence": {
         "label": "tested",
-        "sourceIds": [],
+        "sourceIds": [
+          "s14"
+        ],
         "testNote": "Observed in a signed-in walkthrough on 2026-10-29: A loopback address was accepted and listed. The docs say plain localhost is rejected; that was not tested here.",
         "observationRef": "sp-4"
       }
@@ -577,7 +556,7 @@
     {
       "order": 5,
       "title": "Implement the Authorization Code flow",
-      "estimate": "2-6 hours",
+      "estimate": "2-6 hours (our estimate; unverified)",
       "detail": "Send the user to the Spotify authorize page, exchange the returned code for tokens on your server, and refresh tokens as needed. Keep the Client Secret server-side.",
       "url": "https://developer.spotify.com/documentation/web-api/tutorials/code-flow",
       "requires": [
@@ -589,18 +568,16 @@
       "observed": true,
       "traceHop": 2,
       "evidence": {
-        "label": "tested",
+        "label": "documented",
         "sourceIds": [
           "s2"
-        ],
-        "testNote": "Only reachability was observed: a read-only GET of this page on 2026-10-29 was classified \"public\" (host developer.spotify.com).",
-        "observationRef": "https://developer.spotify.com/documentation/web-api/tutorials/code-flow"
+        ]
       }
     },
     {
       "order": 6,
       "title": "Choose scopes for library, playlists and playback",
-      "estimate": "30-60 minutes",
+      "estimate": "30-60 minutes (our estimate; unverified)",
       "detail": "Pick the scopes your agent needs for reading the library and playlists and controlling playback. The scope names were not captured in the sources, so take them from the Scopes page. Request only what is needed.",
       "url": "https://developer.spotify.com/documentation/web-api/concepts/scopes",
       "requires": [
@@ -611,18 +588,16 @@
       "agentPrep": "Map each planned agent action to the matching scope from the live Scopes page.",
       "observed": true,
       "evidence": {
-        "label": "tested",
+        "label": "documented",
         "sourceIds": [
           "s7"
-        ],
-        "testNote": "Only reachability was observed: a read-only GET of this page on 2026-10-29 was classified \"public\" (host developer.spotify.com).",
-        "observationRef": "https://developer.spotify.com/documentation/web-api/concepts/scopes"
+        ]
       }
     },
     {
       "order": 7,
       "title": "Test on your own account and handle quota errors",
-      "estimate": "1-3 hours",
+      "estimate": "1-3 hours (our estimate; unverified)",
       "detail": "Run the full flow in Development Mode. Handle HTTP 429 responses and use the 'reason' field (QUOTA_EXCEEDED) to tell quota limits from rate limits.",
       "requires": [
         "code_writing",
@@ -641,8 +616,8 @@
     {
       "order": 8,
       "title": "Prepare an extended-access request if other users will use the agent",
-      "estimate": "1-3 hours",
-      "detail": "The sources do not say whether this application exists or what it requires. Confirm in the dashboard and docs, then submit any app review or quota extension form if one is offered.",
+      "estimate": "1-3 hours (our estimate; unverified)",
+      "detail": "Extended quota mode is applied for through Spotify's review. Spotify only accepts applications from legally registered organizations (not individuals) with at least 250,000 monthly active users; the review can take up to six weeks.",
       "requires": [
         "text_drafting",
         "manual_submission"
@@ -651,23 +626,27 @@
       "agentPrep": "Draft the use-case description, the scopes requested with a justification for each, and any demo material the form asks for.",
       "observed": false,
       "evidence": {
-        "label": "unverified",
-        "sourceIds": []
+        "label": "documented",
+        "sourceIds": [
+          "s1"
+        ]
       }
     },
     {
       "order": 9,
       "title": "Wait for Spotify's decision, if a review applies",
-      "estimate": "1-4 weeks (our estimate)",
-      "detail": "No source states a turnaround time. Do not plan a public launch until access beyond Development Mode is confirmed.",
+      "estimate": "Up to 6 weeks (Spotify's quota-modes page)",
+      "detail": "Spotify's extended-quota review can take up to six weeks. Do not plan a public launch until access beyond Development Mode is confirmed.",
       "requires": [
         "provider_review_wait"
       ],
       "actor": "provider_wait",
       "observed": false,
       "evidence": {
-        "label": "unverified",
-        "sourceIds": []
+        "label": "documented",
+        "sourceIds": [
+          "s1"
+        ]
       }
     }
   ],
@@ -758,13 +737,13 @@
       }
     },
     {
-      "problem": "Other users' accounts cannot use the app, or you are unsure whether they can, because the sources do not describe the Development Mode user limits.",
-      "fix": "Check the live Quota modes page and the dashboard for how to request wider access, then ask on the Spotify Developer Community forum if it is unclear.",
+      "problem": "Other users' accounts cannot use the app: a Development Mode app supports up to 5 authenticated users, each added to the app's allowlist.",
+      "fix": "Apply for extended quota, which Spotify accepts only from registered organizations with at least 250,000 monthly active users; review can take up to six weeks. Until then, keep use to the allowlisted users.",
       "contact": "Spotify Developer Community forum",
       "evidence": {
-        "label": "unverified",
+        "label": "documented",
         "sourceIds": [
-          "s9"
+          "s1"
         ]
       }
     }
@@ -785,19 +764,19 @@
       {
         "text": "Step 2: Read the Apps and Quota modes docs",
         "evidence": {
-          "label": "tested",
+          "label": "documented",
           "sourceIds": [
             "s1"
-          ],
-          "testNote": "Only reachability was observed: a read-only GET of this page on 2026-10-29 was classified \"public\" (host developer.spotify.com).",
-          "observationRef": "https://developer.spotify.com/documentation/web-api/concepts/quota-modes"
+          ]
         }
       },
       {
         "text": "Step 4: Register the redirect URI",
         "evidence": {
           "label": "tested",
-          "sourceIds": [],
+          "sourceIds": [
+            "s14"
+          ],
           "testNote": "Observed in a signed-in walkthrough on 2026-10-29: A loopback address was accepted and listed. The docs say plain localhost is rejected; that was not tested here.",
           "observationRef": "sp-4"
         }
@@ -805,23 +784,19 @@
       {
         "text": "Step 5: Implement the Authorization Code flow",
         "evidence": {
-          "label": "tested",
+          "label": "documented",
           "sourceIds": [
             "s2"
-          ],
-          "testNote": "Only reachability was observed: a read-only GET of this page on 2026-10-29 was classified \"public\" (host developer.spotify.com).",
-          "observationRef": "https://developer.spotify.com/documentation/web-api/tutorials/code-flow"
+          ]
         }
       },
       {
         "text": "Step 6: Choose scopes for library, playlists and playback",
         "evidence": {
-          "label": "tested",
+          "label": "documented",
           "sourceIds": [
             "s7"
-          ],
-          "testNote": "Only reachability was observed: a read-only GET of this page on 2026-10-29 was classified \"public\" (host developer.spotify.com).",
-          "observationRef": "https://developer.spotify.com/documentation/web-api/concepts/scopes"
+          ]
         }
       },
       {
@@ -836,8 +811,10 @@
       {
         "text": "Step 8 (prep): Draft the use-case description, the scopes requested with a justification for each, and any demo material the form asks for.",
         "evidence": {
-          "label": "unverified",
-          "sourceIds": []
+          "label": "documented",
+          "sourceIds": [
+            "s1"
+          ]
         }
       }
     ],
@@ -868,8 +845,10 @@
       {
         "text": "Step 8: Prepare an extended-access request if other users will use the agent (needs: manual_submission)",
         "evidence": {
-          "label": "unverified",
-          "sourceIds": []
+          "label": "documented",
+          "sourceIds": [
+            "s1"
+          ]
         }
       }
     ],
@@ -877,20 +856,17 @@
       {
         "text": "Step 9: Wait for Spotify's decision, if a review applies",
         "evidence": {
-          "label": "unverified",
-          "sourceIds": []
+          "label": "documented",
+          "sourceIds": [
+            "s1"
+          ]
         }
       }
     ]
   },
   "tested": {
     "unverified": [
-      "Whether Spotify requires an extended-quota application or review before accounts other than the developer's can authorize the app.",
-      "Whether Development Mode limits how many user accounts can authorize the app, so that only your own account is guaranteed to work.",
-      "Whether a registered business or organization is needed for extended access.",
-      "Any review turnaround time. The weeks-long wait is only our estimate.",
       "The exact dashboard fields, redirect URI rules and scope names. Most captured Spotify pages contained only navigation text.",
-      "Whether email or phone verification, 2FA or terms acceptance are required when creating a developer account.",
       "Weakly supported (self-check): A Spotify developer account to create and manage Client IDs in the Spotify dashboard. The captured sources show only that developers manage ",
       "Weakly supported (self-check): When the quota is exceeded, the 429 response body includes \"reason\": \"QUOTA_EXCEEDED\". Rate-limit 429s do not carry this reason.",
       "Weakly supported (self-check): Spotify Open Access is a separate partner API for approved partners only, with Client IDs allow-listed by Partner Management. It does not cl",
@@ -902,14 +878,19 @@
       "Research gap (not found): timing_evidence",
       "Research gap (not found): community_reports",
       "Steps 2, 5, 6, 7, 8, 9 were not walked through (the walkthrough stopped at before viewing the client secret or using the Web API (greyed out on a free account): guide steps 1, 3 and 4 were observed, steps 2 and 5 to 9 were not attempted); they stay as documented, not observed.",
-      "Cleanup was incomplete after the walkthrough: a test app may still exist."
+      "Cleanup was incomplete after the walkthrough: a test app may still exist.",
+      "Step 3: only app creation and the Client ID were observed; the client secret was not viewed.",
+      "Whether a free-account app can call the Web API was not tested; the form greyed out the option and Spotify's docs require a Premium owner.",
+      "The minimum wait for extended-quota review is not stated; Spotify gives only a maximum of six weeks."
     ]
   },
   "changelog": [
     "2026-10-29: signed-in walkthrough merged (level L3).",
     "2026-10-29: corrected \"A Spotify developer account to create and manage Client IDs in the Spotify dashb\" to \"A Spotify account (a free one worked) plus accepting the Developer Terms and a v\" after the walkthrough.",
     "2026-10-29: corrected \"New apps run in Development Mode.\" to \"The new app was created in Development mode, with a 180-day refresh token lifeti\" after the walkthrough.",
-    "2026-10-29: added the free-account observation (app creation allowed, Web API greyed out) and Spotify's terms status; the test app still awaits deletion by the owner."
+    "2026-10-29: added the free-account observation (app creation allowed, Web API greyed out) and Spotify's terms status; the test app still awaits deletion by the owner.",
+    "2026-10-29: verification: Spotify's quota-modes page states extended quota is for organizations with 250,000+ monthly users, review up to six weeks, and 5 allowlisted users in Development Mode; time to production, requirements, blockers and the business-entity factor updated, and difficulty recomputed by the rubric.",
+    "2026-10-29: verification: steps 2, 5 and 6 changed from tested to documented (page reads only); step time ranges marked as our estimates; redirect rules (loopback IP, no localhost) added from Spotify's redirect-URI page."
   ],
   "sources": [
     {
@@ -1002,6 +983,13 @@
       "url": "https://developer.spotify.com/documentation/android/tutorials/authorization",
       "publisher": "official",
       "retrievedAt": "2026-10-29"
+    },
+    {
+      "id": "s14",
+      "title": "Redirect URIs (Spotify Web API)",
+      "url": "https://developer.spotify.com/documentation/web-api/concepts/redirect_uri",
+      "publisher": "official",
+      "retrievedAt": "2026-10-29T00:00:00.000Z"
     }
   ],
   "research": {
