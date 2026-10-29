@@ -56,10 +56,14 @@ Surprises:
 - Slack: unlisted public distribution needs no review; Marketplace needs 10 active workspaces first. New rate limit of 1 request/minute on history methods for unlisted apps.
 - Notion: docs say the Authorization URL only appears after submitting a connection "for review"; conflicting third-party guide. Unresolved.
 
-## D-008 Library apps (PROPOSED, awaiting owner confirmation)
+## D-008 Library apps (APPROVED by owner 2026-10-29)
 1. **GitHub** — Easy. Attempt-feasible (free account, instant app creation). Terms: ambiguous, medium-low confidence; a single supervised walkthrough looks probably fine.
 2. **Google / Gmail** — Hard. Attempt-feasible in Testing mode without billing or verification; Google may block sign-in from automation-controlled browsers, so the owner signs in first and we use that already-signed-in session. Stop before any verification submission.
 3. **LinkedIn** — Gated. Likely **L2 only**: terms look hostile to automated console use, so per protocol no walkthrough unless the owner decides otherwise; the guide documents the self-serve vs gated split with probes, trace and metadata.
 Fallback / 4th: **Slack** — attempt-feasible, strongest documentation. Swap in for any app whose walkthrough cannot run, so we always keep at least 2 L3.
 Not chosen: Notion (unresolved gating, terms unreadable).
 Why this set: spans Easy → Hard → Gated, and the two L3 targets (GitHub, Google) are the most informative; the LinkedIn L2 is itself a finding.
+
+## D-009 Owner approvals (2026-10-29)
+Owner approved: the attempt protocol; the library list (GitHub, Google/Gmail, LinkedIn at L2; Slack fallback); the spec changes (`useCase` in the verdict, `businessEntityRequired` factor, customer-side approval shown as requirement/blocker); the draft rubric.
+**This is NOT per-provider walkthrough consent.** That is requested separately, in writing, before Sprint 6.

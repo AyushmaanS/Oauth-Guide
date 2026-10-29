@@ -1,4 +1,4 @@
-# Signed-in walkthrough protocol (DRAFT — awaiting owner approval)
+# Signed-in walkthrough protocol (APPROVED by owner 2026-10-29)
 
 Source: engineering spec 6.9. Status: **not approved yet. No walkthrough may start until the owner approves this file and gives per-provider consent in `docs/DECISIONS.md`.**
 
@@ -63,5 +63,5 @@ Delete the test app(s) and any test project created; revoke tokens; remove any s
 
 ## 8. Owner approval
 
-- [ ] I have read this protocol and approve it.
+- [x] Owner approved this protocol on 2026-10-29.
 - Per-provider consent lines are added to `docs/DECISIONS.md` before each walkthrough.
