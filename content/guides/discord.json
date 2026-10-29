@@ -8,8 +8,8 @@
   "pipelineVersion": "0.3.0",
   "modelUsed": "anthropic/claude-sonnet-5.5",
   "complete": true,
-  "attemptLevel": "L2",
-  "attemptLevelReason": "Gate probed: 2 page(s) requested read-only on 2026-10-29; public path followed for 2 page(s) (js shell unclear). No account was used.",
+  "attemptLevel": "L3",
+  "attemptLevelReason": "Signed-in walkthrough on 2026-10-29 (free account, separate browser profile) stopped at before revealing a client secret or bot token: guide steps 3 to 5 were read, not completed; steps 6 to 11 were not attempted, because a human is needed for: legal_acceptance. Discord's terms are ambiguous and lean against automated access (they ban self-bots and say nothing about the Developer Portal); the owner ran this single walkthrough knowingly (decision D-018).",
   "probe": [
     {
       "url": "https://docs.discord.com/developers/topics/oauth2",
@@ -87,6 +87,92 @@
     "notes": [
       "No registration endpoint is listed, so manual console registration is likely still needed."
     ]
+  },
+  "attempt": {
+    "performedBy": "owner_with_claude_code",
+    "date": "2026-10-29",
+    "accountType": "free",
+    "browserProfile": "separate",
+    "steps": [
+      {
+        "id": "dc-1",
+        "guideStepOrder": 1,
+        "action": "Opened the Discord Developer Portal in the project browser profile",
+        "observation": "Not signed in: 'Welcome to the Developer Portal' offered Create Account and Log In. The owner signed in; a skippable onboarding survey followed. Any sign-in prompts were not seen by the agent.",
+        "outcome": "stopped_human_required",
+        "tags": [
+          "login_or_account"
+        ]
+      },
+      {
+        "id": "dc-2",
+        "guideStepOrder": 3,
+        "action": "Clicked New Application and typed the throwaway name oauthpath-test-20261029",
+        "observation": "The dialog requires ticking agreement to the Developer Terms of Service and Developer Policy before Create is enabled, so the owner ticked it and clicked Create.",
+        "outcome": "stopped_human_required",
+        "tags": [
+          "config_check",
+          "legal_acceptance"
+        ]
+      },
+      {
+        "id": "dc-3",
+        "guideStepOrder": 3,
+        "action": "Read the General Information and OAuth2 pages of the new app",
+        "observation": "Creation was instant, with no review or verification. The Client ID and Public Key are visible; the Client Secret is hidden behind Reset Secret. Redirect URIs must match exactly.",
+        "outcome": "differs_from_docs",
+        "tags": [
+          "config_check"
+        ]
+      },
+      {
+        "id": "dc-4",
+        "guideStepOrder": 4,
+        "action": "Read the OAuth2 URL generator and the Bot page",
+        "observation": "The generator lists about 25 scopes including bot. The Bot page says tokens can only be viewed once (Reset Token) and has Public Bot and OAuth2 Code Grant options. No invite link was generated.",
+        "outcome": "completed",
+        "tags": [
+          "config_check"
+        ]
+      },
+      {
+        "id": "dc-5",
+        "guideStepOrder": 5,
+        "action": "Read the Privileged Gateway Intents section of the Bot page",
+        "observation": "Presence, Server Members and Message Content are toggles; the page says review applies only once a bot reaches 10,000 users. They were not toggled.",
+        "outcome": "completed",
+        "tags": [
+          "config_check"
+        ]
+      },
+      {
+        "id": "dc-6",
+        "action": "Cleanup: the test app was not deleted during the session",
+        "observation": "The owner chose to delete the app later. It still exists until they do; no secret or token was ever revealed, so none needs removing.",
+        "outcome": "stopped_human_required",
+        "tags": []
+      }
+    ],
+    "stoppedAt": "before revealing a client secret or bot token: guide steps 3 to 5 were read, not completed; steps 6 to 11 were not attempted",
+    "stoppedBecause": [
+      "legal_acceptance"
+    ],
+    "corrections": [
+      {
+        "docClaim": "A Discord account is needed to register an application in the Developer Portal and get a client ID and client secret.",
+        "observed": "Creating the app needs a Discord account and ticking agreement to the Developer Terms of Service and Developer Policy. The Client ID is visible at once; the Client Secret stays hidden until Reset Secret is clicked.",
+        "sourceId": "dc-3"
+      },
+      {
+        "docClaim": "A community report says the Developer Portal's display of public key and secret is confusing. A real secret is short and alphanumeric, not the long hash-like key.",
+        "observed": "The General Information page shows the Application ID and a Public Key; the Client Secret is on the OAuth2 page, hidden until Reset Secret is clicked, so the two are not confusable on the page itself.",
+        "sourceId": "dc-3"
+      }
+    ],
+    "cleanup": {
+      "appsDeleted": false,
+      "secretsRemoved": true
+    }
   },
   "verdict": {
     "difficulty": "hard",
@@ -231,12 +317,14 @@
   },
   "requirements": [
     {
-      "text": "A Discord account is needed to register an application in the Developer Portal and get a client ID and client secret.",
+      "text": "Creating the app needs a Discord account and ticking agreement to the Developer Terms of Service and Developer Policy. The Client ID is visible at once; the Client Secret stays hidden until Reset Secret is clicked. (Docs said: A Discord account is needed to register an application in the Developer Portal and get a client ID and client secret.)",
       "evidence": {
-        "label": "documented",
+        "label": "tested",
         "sourceIds": [
           "s1"
-        ]
+        ],
+        "testNote": "Observed in a signed-in walkthrough on 2026-10-29; this corrects the documentation.",
+        "observationRef": "dc-3"
       }
     },
     {
@@ -296,12 +384,14 @@
         "login_or_account"
       ],
       "actor": "you",
-      "observed": false,
+      "observed": true,
       "evidence": {
-        "label": "documented",
+        "label": "tested",
         "sourceIds": [
           "s1"
-        ]
+        ],
+        "testNote": "Observed in a signed-in walkthrough on 2026-10-29: Not signed in: 'Welcome to the Developer Portal' offered Create Account and Log In. The owner signed in; a skippable onboarding survey followed. Any sign-in prompts were not seen by the agent.",
+        "observationRef": "dc-1"
       }
     },
     {
@@ -332,17 +422,20 @@
       "estimate": "15-45 minutes",
       "detail": "Create the application in the Developer Portal and retrieve the client ID and client secret. A community report says one OAuth failure came from using the public key instead of the application secret.",
       "requires": [
-        "config_check"
+        "config_check",
+        "legal_acceptance"
       ],
-      "actor": "agent",
+      "actor": "you",
       "agentPrep": "Prepare a secrets-storage plan and a checklist that distinguishes the public key from the client secret.",
-      "observed": false,
+      "observed": true,
       "evidence": {
-        "label": "documented",
+        "label": "tested",
         "sourceIds": [
           "s1",
           "s12"
-        ]
+        ],
+        "testNote": "Observed in a signed-in walkthrough on 2026-10-29: The dialog requires ticking agreement to the Developer Terms of Service and Developer Policy before Create is enabled, so the owner ticked it and clicked Create.",
+        "observationRef": "dc-2"
       }
     },
     {
@@ -354,12 +447,14 @@
         "config_check"
       ],
       "actor": "agent",
-      "observed": false,
+      "observed": true,
       "evidence": {
-        "label": "documented",
+        "label": "tested",
         "sourceIds": [
           "s1"
-        ]
+        ],
+        "testNote": "Observed in a signed-in walkthrough on 2026-10-29: The generator lists about 25 scopes including bot. The Bot page says tokens can only be viewed once (Reset Token) and has Public Bot and OAuth2 Code Grant options. No invite link was generated.",
+        "observationRef": "dc-4"
       }
     },
     {
@@ -371,13 +466,15 @@
         "config_check"
       ],
       "actor": "agent",
-      "observed": false,
+      "observed": true,
       "evidence": {
-        "label": "documented",
+        "label": "tested",
         "sourceIds": [
           "s5",
           "s15"
-        ]
+        ],
+        "testNote": "Observed in a signed-in walkthrough on 2026-10-29: Presence, Server Members and Message Content are toggles; the page says review applies only once a bot reaches 10,000 users. They were not toggled.",
+        "observationRef": "dc-5"
       }
     },
     {
@@ -539,12 +636,14 @@
       }
     },
     {
-      "text": "A community report says the Developer Portal's display of public key and secret is confusing. A real secret is short and alphanumeric, not the long hash-like key.",
+      "text": "The General Information page shows the Application ID and a Public Key; the Client Secret is on the OAuth2 page, hidden until Reset Secret is clicked, so the two are not confusable on the page itself. (Docs said: A community report says the Developer Portal's display of public key and secret is confusing. A real secret is short and alphanumeric, not the long hash-like key.)",
       "evidence": {
-        "label": "reported",
+        "label": "tested",
         "sourceIds": [
           "s12"
-        ]
+        ],
+        "testNote": "Observed in a signed-in walkthrough on 2026-10-29; this corrects the documentation.",
+        "observationRef": "dc-3"
       }
     },
     {
@@ -614,32 +713,38 @@
         }
       },
       {
-        "text": "Step 3: Register the application and save credentials",
+        "text": "Step 3 (prep): Prepare a secrets-storage plan and a checklist that distinguishes the public key from the client secret.",
         "evidence": {
-          "label": "documented",
+          "label": "tested",
           "sourceIds": [
             "s1",
             "s12"
-          ]
+          ],
+          "testNote": "Observed in a signed-in walkthrough on 2026-10-29: The dialog requires ticking agreement to the Developer Terms of Service and Developer Policy before Create is enabled, so the owner ticked it and clicked Create.",
+          "observationRef": "dc-2"
         }
       },
       {
         "text": "Step 4: Configure the bot scope and invite link",
         "evidence": {
-          "label": "documented",
+          "label": "tested",
           "sourceIds": [
             "s1"
-          ]
+          ],
+          "testNote": "Observed in a signed-in walkthrough on 2026-10-29: The generator lists about 25 scopes including bot. The Bot page says tokens can only be viewed once (Reset Token) and has Public Bot and OAuth2 Code Grant options. No invite link was generated.",
+          "observationRef": "dc-4"
         }
       },
       {
         "text": "Step 5: Enable the Message Content intent in the Developer Portal",
         "evidence": {
-          "label": "documented",
+          "label": "tested",
           "sourceIds": [
             "s5",
             "s15"
-          ]
+          ],
+          "testNote": "Observed in a signed-in walkthrough on 2026-10-29: Presence, Server Members and Message Content are toggles; the page says review applies only once a bot reaches 10,000 users. They were not toggled.",
+          "observationRef": "dc-5"
         }
       },
       {
@@ -685,10 +790,24 @@
       {
         "text": "Step 1: Sign in with a Discord account (needs: login_or_account)",
         "evidence": {
-          "label": "documented",
+          "label": "tested",
           "sourceIds": [
             "s1"
-          ]
+          ],
+          "testNote": "Observed in a signed-in walkthrough on 2026-10-29: Not signed in: 'Welcome to the Developer Portal' offered Create Account and Log In. The owner signed in; a skippable onboarding survey followed. Any sign-in prompts were not seen by the agent.",
+          "observationRef": "dc-1"
+        }
+      },
+      {
+        "text": "Step 3: Register the application and save credentials (needs: legal_acceptance)",
+        "evidence": {
+          "label": "tested",
+          "sourceIds": [
+            "s1",
+            "s12"
+          ],
+          "testNote": "Observed in a signed-in walkthrough on 2026-10-29: The dialog requires ticking agreement to the Developer Terms of Service and Developer Policy before Create is enabled, so the owner ticked it and clicked Create.",
+          "observationRef": "dc-2"
         }
       },
       {
@@ -753,11 +872,18 @@
       "Weakly supported (self-check): Wait for Discord's review decision. The app keeps working with the requested intents and can keep joining servers during review. No source s",
       "Weakly supported (self-check): Reapply each year to keep access. After the annual notification you have 90 days to reapply. Keep your use case documentation current.",
       "Not observed: anything beyond the end of the public path (js shell unclear at https://discord.com/developers/home).",
-      "No account was used: steps after the first sign-in are inferred from documentation, not observed.",
       "Research gap (not found): rate_limits",
-      "Research gap (not found): community_reports"
+      "Research gap (not found): community_reports",
+      "Steps 2, 6, 7, 8, 9, 10, 11 were not walked through (the walkthrough stopped at before revealing a client secret or bot token: guide steps 3 to 5 were read, not completed; steps 6 to 11 were not attempted); they stay as documented, not observed.",
+      "Cleanup was incomplete after the walkthrough: a test app may still exist."
     ]
   },
+  "changelog": [
+    "2026-10-29: signed-in walkthrough merged (level L3).",
+    "2026-10-29: corrected \"A Discord account is needed to register an application in the Developer Portal a\" to \"Creating the app needs a Discord account and ticking agreement to the Developer \" after the walkthrough.",
+    "2026-10-29: corrected \"A community report says the Developer Portal's display of public key and secret \" to \"The General Information page shows the Application ID and a Public Key; the Clie\" after the walkthrough.",
+    "2026-10-29: noted that Discord's terms on automated access are ambiguous and the owner ran this walkthrough knowingly."
+  ],
   "sources": [
     {
       "id": "s1",

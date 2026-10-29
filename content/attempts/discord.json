@@ -1,0 +1,86 @@
+{
+  "performedBy": "owner_with_claude_code",
+  "date": "2026-10-29",
+  "accountType": "free",
+  "browserProfile": "separate",
+  "steps": [
+    {
+      "id": "dc-1",
+      "guideStepOrder": 1,
+      "action": "Opened the Discord Developer Portal in the project browser profile",
+      "observation": "Not signed in: 'Welcome to the Developer Portal' offered Create Account and Log In. The owner signed in; a skippable onboarding survey followed. Any sign-in prompts were not seen by the agent.",
+      "outcome": "stopped_human_required",
+      "tags": [
+        "login_or_account"
+      ]
+    },
+    {
+      "id": "dc-2",
+      "guideStepOrder": 3,
+      "action": "Clicked New Application and typed the throwaway name oauthpath-test-20261029",
+      "observation": "The dialog requires ticking agreement to the Developer Terms of Service and Developer Policy before Create is enabled, so the owner ticked it and clicked Create.",
+      "outcome": "stopped_human_required",
+      "tags": [
+        "config_check",
+        "legal_acceptance"
+      ]
+    },
+    {
+      "id": "dc-3",
+      "guideStepOrder": 3,
+      "action": "Read the General Information and OAuth2 pages of the new app",
+      "observation": "Creation was instant, with no review or verification. The Client ID and Public Key are visible; the Client Secret is hidden behind Reset Secret. Redirect URIs must match exactly.",
+      "outcome": "differs_from_docs",
+      "tags": [
+        "config_check"
+      ]
+    },
+    {
+      "id": "dc-4",
+      "guideStepOrder": 4,
+      "action": "Read the OAuth2 URL generator and the Bot page",
+      "observation": "The generator lists about 25 scopes including bot. The Bot page says tokens can only be viewed once (Reset Token) and has Public Bot and OAuth2 Code Grant options. No invite link was generated.",
+      "outcome": "completed",
+      "tags": [
+        "config_check"
+      ]
+    },
+    {
+      "id": "dc-5",
+      "guideStepOrder": 5,
+      "action": "Read the Privileged Gateway Intents section of the Bot page",
+      "observation": "Presence, Server Members and Message Content are toggles; the page says review applies only once a bot reaches 10,000 users. They were not toggled.",
+      "outcome": "completed",
+      "tags": [
+        "config_check"
+      ]
+    },
+    {
+      "id": "dc-6",
+      "action": "Cleanup: the test app was not deleted during the session",
+      "observation": "The owner chose to delete the app later. It still exists until they do; no secret or token was ever revealed, so none needs removing.",
+      "outcome": "stopped_human_required",
+      "tags": []
+    }
+  ],
+  "stoppedAt": "before revealing a client secret or bot token: guide steps 3 to 5 were read, not completed; steps 6 to 11 were not attempted",
+  "stoppedBecause": [
+    "legal_acceptance"
+  ],
+  "corrections": [
+    {
+      "docClaim": "A Discord account is needed to register an application in the Developer Portal and get a client ID and client secret.",
+      "observed": "Creating the app needs a Discord account and ticking agreement to the Developer Terms of Service and Developer Policy. The Client ID is visible at once; the Client Secret stays hidden until Reset Secret is clicked.",
+      "sourceId": "dc-3"
+    },
+    {
+      "docClaim": "A community report says the Developer Portal's display of public key and secret is confusing. A real secret is short and alphanumeric, not the long hash-like key.",
+      "observed": "The General Information page shows the Application ID and a Public Key; the Client Secret is on the OAuth2 page, hidden until Reset Secret is clicked, so the two are not confusable on the page itself.",
+      "sourceId": "dc-3"
+    }
+  ],
+  "cleanup": {
+    "appsDeleted": false,
+    "secretsRemoved": true
+  }
+}
