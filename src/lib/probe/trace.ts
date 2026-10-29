@@ -3,6 +3,7 @@ import type { Classification, FlowTrace, Step } from "@/lib/schema/guide";
 import { classify } from "./classify";
 import { extractLinks, extractTitle, type RawLink } from "./html";
 import { hostAllowed, type SafeResult } from "./safefetch";
+import { buildFacts, CATEGORY_TEXT, isModelGate, shouldRead, type Reader, type ReaderOutput } from "./reader";
 
 export type Fetcher = (url: string) => Promise<SafeResult>;
 /** Returns an index into the numbered list, or null. It can never supply a URL. */
@@ -13,6 +14,8 @@ export interface TraceOptions {
   allowHosts: string[];
   fetch: Fetcher;
   chooser?: Chooser;
+  /** Model page-reader: classifies the page and picks the next link by index. Optional; rules and the chooser are the fallback. */
+  reader?: Reader;
   maxHops?: number;
   maxSeconds?: number;
   now?: () => Date;
@@ -37,8 +40,9 @@ const POSITIVE: [RegExp, number][] = [
   [/\boauth\b|\bauthenticat|\bauthoriz/i, 1],
   [/\b(my )?apps?\b|\bintegrations?\b/i, 1],
 ];
-const NEGATIVE = /\b(pricing|blog|careers?|jobs|contact|support|status|forum|community|changelog|release notes|press|about us|cookie|privacy|terms|legal|language|english|español|français|deutsch|日本語|theme|dark mode|twitter|facebook|linkedin|youtube|github|instagram|discord|slack community)\b/i;
-const NOISE_HOST = /(twitter|x|facebook|linkedin|youtube|instagram|discord|medium|reddit)\.com$/i;
+const NEGATIVE = /\b(pricing|blog|careers?|jobs|contact|support|status|forum|community|changelog|release notes|press|about us|cookie|privacy|terms|legal|language|english|español|français|deutsch|日本語|theme|dark mode)\b/i;
+// Site names are not penalised in link text ("Sign in to GitHub" must score on GitHub), and the allow-list
+// alone decides which hosts are candidates: a provider's own domain (linkedin.com on LinkedIn) must stay eligible.
 export const MIN_RULE_SCORE = 3;
 /** Sign-in-ish links are only worth following to confirm a gate; documentation-ish links are not. */
 
@@ -68,7 +72,7 @@ export function candidates(links: RawLink[], allow: string[], visited: Set<strin
       continue;
     }
     const key = u.origin + u.pathname.replace(/\/$/, "") + u.search;
-    if (u.protocol !== "https:" || !hostAllowed(u.hostname, allow) || NOISE_HOST.test(u.hostname) || visited.has(key) || seen.has(key) || key === from) continue;
+    if (u.protocol !== "https:" || !hostAllowed(u.hostname, allow) || visited.has(key) || seen.has(key) || key === from) continue;
     if (!l.text && u.pathname === "/") continue;
     seen.add(key);
     out.push(l);
@@ -85,7 +89,7 @@ const keyOf = (u: string) => {
 /** Follow the public path hop by hop: GET only, never type, never submit, never leave the allow-list. */
 export async function traceFlow(o: TraceOptions): Promise<FlowTrace> {
   const maxHops = o.maxHops ?? (Number(process.env.PROBE_TRACE_MAX_HOPS) || 5);
-  const maxMs = (o.maxSeconds ?? (Number(process.env.PROBE_TRACE_MAX_SECONDS) || 25)) * 1000;
+  const maxMs = (o.maxSeconds ?? (Number(process.env.PROBE_TRACE_MAX_SECONDS) || (o.reader ? 50 : 25))) * 1000;
   const now = o.now ?? (() => new Date());
   const t0 = Date.now();
   const hops: FlowTrace["hops"] = [];
@@ -102,13 +106,26 @@ export async function traceFlow(o: TraceOptions): Promise<FlowTrace> {
     visited.add(keyOf(url));
     let classification: Classification;
     let title: string | undefined;
+    let signals: string[] = [];
     if (r.blocked) classification = r.blocked.reason === "robots" ? "skipped_robots" : r.blocked.reason === "policy" ? "blocked_by_policy" : "error";
     else {
       const c = classify({ status: r.status ?? 0, finalUrl: r.finalUrl, location: r.location, headers: r.headers, body: r.body });
       classification = c.classification;
+      signals = c.signals;
       title = extractTitle(r.body);
     }
     const hop: FlowTrace["hops"][number] = { n, url: (r.finalUrl || url).split("#")[0], classification, chosenBy, ...(title ? { title } : {}), ...(via ? { viaLinkText: via } : {}) };
+    // Ask the model to read pages the code could not settle (never hard facts), with the candidate links when a next hop is possible.
+    const base = r.finalUrl || url;
+    const cands = classification === "public" && n < maxHops ? candidates(extractLinks(r.body, r.finalUrl), o.allowHosts, visited, keyOf(r.finalUrl)) : [];
+    const scored = cands.map((l) => ({ l, s: scoreLink(l) }));
+    let read: ReaderOutput | null = null;
+    const facts = o.reader && !r.blocked ? buildFacts(base, r, classification, signals) : undefined;
+    if (o.reader && facts && shouldRead(classification, facts.text.length) && Date.now() - t0 <= maxMs) {
+      const links = scored.map((x, index) => ({ index, text: x.l.text.slice(0, 80), path: pathOf(x.l.url), hint: x.s }));
+      read = await o.reader({ facts, hop: n, ...(links.length ? { links } : {}) }).catch(() => null);
+      if (read) hop.reading = read.reading;
+    }
     // A hop must be on the allow-list to be recorded as a trace hop (policy blocks are recorded with the requested URL).
     hops.push(hop);
     o.onHop?.(hop);
@@ -120,21 +137,34 @@ export async function traceFlow(o: TraceOptions): Promise<FlowTrace> {
     if (classification === "blocked_by_policy") { endedAt = "policy"; endedReason = r.blocked ? `Not fetched: ${r.blocked.detail}.` : "The page redirected outside the provider's own sites, which we do not follow."; break; }
     if (classification === "error") { endedAt = "error"; endedReason = "The request failed or timed out."; break; }
     if (classification === "not_found") { endedAt = "dead_end"; endedReason = "The next page was not found."; break; }
+
+    // The model may end the trace at a gate the code could not see. This is a reading, not an observation, and says so.
+    if (isModelGate(hop.reading)) {
+      const rd = hop.reading!;
+      endedAt = "gate";
+      endedReason = `A model reading of this page says it is a ${CATEGORY_TEXT[rd.category]} page ("${rd.quote.slice(0, 100)}"). The code did not confirm this, so it is a reading, not an observation. Everything beyond it was not observed.`;
+      break;
+    }
     if (n === maxHops) { endedAt = "depth_limit"; endedReason = `Stopped after ${maxHops} pages (hop limit).`; break; }
     if (Date.now() - t0 > maxMs) { endedAt = "depth_limit"; endedReason = "Stopped: time limit for the trace was reached."; break; }
 
-    // public page: choose the next link
-    const cands = candidates(extractLinks(r.body, r.finalUrl), o.allowHosts, visited, keyOf(r.finalUrl));
-    const scored = cands.map((l) => ({ l, s: scoreLink(l) })).sort((a, b) => b.s - a.s);
+    // public page: choose the next link. The model's choice (an index only) wins when it answered; otherwise rules, then the chooser.
     let next: RawLink | undefined;
-    if (scored[0] && scored[0].s >= MIN_RULE_SCORE) { next = scored[0].l; chosenBy = "rule"; }
-    else if (o.chooser && cands.length) {
-      const list = cands.map((l, index) => ({ index, text: l.text.slice(0, 80), path: pathOf(l.url) }));
-      const pick = await o.chooser(list).catch(() => null);
-      // The model returns an index only; anything out of range is ignored.
-      if (typeof pick === "number" && Number.isInteger(pick) && pick >= 0 && pick < cands.length) { next = cands[pick]; chosenBy = "model"; }
+    let modelSaidNone = false;
+    if (read && read.choice !== undefined) {
+      if (typeof read.choice === "number" && read.choice >= 0 && read.choice < cands.length) { next = cands[read.choice]; chosenBy = "model"; }
+      else modelSaidNone = true;
+    } else {
+      scored.sort((a, b) => b.s - a.s);
+      if (scored[0] && scored[0].s >= MIN_RULE_SCORE) { next = scored[0].l; chosenBy = "rule"; }
+      else if (o.chooser && cands.length) {
+        const list = cands.map((l, index) => ({ index, text: l.text.slice(0, 80), path: pathOf(l.url) }));
+        const pick = await o.chooser(list).catch(() => null);
+        // The model returns an index only; anything out of range is ignored.
+        if (typeof pick === "number" && Number.isInteger(pick) && pick >= 0 && pick < cands.length) { next = cands[pick]; chosenBy = "model"; }
+      }
     }
-    if (!next) { endedAt = "dead_end"; endedReason = "No link on this page clearly continues the setup."; break; }
+    if (!next) { endedAt = "dead_end"; endedReason = modelSaidNone ? `A model reading of the links found none that continues the setup${read?.choiceReason ? ` (${read.choiceReason})` : ""}.` : "No link on this page clearly continues the setup."; break; }
     url = next.url;
     via = next.text || pathOf(next.url);
   }

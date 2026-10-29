@@ -92,7 +92,8 @@ export function classify(i: ClassifyInput): Classified {
     signals.push("password_input");
     return { classification: "login_redirect", signals };
   }
-  if (loginUrl && b.forms > 0) return { classification: "login_redirect", signals };
+  // A sign-in-looking path with a form only counts when the page is short like a login page, not a long documentation page with a search box.
+  if (loginUrl && b.forms > 0 && b.textLen < 1500) return { classification: "login_redirect", signals };
 
   signals.push(`text_len:${b.textLen}`);
   if (i.status >= 200 && i.status < 300) {

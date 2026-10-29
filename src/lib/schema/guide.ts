@@ -148,6 +148,42 @@ export const Classification = z.enum([
 ]);
 export type Classification = z.infer<typeof Classification>;
 
+export const PageCategory = z.enum([
+  "public_docs",
+  "sign_in",
+  "sign_up",
+  "bot_check",
+  "verification_code",
+  "identity_or_business_verification",
+  "payment_required",
+  "terms_acceptance",
+  "app_creation_form",
+  "app_review_submission",
+  "invite_waitlist_or_sales",
+  "region_restricted",
+  "permission_denied",
+  "not_found_or_error",
+  "unreadable_page",
+  "other",
+]);
+export type PageCategory = z.infer<typeof PageCategory>;
+
+/** A model's reading of a fetched page. Interpretation only: it never counts as a "tested" observation. */
+export const PageReading = z.strictObject({
+  category: PageCategory,
+  also: z.array(PageCategory).max(2),
+  /** Required description when category is "other". */
+  other: z.string().max(120).optional(),
+  confidence: z.enum(["low", "medium", "high"]),
+  /** Words copied from the page; quoteVerified says whether our code found them in the fetched text. */
+  quote: z.string().max(160),
+  quoteVerified: z.boolean(),
+  reason: z.string().max(200),
+  /** How the reading compares with the deterministic classifier. */
+  agreement: z.enum(["agree", "disagree", "code_unclear"]),
+});
+export type PageReading = z.infer<typeof PageReading>;
+
 export const ProbeResult = z.strictObject({
   url: z.url(),
   checkedAt: z.string(),
@@ -155,6 +191,7 @@ export const ProbeResult = z.strictObject({
   finalHost: z.string().optional(),
   classification: Classification,
   signals: z.array(z.string()),
+  reading: PageReading.optional(),
 });
 export type ProbeResult = z.infer<typeof ProbeResult>;
 
@@ -169,6 +206,7 @@ export const FlowTrace = z.strictObject({
       classification: Classification,
       viaLinkText: z.string().optional(),
       chosenBy: z.enum(["start", "rule", "model"]),
+      reading: PageReading.optional(),
       matchedStepOrder: z.number().int().optional(),
     }),
   ),

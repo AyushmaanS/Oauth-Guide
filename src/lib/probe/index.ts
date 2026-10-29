@@ -4,6 +4,7 @@ import { callJson } from "@/lib/llm";
 import { classify } from "./classify";
 import { checkMetadata, metadataLocations } from "./metadata";
 import { hostAllowed, registrable, safeGet, type RobotsRules, type SafeResult } from "./safefetch";
+import { buildFacts, shouldRead, type Reader } from "./reader";
 import { ChooserOut, traceFlow, matchHopsToSteps, type Chooser, type Fetcher } from "./trace";
 import { wrapUntrusted } from "@/lib/pipeline/gather/sources";
 import { UNTRUSTED_RULE } from "@/lib/pipeline/prompts/common";
@@ -67,6 +68,8 @@ export interface ProbeArgs {
   sources: Source[];
   get: ProbeGet;
   chooser?: Chooser;
+  /** Model page-reader (classify + choose link). Interpretation only; hard facts and evidence labels stay in code. */
+  reader?: Reader;
   now: () => Date;
   emit?: (e: { type: "probe_result"; url: string; classification: string } | { type: "trace_hop"; n: number; url: string; classification: string }) => void;
   maxUrls?: number;
@@ -107,7 +110,15 @@ export async function runProbes(a: ProbeArgs): Promise<Observations> {
   const stepUrls = [...new Set(a.steps.map((s) => s.url).filter((u): u is string => !!u && u.startsWith("https://") && hostAllowed(hostOf(u), allowHosts)))].slice(0, maxUrls);
   const results = new Map<string, ProbeResult>();
   await pool(stepUrls, 5, async (u) => {
-    const pr = toProbeResult(u, await get(u), a.now());
+    const r = await get(u);
+    const pr = toProbeResult(u, r, a.now());
+    if (a.reader && !r.blocked) {
+      const facts = buildFacts(u, r, pr.classification, pr.signals);
+      if (shouldRead(pr.classification, facts.text.length)) {
+        const out = await a.reader({ facts }).catch(() => null);
+        if (out) pr.reading = out.reading;
+      }
+    }
     results.set(u, pr);
     a.emit?.({ type: "probe_result", url: u, classification: pr.classification });
   });
@@ -119,14 +130,14 @@ export async function runProbes(a: ProbeArgs): Promise<Observations> {
   const stepHops = new Map<number, number>();
   if (a.traceEnabled !== false && start) {
     try {
-      const t = await traceFlow({ startUrl: start, allowHosts, fetch: get, chooser: a.chooser, now: a.now, onHop: (h) => a.emit?.({ type: "trace_hop", n: h.n, url: h.url, classification: h.classification }) });
+      const t = await traceFlow({ startUrl: start, allowHosts, fetch: get, chooser: a.chooser, reader: a.reader, now: a.now, onHop: (h) => a.emit?.({ type: "trace_hop", n: h.n, url: h.url, classification: h.classification }) });
       const m = matchHopsToSteps(t, a.steps);
       flowTrace = m.trace;
       m.stepHops.forEach((v, k) => stepHops.set(k, v));
       const byFinal = new Map([...cache.values()].map((r) => [r.finalUrl.split("#")[0], r]));
       for (const h of t.hops) if (!results.has(h.url) && !["blocked_by_policy", "skipped_robots", "error"].includes(h.classification)) {
         const r = cache.get(h.url) ?? byFinal.get(h.url);
-        if (r) results.set(h.url, toProbeResult(h.url, r, a.now()));
+        if (r) results.set(h.url, { ...toProbeResult(h.url, r, a.now()), ...(h.reading ? { reading: h.reading } : {}) });
       }
     } catch (e) {
       warnings.push(`Flow trace failed: ${(e as Error).message}`);

@@ -1,6 +1,7 @@
 import type { GuideShape, ProbeResult, RequirementTag } from "@/lib/schema/guide";
 import { applyOwners, deriveHandoff } from "@/lib/handoff";
 import type { Observations } from "./index";
+import { CATEGORY_TEXT, GATE_CATEGORIES } from "./reader";
 
 const CLEAR = ["public", "login_redirect", "captcha_or_bot", "forbidden", "not_found", "input_required"];
 const norm = (u: string) => u.replace(/#.*$/, "").replace(/\/$/, "");
@@ -39,6 +40,17 @@ export function applyObservations(g: GuideShape, o: Observations): GuideShape {
     if (pr.classification === "login_redirect") add("login_or_account");
     if (pr.classification === "captcha_or_bot") add("captcha_or_bot_check");
     if (pr.classification === "not_found") g.tested.unverified.push(`Step ${s.order}: the provider page we linked returned "not found" on ${date}; the link may be outdated.`);
+  }
+
+  // Model readings are interpretation, never a tested observation: they add no requirement tag and no "tested" label.
+  // A confident, quote-verified gate reading that the code did not see is stated plainly as unverified.
+  for (const p of o.probe) {
+    const r = p.reading;
+    if (!r || !r.quoteVerified || r.confidence === "low") continue;
+    if (GATE_CATEGORIES.has(r.category) && p.classification === "public")
+      g.tested.unverified.push(`A model reading of ${new URL(p.url).pathname || p.url} suggests a ${CATEGORY_TEXT[r.category]} page ("${r.quote.slice(0, 80)}"). The code classified it public, so this is a reading, not an observation.`);
+    else if (r.category === "other" && r.other)
+      g.tested.unverified.push(`A model reading of ${new URL(p.url).pathname || p.url} described the page as: ${r.other}. This fits none of our categories and is not used.`);
   }
 
   // Steps and handoff are recomputed from the (possibly extended) tags.

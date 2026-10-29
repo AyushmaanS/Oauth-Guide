@@ -1,4 +1,5 @@
 import type { Guide } from "@/lib/schema/guide";
+import { CATEGORY_TEXT } from "@/lib/probe/categories";
 
 const CLASS_TEXT: Record<string, string> = {
   public: "Public page",
@@ -13,6 +14,18 @@ const CLASS_TEXT: Record<string, string> = {
   error: "Error",
 };
 const isGate = (c: string) => ["login_redirect", "captcha_or_bot", "forbidden"].includes(c);
+const AGREE_TEXT = { agree: "agrees with the code", disagree: "differs from the code", code_unclear: "code could not tell" } as const;
+
+/** A model's reading of a page. Labelled as interpretation: it is never shown as a tested observation. */
+function Reading({ r }: { r?: NonNullable<Guide["probe"][number]["reading"]> }) {
+  if (!r) return null;
+  const what = r.category === "other" && r.other ? `other: ${r.other}` : CATEGORY_TEXT[r.category];
+  return (
+    <span className="block text-xs text-gray-700" title={r.quoteVerified ? `Quoted from the page: "${r.quote}"` : "The quoted words were not found on the page, so this reading is not relied on."}>
+      Model reading: {what} ({r.confidence}{r.quoteVerified ? "" : ", quote not found"}) · {AGREE_TEXT[r.agreement]}
+    </span>
+  );
+}
 const date = (iso: string) => iso.slice(0, 10);
 
 export function ProbeList({ probe }: { probe: Guide["probe"] }) {
@@ -25,7 +38,7 @@ export function ProbeList({ probe }: { probe: Guide["probe"] }) {
         {probe.map((p) => (
           <tr key={p.url} className="border-b border-gray-200 align-top">
             <td className="break-all py-1 pr-2">{p.url}</td>
-            <td className="pr-2">{isGate(p.classification) ? "🔒 " : ""}{CLASS_TEXT[p.classification]}</td>
+            <td className="pr-2">{isGate(p.classification) ? "🔒 " : ""}{CLASS_TEXT[p.classification]}<Reading r={p.reading} /></td>
             <td className="whitespace-nowrap">{date(p.checkedAt)}</td>
           </tr>
         ))}
@@ -45,6 +58,7 @@ export function FlowTraceView({ trace }: { trace?: Guide["flowTrace"] }) {
             <span className={`rounded border px-2 py-1 ${isGate(h.classification) ? "border-red-700 bg-red-50" : "border-gray-400"}`}>
               {isGate(h.classification) && "🔒 "}{h.title ?? new URL(h.url).pathname}
               <span className="block text-xs text-gray-700">{CLASS_TEXT[h.classification]}{h.viaLinkText ? ` · via "${h.viaLinkText}"` : ""}</span>
+              <Reading r={h.reading} />
             </span>
           </li>
         ))}

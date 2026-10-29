@@ -141,6 +141,7 @@ describe("classify (fixtures)", () => {
   it("redirect not followed to a login host", () => expect(c({ status: 302, location: "https://accounts.other.com/ServiceLogin" }).classification).toBe("login_redirect"));
   it("redirect not followed to an ordinary off-list host is blocked_by_policy, not a gate", () => expect(c({ status: 302, location: "https://www.other.com/page" }).classification).toBe("blocked_by_policy"));
   it("final URL on a login path", () => expect(c({ finalUrl: "https://example.com/login?next=/apps", body: "<form><input name=u></form>" }).classification).toBe("login_redirect"));
+  it("a long documentation page on a sign-in-looking path with a search form is not a login gate", () => { const r = c({ finalUrl: "https://developers.example.com/identity/sign-in/ios/api-access", body: `<form><input type="text" name="q"></form><p>${big.repeat(3)}</p>` }); expect(r.classification).toBe("public"); });
   it("password input", () => { const r = c({ body: `<form><input type="password"></form><p>${big}</p>` }); expect(r.classification).toBe("login_redirect"); expect(r.signals).toContain("password_input"); });
   it("Cloudflare header challenge", () => expect(c({ status: 403, headers: { "cf-mitigated": "challenge" } }).classification).toBe("captcha_or_bot"));
   it("reCAPTCHA marker on a thin page", () => expect(c({ body: '<div class="g-recaptcha"></div><p>short</p>' }).classification).toBe("captcha_or_bot"));

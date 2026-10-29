@@ -12,6 +12,7 @@ import { PIPELINE_VERSION } from "./prompts/common";
 import { InputError, resolveApp, validateInput } from "./resolve";
 import { selfCheck } from "./selfcheck";
 import { makeChooser, runProbes, type Observations } from "@/lib/probe";
+import { makeReader } from "@/lib/probe/reader";
 import { applyObservations } from "@/lib/probe/apply";
 import { assemble, synthesize } from "./synthesize";
 import type { Ctx, Deps, Gathered, Models, PipelineMode, Resolved } from "./types";
@@ -262,6 +263,7 @@ export async function runPipeline(args: RunArgs): Promise<PipelineResult> {
             sources: gathered!.sources,
             get: deps.probeGet!,
             chooser: process.env.TRACE_LLM_CHOOSER === "off" ? undefined : makeChooser(deps.llm, models.fast),
+            reader: process.env.TRACE_LLM_READER === "off" ? undefined : makeReader(deps.llm, models.fast, { appName: app.appName, goal: factors.useCase }),
             now: deps.now,
             emit: (e) => ctx.emit(e),
           }),
