@@ -30,12 +30,32 @@ export function buildQueries(app: string, mode: PipelineMode): QuerySpec[] {
   return mode === "deep" ? all : all.slice(0, 7).filter((x) => x.target !== "rate_limits");
 }
 
-/** Drop pages that are not about OAuth, and non-official pages that barely mention the app. */
+/** Composio status is computed by code from the public directory, never by the model. Adds a source when listed. */
+export async function attachComposio(app: Resolved, sources: Source[], texts: Map<string, string>, deps: Deps, warnings: string[]): Promise<Gathered["composio"]> {
+  const composio: Gathered["composio"] = { value: "unknown" };
+  const dir = await deps.composio();
+  if (dir) {
+    const v = lookupComposio(dir, app.appName);
+    if (v !== "unknown") {
+      const id = `s${sources.length + 1}`;
+      const text = `Composio's managed-auth directory lists "${app.appName}" under ${v === "yes" ? "Composio-managed OAuth available" : "Bring your own OAuth app"}.`;
+      sources.push({ id, title: "Composio: Managed OAuth apps (directory)", url: COMPOSIO_URL, publisher: "official", retrievedAt: deps.now().toISOString().slice(0, 10) });
+      texts.set(id, text);
+      composio.value = v;
+      composio.sourceId = id;
+    }
+  } else warnings.push("Composio directory could not be read; managed-OAuth status left unknown");
+  return composio;
+}
+
+const ON_TOPIC = /oauth|authoriz(e|ation)|access token|app (review|approval)|approval (process|guidelines)|verification|marketplace|(register|create|submit)[^.\n]{0,30}(app|integration|client)|developer (console|portal)/i;
+
+/** Drop pages that are not about registering or approving apps, and non-official pages that barely mention the app. */
 export function isRelevant(text: string, appName: string, publisher: Source["publisher"]): boolean {
-  if (!/oauth|authoriz|access token/i.test(text)) return false;
+  if (!ON_TOPIC.test(text)) return false;
   if (publisher === "official") return true;
   const hits = text.toLowerCase().split(appName.toLowerCase()).length - 1;
-  return hits >= 3;
+  return hits >= 2;
 }
 
 /** Run the fixed gather: parallel searches, dedupe, extract pages, build sources with ids s1.. */
@@ -113,26 +133,14 @@ export async function fixedGather(app: Resolved, mode: PipelineMode, deps: Deps,
     ctx.emit({ type: "source_found", title: sources[sources.length - 1].title, url: c.url });
   }
 
-  // Composio status is computed by code from the public directory, never by the model.
-  const composio: Gathered["composio"] = { value: "unknown" };
-  const dir = await deps.composio();
-  if (dir) {
-    const v = lookupComposio(dir, app.appName);
-    if (v !== "unknown") {
-      const id = `s${sources.length + 1}`;
-      const text = `Composio's managed-auth directory lists "${app.appName}" under ${v === "yes" ? "Composio-managed OAuth available" : "Bring your own OAuth app"}.`;
-      sources.push({ id, title: "Composio: Managed OAuth apps (directory)", url: COMPOSIO_URL, publisher: "official", retrievedAt: deps.now().toISOString().slice(0, 10) });
-      texts.set(id, text);
-      composio.value = v;
-      composio.sourceId = id;
-    }
-  } else warnings.push("Composio directory could not be read; managed-OAuth status left unknown");
+  const composio = await attachComposio(app, sources, texts, deps, warnings);
 
   return {
     sources,
     texts,
     checklist: coverageFromTexts(sources.map((x) => ({ id: x.id, publisher: x.publisher, text: texts.get(x.id) ?? "" })), composio),
     composio,
+    method: "fixed",
     searches: queries.length,
     pageReads: pages.size,
     warnings,

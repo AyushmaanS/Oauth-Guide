@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { Guide } from "@/lib/schema/guide";
+import { getStore } from "@/lib/store";
 
 const GUIDE_DIR = path.join(process.cwd(), "content", "guides");
 const FIXTURE = path.join(process.cwd(), "src", "fixtures", "sample-guide.json");
@@ -28,4 +29,11 @@ export function getLibraryGuides(): Guide[] {
 
 export function getGuide(slug: string): Guide | undefined {
   return getLibraryGuides().find((g) => g.slug === slug);
+}
+
+/** Library first, then the live store. Returns undefined when neither has it. */
+export async function getAnyGuide(slug: string): Promise<Guide | undefined> {
+  const lib = getGuide(slug);
+  if (lib) return lib;
+  return (await getStore().get(slug).catch(() => null)) ?? undefined;
 }

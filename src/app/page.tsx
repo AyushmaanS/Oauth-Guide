@@ -1,3 +1,4 @@
+import { GenerateBox } from "@/components/GenerateBox";
 import { LibraryBrowser, type LibraryItem } from "@/components/LibraryBrowser";
 import { getLibraryGuides } from "@/lib/guides";
 
@@ -17,14 +18,7 @@ export default function Home() {
         Before you build an integration, see whether registering your own OAuth app is an hour or a month, what blocks approval,
         and what an agent can do versus what you must do. Every claim says how well it is evidenced.
       </p>
-      <form className="mt-6" aria-describedby="gen-note">
-        <label htmlFor="gen" className="block text-sm font-medium">Generate a guide for any app (name or website)</label>
-        <div className="mt-1 flex gap-2">
-          <input id="gen" disabled placeholder="Coming soon" className="w-full rounded border border-gray-400 bg-gray-100 px-3 py-2" />
-          <button type="button" disabled className="rounded bg-gray-300 px-4 py-2 text-gray-700">Generate</button>
-        </div>
-        <p id="gen-note" className="mt-1 text-xs text-gray-700">Live generation is built in a later sprint.</p>
-      </form>
+      <GenerateBox />
       <section className="mt-10" aria-labelledby="lib"><h2 id="lib" className="mb-3 text-xl font-semibold">Library</h2><LibraryBrowser items={items} /></section>
     </main>
   );

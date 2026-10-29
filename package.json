@@ -10,10 +10,13 @@
     "test": "vitest run",
     "format": "prettier --write .",
     "typecheck": "tsc --noEmit",
-    "guide": "tsx --env-file=.env.local scripts/generate-guide.ts"
+    "guide": "tsx --env-file=.env.local scripts/generate-guide.ts",
+    "prebuild": "tsx scripts/validate-content.ts",
+    "smoke": "tsx --env-file=.env.local scripts/smoke-live.ts"
   },
   "dependencies": {
     "@tavily/core": "^0.7.14",
+    "@upstash/redis": "^1.40.0",
     "next": "16.4.3",
     "openai": "^7.45.1",
     "react": "19.3.0",

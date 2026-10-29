@@ -77,3 +77,12 @@ export async function resolveApp(input: ValidInput, deps: Deps, model: string): 
     hits,
   };
 }
+
+/** Best-guess slug before resolving (for the cache check). Resolve may later pick a different canonical name. */
+export function guessSlug(input: ValidInput): string {
+  if (input.kind === "url" && input.host) {
+    const labels = input.host.replace(/^www\./, "").split(".");
+    return slugify(labels.length > 1 ? labels[labels.length - 2] : labels[0]);
+  }
+  return slugify(input.value);
+}

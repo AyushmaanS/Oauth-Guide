@@ -3,6 +3,7 @@ import { computeDifficulty } from "@/lib/rubric";
 import { validateGuide } from "@/lib/validate";
 import { extractFactors } from "./factors";
 import { fixedGather } from "./gather/fixed";
+import { agentGather } from "./gather/agent";
 import { classifyPublisher, isHttps, normalizeUrl } from "./gather/sources";
 import { PIPELINE_VERSION } from "./prompts/common";
 import { InputError, resolveApp, validateInput } from "./resolve";
@@ -15,6 +16,7 @@ export interface PipelineResult {
   /** Present when validation failed; the unvalidated draft is never shown to users. */
   errors: string[];
   warnings: string[];
+  cached?: boolean;
 }
 
 const DEFAULT_BUDGET_MS: Record<PipelineMode, number> = { fast: 120_000, deep: 20 * 60_000 };
@@ -98,6 +100,10 @@ function hitSources(app: Resolved, now: Date): Source[] {
 export interface RunArgs {
   query: string;
   mode: PipelineMode;
+  /** Gather strategy. Default: fixed (see D-012); GATHER_MODE=agent switches live mode to the bounded research agent. */
+  gather?: "agent" | "fixed";
+  /** If set, a cached complete guide for the resolved slug stops the run early. */
+  cacheLookup?: (slug: string) => Promise<Guide | null>;
   models: Models;
   deps: Deps;
   ctx?: Partial<Ctx>;
@@ -129,6 +135,11 @@ export async function runPipeline(args: RunArgs): Promise<PipelineResult> {
     return { guide: null, errors: [`Could not identify that app: ${(e as Error).message}`], warnings: softWarnings };
   }
 
+  if (app.supportsOAuth === "unclear" && app.docsUrls.length === 0) {
+    // Nothing identifiable (nonsense or an unknown name): say so instead of researching a guess.
+    return { guide: null, errors: [`We could not identify "${input.value.slice(0, 60)}" as a product with a developer OAuth programme.`], warnings: softWarnings };
+  }
+
   if (app.supportsOAuth === "no") {
     const why = `We found no evidence that ${app.appName} lets third-party developers register OAuth apps. ${app.note}`.slice(0, 300);
     const draft = minimalGuide(app, mode, model, now, why, hitSources(app, now), true);
@@ -136,12 +147,34 @@ export async function runPipeline(args: RunArgs): Promise<PipelineResult> {
     return finish(draft);
   }
 
+  if (args.cacheLookup) {
+    const hit = await args.cacheLookup(app.slug).catch(() => null);
+    if (hit) {
+      ctx.emit({ type: "complete", slug: hit.slug });
+      return { guide: hit, errors: [], warnings: ["Served from cache"], cached: true };
+    }
+  }
+
   let gathered: Gathered | null = null;
+  // Default is the fixed gather: the Sprint 4 comparison (docs/DECISIONS.md D-012) found the agent no better. GATHER_MODE=agent opts in.
+  const strategy = args.gather ?? (process.env.GATHER_MODE === "agent" ? "agent" : "fixed");
   try {
-    gathered = await stage("gather", "Researching official docs and community reports", () => fixedGather(app, mode, deps, ctx));
+    gathered = await stage("gather", strategy === "agent" ? "Research agent investigating" : "Researching official docs and community reports", async () => {
+      if (strategy === "fixed") return fixedGather(app, mode, deps, ctx);
+      try {
+        return await agentGather(app, deps, ctx, models.fast);
+      } catch (e) {
+        softWarnings.push(`Research agent failed (${(e as Error).message}); used the fixed search instead`);
+        ctx.emit({ type: "warning", message: "The research agent stopped early; switching to the fixed search" });
+        const g = await fixedGather(app, mode, deps, ctx);
+        g.method = "fixed_fallback";
+        return g;
+      }
+    });
   } catch (e) {
     softWarnings.push(`Research stage failed: ${(e as Error).message}`);
   }
+  ctx.emit({ type: "checklist", items: gathered?.checklist.filter((c) => c.item !== "composio_status").map((c) => ({ item: c.item, status: c.status })) ?? [] });
   // The Composio directory alone is not enough to write a guide: we need pages from the provider side.
   if (!gathered || gathered.sources.filter((s) => s.id !== gathered!.composio.sourceId).length === 0) {
     const draft = minimalGuide(app, mode, model, now, `We could not read enough sources to write a guide for ${app.appName}.`, hitSources(app, now), false);

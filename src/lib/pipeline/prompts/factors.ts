@@ -22,7 +22,7 @@ First choose "useCase": the single use case an AI-agent builder most likely has 
 Return ONE JSON object only with keys: useCase, factors, claims.
 "factors" keys and allowed values:
 - registrationFriction: "instant" | "account_needed" | "paid_or_business_account" | "unknown"  (ONLY about creating the app and getting credentials. "paid_or_business_account" only if a paid plan or business account is needed just to register; needing a legal entity for REVIEW goes in businessEntityRequired instead)
-- reviewRequired: "none" | "for_public_use" | "for_sensitive_scopes" | "always" | "unknown"  (is provider review required for the use case? An optional marketplace listing does NOT count as required)
+- reviewRequired: "none" | "for_public_use" | "for_sensitive_scopes" | "always" | "unknown"  (is provider review required for the use case? If the sources say apps used by OTHER customers/accounts/workspaces must be listed, approved or verified, that is "for_public_use". An optional marketplace listing for extra visibility does NOT count as required)
 - reviewDepth: "none" | "automated" | "manual" | "security_assessment" | "partnership_contract" | "unknown"
 - docsQuality: "clear" | "partial" | "poor"
 - waitBasis: "documented" | "reported" | "unknown"  (how well the review wait is evidenced)

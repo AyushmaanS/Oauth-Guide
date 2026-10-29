@@ -98,3 +98,28 @@ Known weaknesses (to address in Sprint 4/6):
 - Step links are dropped unless they match a fetched source URL, so many steps have no link.
 - Draft guides in `content/guides/` are **L1, unverified**; do not deploy them as "verified" library guides before Sprint 6.
 - Composio's own directory is treated as "official" so Composio-status can be Documented; the prompts restrict it to that statement only.
+
+## D-012 Sprint 4: live generation, research agent, and the agent-vs-fixed comparison
+Built: `/api/generate` (SSE), progress panel and generate box, fs + Redis stores, rate limit and daily cap, the bounded research agent (`gather/agent.ts`, 14 unit tests incl. prompt-injection fixture), `scripts/smoke-live.ts`.
+
+**Store choice (answers PRD open question 4):** Upstash Redis via the Vercel Marketplace (`@upstash/redis`). One service gives both guide storage and atomic counters for the rate limit and daily cap (serverless has no shared memory, so in-memory counters would not hold). Blob would have needed a second mechanism for counters. The Redis adapter is covered by unit tests with a fake client only; it has **not** been run against a real Upstash store (Sprint 7). Env var names differ by how the store is added (`UPSTASH_REDIS_REST_*` or `KV_REST_API_*`); both accepted. [VERIFY on Vercel]
+
+**Agent vs fixed comparison** (5 apps: Zoom, Dropbox, HubSpot, Spotify, Atlassian; fast mode, same models, one run each):
+
+| | agent | fixed |
+|---|---|---|
+| avg seconds | 79 | 66 |
+| avg sources used | 4.8 | 5.2 |
+| avg official sources | 4.0 | 3.8 |
+| avg checklist items covered (of 8) | 5.2 | 4.8 |
+| avg claims unverified (steps+requirements+scopes) | 5.8 | 3.8 |
+| avg LLM calls | 10.6 | 4.8 |
+| labels computed | Dropbox unknown, Zoom moderate, HubSpot moderate, Spotify unknown, Atlassian hard | Dropbox moderate, HubSpot unknown, Spotify unknown, Zoom moderate, Atlassian hard |
+
+Reading: the agent found marginally more official sources and coverage, but was slower, used twice the model calls, and its guides had more unverified claims. One run per app means differences of this size are inside run-to-run noise (labels flipped between runs for both strategies). **Decision (per the sprint-plan rule "keep the agent only if at least as good"): live mode defaults to the fixed gather.** The agent stays built, tested and selectable with `GATHER_MODE=agent`; the README must say this plainly. Cut-order item 1 is therefore already applied. Owner can overrule: it trades the visible "agent investigating" demo moment against measured quality; the progress panel still shows stages, sources and checklist with the fixed gather.
+
+**Agent issues found while building it:** (a) the `UNREAD RESULTS` and `SOURCES SO FAR` lists were not wrapped as untrusted (caught by the injection test; fixed); (b) the relevance filter required the word "oauth", which discarded valid Marketplace/approval pages and community threads on approval times (Atlassian read 1 page in 8 actions); relaxed to a topic-keyword check.
+
+**Smoke results (default = fixed gather, fast mode, 10 inputs, concurrency 3):** 7 of 8 unfamiliar apps passed the coherence bar (guide complete, ≥3 sources with ≥1 official, ≥3 steps, ≤150 s); average 55 s, max 77 s. The one failure (Zoom) was the model emitting `"minDays": undefined` (invalid JSON); `extractJson` now treats `undefined` as absent and Zoom re-run passes. Craigslist (no developer OAuth) returned a short "no evidence" guide; the nonsense string produced an incomplete guide with irrelevant sources, which was wrong: unidentifiable input now stops after the resolve step with an error and no research.
+**Labels are often "unknown"** for unfamiliar apps (6 of 8 in the final run): the sources the fast run reads often do not state review depth or wait, and the rubric refuses to guess. That is the honest outcome but a weak demo; Sprint 5's probes and metadata may help, and the factor prompt now tells the model that "other customers must be approved or listed" means `for_public_use`.
+Not yet done: browser check of the progress panel (the Browser pane was not displayed during the session; the SSE stream itself was verified with curl on a real app (Box) and the stored guide rendered at `/guide/box`).

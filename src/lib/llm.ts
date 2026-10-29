@@ -49,14 +49,30 @@ export function openAiClient(): LlmClient {
 /** Parse model text as JSON, tolerating code fences or surrounding prose. */
 export function extractJson(text: string): unknown {
   const t = text.trim().replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/, "");
+  const attempt = (s: string): unknown => {
+    try {
+      return JSON.parse(s);
+    } catch {
+      // Models sometimes emit JavaScript-isms such as `"x": undefined`; treat as absent.
+      return prune(JSON.parse(s.replace(/:\s*undefined\b/g, ": null")));
+    }
+  };
   try {
-    return JSON.parse(t);
+    return attempt(t);
   } catch {
     const a = t.indexOf("{");
     const b = t.lastIndexOf("}");
-    if (a >= 0 && b > a) return JSON.parse(t.slice(a, b + 1));
+    if (a >= 0 && b > a) return attempt(t.slice(a, b + 1));
     throw new Error("not valid JSON");
   }
+}
+
+/** Remove null-valued keys (our schemas use optional fields, never null). */
+function prune(v: unknown): unknown {
+  if (Array.isArray(v)) return v.map(prune);
+  if (v && typeof v === "object")
+    return Object.fromEntries(Object.entries(v as Record<string, unknown>).filter(([, x]) => x !== null).map(([k, x]) => [k, prune(x)]));
+  return v;
 }
 
 export interface JsonCallArgs<T> {

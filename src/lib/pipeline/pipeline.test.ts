@@ -103,6 +103,13 @@ describe("runPipeline (mocked LLM and search)", () => {
     expect(calls).not.toContain("factors");
     expect(g.mode).toBe("live");
   });
+  it("an unidentifiable input stops after resolve with an error, no research", async () => {
+    const { deps, calls } = mocks({ resolve: { ...resolveJson, appName: "Unidentified", supportsOAuth: "unclear", docsUrls: [], note: "nonsense" } });
+    const r = await runPipeline({ query: "asdkj qwe", mode: "fast", models, deps });
+    expect(r.guide).toBeNull();
+    expect(r.errors[0]).toContain("could not identify");
+    expect(calls).not.toContain("factors");
+  });
   it("search outage after resolve: still works from the docs URLs, warns, never crashes", async () => {
     const { deps } = mocks({ failSearch: true });
     // resolve also searches, so let it through once by making only later searches fail
@@ -181,6 +188,9 @@ describe("sources", () => {
     expect(isRelevant("a page about pull requests", "GitHub", "official")).toBe(false);
     expect(isRelevant("OAuth stuff", "GitHub", "official")).toBe(true);
     expect(isRelevant("OAuth stuff about Zoom", "GitHub", "community")).toBe(false);
+    expect(isRelevant("How long does Atlassian take for app approval? Atlassian reviewed ours in weeks.", "Atlassian", "community")).toBe(true);
+    expect(isRelevant("Marketplace approval guidelines for partners", "Atlassian", "official")).toBe(true);
+    expect(isRelevant("Our football club won the finals; Atlassian sponsored it twice, Atlassian again.", "Atlassian", "third_party")).toBe(false);
   });
   it("builds more queries for deep than fast", () => expect(buildQueries("X", "deep").length).toBeGreaterThan(buildQueries("X", "fast").length));
 });
@@ -206,5 +216,6 @@ describe("callJson", () => {
     await expect(callJson({ llm: { complete }, model: "m", system: "s", user: "u", schema: z.object({ a: z.number() }) })).rejects.toThrow();
     expect(complete).toHaveBeenCalledTimes(2);
   });
+  it("extractJson treats undefined values as absent", () => expect(extractJson('{"a":1,"b":undefined,"c":{"d":undefined}}')).toEqual({ a: 1, c: {} }));
   it("extractJson tolerates surrounding prose", () => expect(extractJson('Sure! {"a":1} done')).toEqual({ a: 1 }));
 });
