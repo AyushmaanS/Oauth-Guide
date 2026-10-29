@@ -45,7 +45,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ q
         <div className="mx-auto max-w-6xl px-4 pb-16 pt-14 sm:pt-20">
           <p className="eyebrow flex items-center gap-2"><Icon name="pin" className="h-3.5 w-3.5" /> A field guide to OAuth approval</p>
           <h1 className="display mt-4 max-w-3xl text-4xl sm:text-5xl">
-            How hard is it, <span className="text-accent">really</span>, to get OAuth credentials for this app?
+            How hard is OAuth for this app, <span className="text-accent">really</span>?
           </h1>
           <p className="mt-6 max-w-2xl text-lg leading-relaxed text-ink-2">
             Before you build an integration, see whether registering your own OAuth app is an hour or a month, what blocks approval,
