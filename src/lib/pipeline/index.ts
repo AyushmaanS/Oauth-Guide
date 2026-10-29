@@ -1,7 +1,7 @@
 import { Guide, type GuideShape, type Source } from "@/lib/schema/guide";
 import { computeDifficulty } from "@/lib/rubric";
 import { validateGuide } from "@/lib/validate";
-import { extractFactors } from "./factors";
+import { extractFactors, refineFactors } from "./factors";
 import { fixedGather } from "./gather/fixed";
 import { agentGather } from "./gather/agent";
 import { followupGather } from "./gather/followup";
@@ -11,6 +11,8 @@ import { classifyPublisher, isHttps, normalizeUrl } from "./gather/sources";
 import { PIPELINE_VERSION } from "./prompts/common";
 import { InputError, resolveApp, validateInput } from "./resolve";
 import { selfCheck } from "./selfcheck";
+import { makeChooser, runProbes, type Observations } from "@/lib/probe";
+import { applyObservations } from "@/lib/probe/apply";
 import { assemble, synthesize } from "./synthesize";
 import type { Ctx, Deps, Gathered, Models, PipelineMode, Resolved } from "./types";
 
@@ -128,6 +130,7 @@ export async function runPipeline(args: RunArgs): Promise<PipelineResult> {
     ctx.emit({ type: "stage_done", stage: name });
     return r;
   };
+  let allowForValidate: string[] | undefined;
   const model = mode === "deep" ? models.deep : models.fast;
   const now = deps.now();
 
@@ -201,10 +204,12 @@ export async function runPipeline(args: RunArgs): Promise<PipelineResult> {
   const unknownAfterFirst = unknownFactorKeys(factors.factors);
   if (unknownAfterFirst.length && !expired() && !late(80) && gathered.sources.length) {
     try {
+      const before = gathered.sources.length;
       const added = await stage("followup", "Asking follow-up questions about what is still unknown", () => followupGather(app, unknownAfterFirst, gathered!, deps, ctx));
       if (added > 0 && !expired() && !late(100)) {
-        const again = await stage("factors2", "Re-checking the difficulty factors with the new sources", () => extractFactors(app, gathered!, deps, model));
-        factors = { ...again, useCase: factors.useCase || again.useCase };
+        const newIds = new Set(gathered.sources.slice(before).map((s) => s.id));
+        const prior = factors;
+        factors = await stage("factors2", "Re-checking the difficulty factors with the new sources", () => refineFactors(app, prior, gathered!, newIds, deps, model));
       }
     } catch (e) {
       softWarnings.push(`Follow-up research did not complete: ${(e as Error).message}`);
@@ -235,20 +240,47 @@ export async function runPipeline(args: RunArgs): Promise<PipelineResult> {
     return finish(g);
   }
 
-  if (mode === "deep" || (!expired() && !late(110))) {
-    try {
-      const r = await stage("selfcheck", "Challenging unsupported claims", () => selfCheck(draft, gathered!, deps, model));
-      if (r.downgraded || r.weak) draft.warnings.push(`Self-check: ${r.downgraded} claim(s) downgraded, ${r.weak} flagged as weak`);
-    } catch (e) {
-      draft.warnings.push(`Self-check did not run: ${(e as Error).message}`);
-    }
-  } else draft.warnings.push("Self-check skipped: time budget used up");
+  // Self-check (model) and the read-only probes run side by side: they touch different parts of the draft.
+  const selfP = (async () => {
+    if (mode === "deep" || (!expired() && !late(110))) {
+      try {
+        const r = await stage("selfcheck", "Challenging unsupported claims", () => selfCheck(draft, gathered!, deps, model, mode === "fast" ? { maxClaims: 30, perSourceChars: 2000 } : undefined));
+        if (r.downgraded || r.weak) draft.warnings.push(`Self-check: ${r.downgraded} claim(s) downgraded, ${r.weak} flagged as weak`);
+      } catch (e) {
+        draft.warnings.push(`Self-check did not run: ${(e as Error).message}`);
+      }
+    } else draft.warnings.push("Self-check skipped: time budget used up");
+  })();
+  const probeP: Promise<Observations | null> =
+    deps.probeGet && !expired()
+      ? stage("probe", "Probing the provider's pages and tracing the public path", () =>
+          runProbes({
+            steps: draft.steps,
+            docsUrls: app.docsUrls,
+            providerSite: app.providerSite,
+            providerDomains: app.providerDomains,
+            sources: gathered!.sources,
+            get: deps.probeGet!,
+            chooser: process.env.TRACE_LLM_CHOOSER === "off" ? undefined : makeChooser(deps.llm, models.fast),
+            now: deps.now,
+            emit: (e) => ctx.emit(e),
+          }),
+        ).catch((e) => {
+          draft.warnings.push(`Probes did not run: ${(e as Error).message}`);
+          return null;
+        })
+      : Promise.resolve(null);
+  const [, obs] = await Promise.all([selfP, probeP]);
+  if (obs) {
+    applyObservations(draft, obs);
+    allowForValidate = obs.allowHosts;
+  }
 
   return finish(draft);
 
   function finish(d: GuideShape): PipelineResult {
     ctx.emit({ type: "stage_start", stage: "validate", label: "Validating and saving" });
-    const r = validateGuide(d);
+    const r = validateGuide(d, { allowedHosts: allowForValidate });
     ctx.emit({ type: "stage_done", stage: "validate" });
     if (r.guide) ctx.emit({ type: "complete", slug: r.guide.slug });
     return { guide: r.guide, errors: r.errors, warnings: r.warnings };

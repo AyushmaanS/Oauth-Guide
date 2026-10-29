@@ -15,34 +15,46 @@ const SRange = z.object({
   evidence: Ev,
 });
 
-export const SynthOut = z.object({
+/** Keep the well-formed items of a list and drop malformed ones, so one bad item cannot fail the whole guide. */
+const lenient = <T extends z.ZodTypeAny>(item: T, max: number) =>
+  z
+    .array(z.unknown())
+    .default([])
+    .transform((list) => list.flatMap((x) => { const r = item.safeParse(x); return r.success ? [r.data as z.output<T>] : []; }).slice(0, max));
+
+const Step = z.object({
+  title: z.string().min(3).max(140),
+  estimate: z.string().max(60),
+  detail: z.string().max(500),
+  url: z.string().optional(),
+  requires: z.array(RequirementTag).min(1),
+  agentPrep: z.string().max(250).optional(),
+  evidence: Ev,
+});
+const Blocker = z.object({ problem: z.string().max(250), fix: z.string().max(350), contact: z.string().max(200).optional(), evidence: Ev });
+
+/** `strict` is the shape shown to the model (JSON schema); the lenient variant is what we parse with. */
+const build = (strict: boolean) => {
+  const L = <T extends z.ZodTypeAny>(item: T, max: number) => (strict ? z.array(item).max(max) : lenient(item, max));
+  return z.object({
   summary: z.string().min(10).max(300),
   biggestLaunchRisk: z.string().min(5).max(300),
   timeToCredentials: SRange,
   timeToProduction: z.union([SRange, z.object({ none: z.literal(true), evidence: Ev })]),
   humanEffortHours: SRange,
-  managedCovers: z.array(SClaim).max(6),
-  youNeedOwnWhen: z.array(SClaim).max(8),
-  requirements: z.array(SClaim).max(14),
-  steps: z
-    .array(
-      z.object({
-        title: z.string().min(3).max(140),
-        estimate: z.string().max(60),
-        detail: z.string().max(500),
-        url: z.string().optional(),
-        requires: z.array(RequirementTag).min(1),
-        agentPrep: z.string().max(250).optional(),
-        evidence: Ev,
-      }),
-    )
-    .min(1)
-    .max(14),
-  scopesAndNuances: z.array(SClaim).max(12),
-  blockers: z.array(z.object({ problem: z.string().max(250), fix: z.string().max(350), contact: z.string().max(200).optional(), evidence: Ev })).max(8),
+  managedCovers: L(SClaim, 6),
+  youNeedOwnWhen: L(SClaim, 8),
+  requirements: L(SClaim, 14),
+  steps: L(Step, 14).refine((l) => l.length >= 1, "at least one valid step is required"),
+  scopesAndNuances: L(SClaim, 12),
+  blockers: L(Blocker, 8),
   unverified: z.array(z.string().max(250)).max(12),
   nextAction: z.string().min(5).max(250),
-});
+  });
+};
+export const SynthOut = build(false);
+/** Strict shape, used only to describe the expected JSON to the model. */
+export const SynthShape = build(true);
 export type SynthOut = z.infer<typeof SynthOut>;
 
 export const SYNTH_SYSTEM = `You write the body of a verdict-first guide for a developer who must register their OWN OAuth app with a provider. Use ONLY the provided sources and the provided factors. Do not decide the difficulty label or who performs a step: code does that.

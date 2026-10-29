@@ -12,6 +12,8 @@ export type PipelineEvent =
   | { type: "source_found"; title: string; url: string }
   | { type: "agent_step"; n: number; action: "search" | "read"; target: string; reason: string; question?: string }
   | { type: "checklist"; items: { item: ChecklistId; status: "pending" | "covered" | "partial" | "not_found" }[] }
+  | { type: "probe_result"; url: string; classification: string }
+  | { type: "trace_hop"; n: number; url: string; classification: string }
   | { type: "warning"; message: string }
   | { type: "complete"; slug: string };
 
@@ -27,6 +29,8 @@ export interface Deps {
   /** Returns null if the directory cannot be read (best effort). */
   composio: () => Promise<ComposioDirectory | null>;
   now: () => Date;
+  /** Read-only page fetcher for the gate probe, trace and metadata check. Omitted = probes are skipped (tests). */
+  probeGet?: (url: string, allowHosts: string[]) => Promise<import("@/lib/probe/safefetch").SafeResult>;
 }
 
 export interface Models {

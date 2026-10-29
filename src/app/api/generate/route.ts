@@ -2,6 +2,7 @@ import { z } from "zod";
 import { openAiClient } from "@/lib/llm";
 import { tavilyProvider } from "@/lib/search";
 import { fetchDirectory } from "@/lib/pipeline/composio";
+import { realProbeGet } from "@/lib/probe";
 import { runPipeline } from "@/lib/pipeline";
 import { InputError, guessSlug, validateInput } from "@/lib/pipeline/resolve";
 import { getAnyGuide, getGuide } from "@/lib/guides";
@@ -70,7 +71,7 @@ export async function POST(req: Request) {
           query: input.value,
           mode: "fast",
           models,
-          deps: { llm: openAiClient(), search: tavilyProvider(), composio: () => fetchDirectory(), now: () => new Date() },
+          deps: { llm: openAiClient(), search: tavilyProvider(), composio: () => fetchDirectory(), now: () => new Date(), probeGet: realProbeGet() },
           cacheLookup: force ? undefined : async (slug) => {
             const g = await getAnyGuide(slug);
             return g?.complete ? g : null;

@@ -24,7 +24,8 @@ export interface ValidateResult {
 const REQUIRED_CHECKLIST = ["registration", "review_process", "scopes_restrictions", "timing_evidence", "requirements"];
 const GATE_CLASSES = ["login_redirect", "captcha_or_bot", "forbidden"];
 
-const lastTwoLabels = (host: string) => host.toLowerCase().split(".").slice(-2).join(".");
+import { registrable } from "@/lib/probe/safefetch";
+const lastTwoLabels = registrable;
 const hostOf = (u: string) => {
   try {
     return new URL(u).hostname;

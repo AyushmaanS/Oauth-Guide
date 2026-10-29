@@ -150,3 +150,20 @@ Problem: unfamiliar apps came out "Unknown" (6 of 8 in D-012) with no insight fo
 - Runs take longer: about 100-150 s with 3 runs in parallel (earlier 55-80 s). To stay near 2 minutes the research agent budget was cut to 7 actions / 55 s, the follow-up round is skipped once the run passes 80 s, and the self-check is skipped past 110 s (it was skipped for 4 of 6 apps in the last run, so those guides carry the warning "Self-check skipped"). Deep mode has no soft limits.
 - Some "check first" questions are still loosely worded; the code only checks form.
 - Library guides were not regenerated; run `npm run guide` again in Sprint 6 so they pick up the new fields.
+
+## D-015 Sprint 5: gate probe, public flow trace, provider metadata, Attempt Kit
+Built (`src/lib/probe/`, `attemptkit.ts`, `AttemptKitPanel`): SSRF-safe GET with robots.txt and DNS pinning (the validated IP is the one connected to), conservative classifier, rule-first link choice with an optional index-only model chooser (max 4 calls), provider OAuth-metadata reader, observation merge (`apply.ts`), visitor-run Attempt Kit, and their tests (probe, trace, metadata, kit, pipeline integration with a fake fetcher; 286 tests in total).
+
+**Live results** (real network, 3 batches, 6 to 8 unfamiliar or library apps each, same code with small fixes between batches):
+- Attempt level: L2 for 5 of 6 in the last full batch; the one L1 (Atlassian) was a JavaScript page the classifier refused to guess about (and a bug that dropped such hops from the probe list, fixed afterwards).
+- Where the trace ended: reached a sign-in wall for GitHub and Gmail; a dead end (no link clearly continued the setup) for Dropbox, Spotify, Zoom, LinkedIn; `js_shell_unclear` for Atlassian; and in earlier batches hop limit while still reading documentation. Link scoring was rebalanced (console, sign-in and create-app links now outrank further documentation) which is what made GitHub and Gmail reach the wall.
+- Provider metadata: published by Zoom, Spotify and Google (after fixing a domain bug: providerDomains came back as subdomains, so `accounts.google.com` was never tried). **None of the found documents lists a registration endpoint** (dynamic client registration not listed). Not found for GitHub (404), Dropbox, Atlassian (`auth.atlassian.com` robots.txt disallows the path, so we did not fetch it), LinkedIn.
+- Probes cost little time (about 3 s); total run time is 100 to 150 s with 2 to 3 runs in parallel, so the live target of about 2 minutes is met only sometimes. Optimisations made: second factor extraction now sees only new sources (-5 s), the self-check is trimmed in live mode and runs in parallel with the probes.
+
+**Bugs found by live runs and fixed:** synthesis occasionally failed on malformed model JSON (now repaired when truncated, a third attempt, and malformed list items are dropped rather than failing the guide); allow-list and metadata hosts now use registrable domains; hops after redirects were missing from the probe list.
+
+**Honest limitations**
+- The probe only classifies the first page of a console; anything behind it is inferred (stated on every guide as "Not observed").
+- Steps marked `tested` are tested only in the narrow sense "this page was reachable or gated on that date". A "documented" step that also shows as "tested" does not mean its instructions were tested.
+- The trace often ends at a dead end on documentation sites; a hosted headless browser would not fix that (the missing piece is choosing the console link, not rendering JavaScript). One of 8 runs hit a JavaScript-only page, so a headless browser is **not** worth adding now.
+- The Attempt Kit has been unit-tested for stop rules, safety rules, allow-list, injection defense and hostile step text, but **not yet dry-run with a real agent** (Sprint 5 task 5). That needs your consent for a specific provider under the attempt protocol; to be done with you in Sprint 6.

@@ -4,7 +4,7 @@ import type { Evidence, Factors, GuideShape, Range } from "@/lib/schema/guide";
 import { applyOwners, deriveHandoff } from "@/lib/handoff";
 import { resolveDifficulty } from "@/lib/rubric";
 import type { Inferred } from "./infer";
-import { SYNTH_SYSTEM, SynthOut } from "./prompts/synthesize";
+import { SYNTH_SYSTEM, SynthOut, SynthShape } from "./prompts/synthesize";
 import { PIPELINE_VERSION, sourceBundle } from "./prompts/common";
 import { normalizeUrl } from "./gather/sources";
 import type { FactorsOut } from "./prompts/factors";
@@ -23,12 +23,13 @@ export async function synthesize(app: Resolved, f: FactorsOut, g: Gathered, deps
       est && est.checkFirst.length ? `OPEN QUESTIONS: ${JSON.stringify(est.checkFirst)}` : "",
       `CANDIDATE CLAIMS from the factor stage: ${JSON.stringify(f.claims)}`,
       `Composio managed OAuth status (computed by code): ${g.composio.value}${g.composio.sourceId ? ` (source ${g.composio.sourceId})` : ""}`,
-      `Output JSON schema:\n${JSON.stringify(z.toJSONSchema(SynthOut))}`,
+      `Output JSON schema:\n${JSON.stringify(z.toJSONSchema(SynthShape))}`,
       sourceBundle(g.sources, g.texts),
     ].join("\n\n"),
     schema: SynthOut,
     maxTokens: 8000,
     timeoutMs: 180000,
+    attempts: 3,
   });
   void known;
   return out;

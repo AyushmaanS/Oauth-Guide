@@ -7,6 +7,7 @@ import fs from "node:fs";
 import { openAiClient, type LlmClient } from "../src/lib/llm";
 import { tavilyProvider, type SearchProvider } from "../src/lib/search";
 import { fetchDirectory } from "../src/lib/pipeline/composio";
+import { realProbeGet } from "../src/lib/probe";
 import { runPipeline } from "../src/lib/pipeline";
 import { InputError } from "../src/lib/pipeline/resolve";
 
@@ -31,14 +32,14 @@ async function one(item: (typeof SET)[number]) {
   const t0 = Date.now();
   const row: Record<string, unknown> = { app: item.q, expect: item.expect, gather };
   try {
-    const r = await runPipeline({ query: item.q, mode: "fast", gather, models, deps: { llm, search, composio: () => fetchDirectory(), now: () => new Date() }, ctx: { deadline: Date.now() + 170_000, emit: () => {} } });
+    const r = await runPipeline({ query: item.q, mode: "fast", gather, models, deps: { llm, search, composio: () => fetchDirectory(), now: () => new Date(), probeGet: realProbeGet() }, ctx: { deadline: Date.now() + 170_000, emit: (e) => { if (process.env.SMOKE_TIMING && (e.type === "stage_start" || e.type === "stage_done")) console.log(`  [${((Date.now() - t0) / 1000).toFixed(0)}s] ${e.type} ${e.stage}`); } } });
     const g = r.guide;
     row.seconds = Math.round((Date.now() - t0) / 1000);
     row.llmCalls = llmCalls; row.searchCalls = searchCalls; row.extractCalls = extractCalls;
     if (!g) { row.outcome = "no guide"; row.errors = r.errors; row.pass = item.expect === "graceful"; return row; }
     const labels = [...g.steps.map((s) => s.evidence.label), ...g.requirements.map((c) => c.evidence.label), ...g.scopesAndNuances.map((c) => c.evidence.label)];
     Object.assign(row, {
-      outcome: "guide", difficulty: g.verdict.difficulty, confidence: g.verdict.difficultyConfidence, range: g.verdict.difficultyRange, inferred: g.verdict.inference?.length ?? 0, checkFirst: g.verdict.checkFirst, estimates: [g.verdict.timeToCredentials, g.verdict.timeToProduction, g.verdict.humanEffortHours].filter((r) => "estimate" in r && (r as { estimate?: boolean }).estimate).length, trace: g.research.steps, complete: g.complete, method: g.research.method, sources: g.sources.length,
+      outcome: "guide", difficulty: g.verdict.difficulty, confidence: g.verdict.difficultyConfidence, range: g.verdict.difficultyRange, inferred: g.verdict.inference?.length ?? 0, checkFirst: g.verdict.checkFirst, estimates: [g.verdict.timeToCredentials, g.verdict.timeToProduction, g.verdict.humanEffortHours].filter((r) => "estimate" in r && (r as { estimate?: boolean }).estimate).length, trace: g.research.steps, attemptLevel: g.attemptLevel, probes: g.probe.map((x) => x.classification), traceHops: g.flowTrace?.hops.map((h) => h.classification), traceEnded: g.flowTrace?.endedAt, metadata: g.providerMetadata ? { found: g.providerMetadata.found, dyn: g.providerMetadata.dynamicRegistration } : null, observedSteps: g.steps.filter((x) => x.observed).length, complete: g.complete, method: g.research.method, sources: g.sources.length,
       official: g.sources.filter((s) => s.publisher === "official").length, steps: g.steps.length,
       covered: g.research.checklist.filter((c) => c.status === "covered").length, unverifiedClaims: labels.filter((l) => l === "unverified").length, claims: labels.length,
       warnings: g.warnings.length, warningList: g.warnings.map((w) => w.slice(0, 160)), factors: g.verdict.factors, summary: g.verdict.summary.slice(0, 140),
@@ -60,7 +61,7 @@ async function main() {
     for (let it = queue.shift(); it; it = queue.shift()) {
       const row = await one(it);
       out.push(row);
-      console.log(`${row.pass ? "PASS" : "FAIL"} ${String(row.app).padEnd(16)} ${String(row.seconds).padStart(4)}s ${String(row.outcome)} ${row.difficulty ?? ""}/${row.confidence ?? "-"} inf=${row.inferred ?? "-"} src=${row.sources ?? "-"}/${row.official ?? "-"}off cov=${row.covered ?? "-"} llm=${row.llmCalls ?? "-"} ${row.method ?? ""}`);
+      console.log(`${row.pass ? "PASS" : "FAIL"} ${String(row.app).padEnd(16)} ${String(row.seconds).padStart(4)}s ${String(row.outcome)} ${row.difficulty ?? ""}/${row.confidence ?? "-"} inf=${row.inferred ?? "-"} src=${row.sources ?? "-"}/${row.official ?? "-"}off cov=${row.covered ?? "-"} llm=${row.llmCalls ?? "-"} ${row.method ?? ""} ${row.attemptLevel ?? ""} trace=${row.traceEnded ?? "-"} meta=${(row.metadata as { found?: boolean } | null)?.found ?? "-"}`);
     }
   }));
   fs.mkdirSync(".cache", { recursive: true });

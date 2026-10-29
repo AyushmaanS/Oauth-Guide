@@ -14,7 +14,8 @@ Code: `src/lib/pipeline/`. CLI: `npm run guide -- "GitHub"` writes `content/guid
 | 5 | Difficulty label | D | `rubric.ts` |
 | 6 | Synthesize guide body, with requirement tags per step | L1 (+1 repair retry) | `synthesize.ts` |
 | 6b | Assemble: step links must equal a fetched source URL; unsourced ranges lose their numbers; actors and handoff computed | D | `synthesize.ts` (`assemble`) |
-| 7 | Probe, flow trace, metadata | **not built yet** (Sprint 5) | |
+| 7 | Gate probe, public flow trace, provider metadata | D (read-only GET via `safefetch`) + optional L1 link chooser (index only, max 4 calls); runs in parallel with the self-check | `src/lib/probe/` |
+| 7b | Merge observations: tested evidence scoped to what was seen, `login_or_account` added at observed gates, attempt level L1→L2 | D | `probe/apply.ts` |
 | 8 | Handoff mapping | D | `handoff.ts` |
 | 9 | Self-check | L1 reviewer returns verdicts only; code applies downgrades | `selfcheck.ts` |
 | 10 | Validate and persist | D | `validate.ts`, CLI |
@@ -31,3 +32,8 @@ Safety properties in code (tested with mocked model and search):
 - Difficulty, step owners and the handoff table are recomputed in code; model values are overwritten.
 - Source publisher is classified by code (provider-run forums, issue threads and discussions count as community, not official).
 - A stage failure degrades to a labelled incomplete guide instead of throwing.
+
+## Added in Sprints 4-5
+- Live mode: bounded research agent (default for live, owner decision D-013) with specific-question enforcement; follow-up round; best/worst-case bounds; labelled inference (D-014).
+- Probes (Sprint 5): safe fetch rules (https only, allow-list = provider registrable domains and official source domains, never Composio; DNS validated per hop and pinned; max 3 redirects, never followed off the allow-list; GET only; no cookies; 200 KB cap; robots.txt respected). Classifier is conservative: JavaScript shells are `js_shell_unclear`, never a guessed gate.
+- Attempt Kit: `attemptkit.ts` builds a visitor-run prompt from validated guide data only.

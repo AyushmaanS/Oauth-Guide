@@ -7,6 +7,7 @@ import path from "node:path";
 import { openAiClient } from "../src/lib/llm";
 import { tavilyProvider } from "../src/lib/search";
 import { fetchDirectory } from "../src/lib/pipeline/composio";
+import { realProbeGet } from "../src/lib/probe";
 import { runPipeline } from "../src/lib/pipeline";
 import { InputError } from "../src/lib/pipeline/resolve";
 
@@ -24,7 +25,7 @@ async function main() {
       query,
       mode: "deep",
       models,
-      deps: { llm: openAiClient(), search: tavilyProvider(), composio: () => fetchDirectory(), now: () => new Date() },
+      deps: { llm: openAiClient(), search: tavilyProvider(), composio: () => fetchDirectory(), now: () => new Date(), probeGet: realProbeGet() },
       ctx: {
         emit: (e) => {
           if (e.type === "stage_start") console.log(`→ ${e.label}...`);

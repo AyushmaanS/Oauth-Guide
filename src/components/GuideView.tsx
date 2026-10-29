@@ -1,6 +1,8 @@
 import type { ReactNode } from "react";
 import type { Guide } from "@/lib/schema/guide";
 import { guideToMarkdown } from "@/lib/markdown";
+import { buildAttemptKit } from "@/lib/attemptkit";
+import { AttemptKitPanel } from "./AttemptKitPanel";
 import { AttemptLevelBadge } from "./badges";
 import { ClaimList } from "./Claims";
 import { HandoffTable } from "./HandoffTable";
@@ -101,6 +103,7 @@ export function GuideView({ guide }: { guide: Guide }) {
 
       <Section id="sources" title="Sources"><SourceList sources={guide.sources} /></Section>
       <Section id="next" title="Do this next"><p className="text-lg">{guide.nextAction}</p></Section>
+      <Section id="kit" title="Go further"><AttemptKitPanel kit={buildAttemptKit(guide)} appName={guide.appName} /></Section>
     </article>
   );
 }
