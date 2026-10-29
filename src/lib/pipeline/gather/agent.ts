@@ -28,6 +28,8 @@ const SEEDS = (app: string): { q: string; target: QuestionId }[] => [
 ];
 
 export class AgentFailure extends Error {}
+const MAX_INVALID_STREAK = 3;
+const MAX_INVALID_TOTAL = 6;
 
 /**
  * Bounded research agent (spec 6.5). The model proposes JSON actions; this code validates every one
@@ -48,6 +50,7 @@ export async function agentGather(app: Resolved, deps: Deps, ctx: Ctx, model: st
   let reads = 0;
   let searches = 0;
   let invalidStreak = 0;
+  let invalidTotal = 0;
   let last = "(none yet)";
   let n = 0;
 
@@ -144,7 +147,12 @@ export async function agentGather(app: Resolved, deps: Deps, ctx: Ctx, model: st
 
   let invalidMsg = "";
   while (!overBudget() && !required()) {
-    if (invalidStreak >= 2) throw new AgentFailure("two consecutive invalid model outputs");
+    if (invalidStreak >= MAX_INVALID_STREAK || invalidTotal >= MAX_INVALID_TOTAL) {
+      // Keep whatever pages the agent already read; only give up entirely when it found nothing usable.
+      if (sources.length === 0) throw new AgentFailure("repeated invalid model outputs and no usable pages");
+      warnings.push("The research agent's replies could not be read several times in a row; it stopped early and kept the pages it had already read");
+      break;
+    }
     let turn: AgentTurn;
     try {
       turn = await callJson({
@@ -155,16 +163,16 @@ export async function agentGather(app: Resolved, deps: Deps, ctx: Ctx, model: st
         schema: AgentTurn,
         maxTokens: 700,
         timeoutMs: 30000,
-        repair: false,
+        attempts: 2, // one repair try: the model is told what was wrong with its reply
       });
       invalidStreak = 0;
       invalidMsg = "";
     } catch (e) {
       invalidStreak++;
+      invalidTotal++;
       invalidMsg = (e as Error).message.slice(0, 200);
       if (process.env.AGENT_DEBUG) console.error(`[agent] invalid turn ${invalidStreak}: ${invalidMsg}`);
-      actions++; // a wasted action
-      continue;
+      continue; // an unreadable reply costs time, not an action from the budget
     }
     applyCoverage(turn.coverage);
     if (turn.action === "finish") break;

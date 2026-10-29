@@ -8,13 +8,71 @@ const Coverage = z.array(
 const Targets = z.array(ChecklistId).min(1).max(3);
 const LookingFor = z.string().min(12).max(160);
 
+// ---- tolerant reading of the model's turn --------------------------------------------------------------
+// Models often slip on small things: they omit "targets", use a near-miss id ("timing", "approval"), or pass a single string.
+// Our code understands those slips; it still validates everything that matters (URLs, budgets, query quality) afterwards.
+const IDS = ChecklistId.options as readonly string[];
+const ALIAS: Record<string, string> = {
+  timing: "timing_evidence", time: "timing_evidence", timeline: "timing_evidence", wait: "timing_evidence", turnaround: "timing_evidence",
+  review: "review_process", approval: "review_process", approvals: "review_process", verification: "review_process", process: "review_process",
+  scopes: "scopes_restrictions", scope: "scopes_restrictions", restrictions: "scopes_restrictions", limits: "scopes_restrictions",
+  register: "registration", signup: "registration", creation: "registration", setup: "registration",
+  requirement: "requirements", eligibility: "requirements",
+  ratelimits: "rate_limits", rate: "rate_limits", quota: "rate_limits", quotas: "rate_limits",
+  community: "community_reports", forum: "community_reports", reports: "community_reports",
+  composio: "composio_status",
+};
+const KEYWORDS: [RegExp, string][] = [
+  [/\b(how many|business days|weeks|turnaround|wait|timeline|how long)\b/i, "timing_evidence"],
+  [/\b(review|approval|approve|verification|verify|audit|assessment)\b/i, "review_process"],
+  [/\b(scope|permission|restrict)/i, "scopes_restrictions"],
+  [/\b(register|create an? app|sign ?up|dashboard|console)\b/i, "registration"],
+  [/\b(requirement|company|legal entity|business (entity|account|registration)|eligib|account type)/i, "requirements"],
+  [/\b(rate limit|quota|throttl)/i, "rate_limits"],
+  [/\b(forum|community|reddit|stack ?overflow|developers? report)/i, "community_reports"],
+];
+const asId = (v: unknown): string | null => {
+  if (typeof v !== "string") return null;
+  const k = v.trim().toLowerCase().replace(/[\s-]+/g, "_");
+  return IDS.includes(k) ? k : (ALIAS[k.replace(/_/g, "")] ?? ALIAS[k] ?? null);
+};
+
+/** Exported for tests. Turns small format slips into a valid turn; leaves anything it cannot understand untouched so validation rejects it. */
+export function normalizeTurn(raw: unknown): unknown {
+  if (!raw || typeof raw !== "object") return raw;
+  const t = { ...(raw as Record<string, unknown>) };
+  if (Array.isArray(t.coverage)) {
+    t.coverage = t.coverage
+      .map((c) => (c && typeof c === "object" ? { ...(c as Record<string, unknown>), item: asId((c as Record<string, unknown>).item) ?? (c as Record<string, unknown>).item } : c))
+      .filter((c) => c && typeof c === "object" && IDS.includes(String((c as Record<string, unknown>).item)) && ["covered", "partial", "not_found"].includes(String((c as Record<string, unknown>).status)));
+  }
+  if (t.action === "search" || t.action === "read") {
+    if (typeof t.query === "string" && t.query.length > 120) t.query = t.query.slice(0, 120);
+    if (typeof t.lookingFor === "string" && t.lookingFor.length > 160) t.lookingFor = t.lookingFor.slice(0, 160);
+    // An explicit empty list means "no question": that stays invalid. A missing or unrecognised list is a slip we repair.
+    const explicitEmpty = Array.isArray(t.targets) && t.targets.length === 0;
+    if (!explicitEmpty) {
+      const given = [t.targets, t.target].flatMap((v) => (Array.isArray(v) ? v : v === undefined ? [] : [v]));
+      let ids = [...new Set(given.map(asId).filter((x): x is string => !!x))];
+      if (ids.length === 0) {
+        const text = `${typeof t.lookingFor === "string" ? t.lookingFor : ""} ${typeof t.query === "string" ? t.query : ""}`;
+        ids = KEYWORDS.filter(([re]) => re.test(text)).map(([, id]) => id);
+      }
+      if (ids.length > 0) t.targets = ids.slice(0, 3);
+      delete t.target;
+    }
+  }
+  return t;
+}
+
 /** One JSON action per turn. Our code validates and executes it; the model never runs anything (spec 6.5). */
-export const AgentTurn = z.discriminatedUnion("action", [
+const AgentTurnStrict = z.discriminatedUnion("action", [
   z.object({ action: z.literal("search"), query: z.string().min(2).max(120), lookingFor: LookingFor, targets: Targets, coverage: Coverage.optional() }),
   z.object({ action: z.literal("read"), url: z.string().max(400), lookingFor: LookingFor, targets: Targets, coverage: Coverage.optional() }),
   z.object({ action: z.literal("finish"), reason: z.string().max(200), coverage: Coverage.optional() }),
 ]);
-export type AgentTurn = z.infer<typeof AgentTurn>;
+export const AgentTurn = z.preprocess(normalizeTurn, AgentTurnStrict);
+export type AgentTurn = z.infer<typeof AgentTurnStrict>;
 
 import { QUESTIONS, REQUIRED_QUESTIONS } from "../questions";
 

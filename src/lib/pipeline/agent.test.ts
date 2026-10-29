@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { agentGather, AgentFailure } from "./gather/agent";
+import { normalizeTurn } from "./prompts/agent";
 import type { Ctx, Deps, Resolved } from "./types";
 import type { LlmClient } from "@/lib/llm";
 import type { SearchProvider } from "@/lib/search";
@@ -161,5 +162,59 @@ describe("research agent", () => {
   it("keeps off-topic pages out of the sources", async () => {
     const t = setup([read(DOCS), finish], { extract: async (urls) => urls.map((u) => ({ url: u, text: "A long page about cooking pasta with no relevant words. ".repeat(10) })) });
     await expect(agentGather(app, t.deps, t.ctx, "m", budgets)).rejects.toBeInstanceOf(AgentFailure);
+  });
+
+  describe("tolerance for small format slips (Dropbox failure)", () => {
+    const noTargets = (q: string, lf = LF) => JSON.stringify({ action: "search", query: q, lookingFor: lf });
+    const FORUM = "https://forum.example.org/t/x/1";
+
+    it("understands a missing targets field from what the model says it is looking for", async () => {
+      const t = setup([noTargets("Example app review approval wait"), read(DOCS), finish]);
+      const g = await agentGather(app, t.deps, t.ctx, "m", budgets);
+      expect(t.searched).toContain("Example app review approval wait");
+      expect(g.sources.length).toBe(1);
+    });
+    it("understands a near-miss target id and drops an unknown one", async () => {
+      const t = setup([search("Example app review approval wait", ["timing", "bogus"]), read(DOCS), finish]);
+      await agentGather(app, t.deps, t.ctx, "m", budgets);
+      expect(t.searched).toContain("Example app review approval wait");
+    });
+    it("normalizeTurn: fills, maps and filters, but an explicit empty list stays invalid", () => {
+      const lf = "number of business days the review takes";
+      expect((normalizeTurn({ action: "search", query: "q q", lookingFor: lf }) as { targets: string[] }).targets).toEqual(["timing_evidence", "review_process"]);
+      expect((normalizeTurn({ action: "read", url: "https://x.y", lookingFor: lf, targets: "approval" }) as { targets: string[] }).targets).toEqual(["review_process"]);
+      expect((normalizeTurn({ action: "read", url: "https://x.y", lookingFor: lf, targets: ["scopes", "nonsense", "scopes_restrictions"] }) as { targets: string[] }).targets).toEqual(["scopes_restrictions"]);
+      expect((normalizeTurn({ action: "read", url: "https://x.y", lookingFor: lf, targets: [] }) as { targets: string[] }).targets).toEqual([]);
+      expect((normalizeTurn({ action: "read", url: "https://x.y", lookingFor: "something quite unrelated here" }) as { targets?: string[] }).targets).toBeUndefined();
+      const cov = (normalizeTurn({ action: "finish", reason: "x", coverage: [{ item: "timing", status: "covered", sourceIds: [] }, { item: "nope", status: "covered" }, { item: "registration", status: "weird" }] }) as { coverage: { item: string }[] }).coverage;
+      expect(cov.map((c) => c.item)).toEqual(["timing_evidence"]);
+    });
+    it("gets one repair try per turn, and is told what was wrong", async () => {
+      const t = setup(["garbage", read(DOCS), finish]);
+      const g = await agentGather(app, t.deps, t.ctx, "m", budgets);
+      expect(g.sources.length).toBe(1);
+      expect(t.prompts.some((p) => p.includes("rejected"))).toBe(true);
+    });
+    it("survives two bad turns in a row (three are needed to give up)", async () => {
+      const t = setup(["bad", "bad", "bad", "bad", read(DOCS), finish]);
+      const g = await agentGather(app, t.deps, t.ctx, "m", budgets);
+      expect(g.sources.length).toBe(1);
+      expect(g.method).toBe("agent");
+    });
+    it("keeps the pages already read when the replies keep failing, instead of throwing everything away", async () => {
+      const t = setup([read(DOCS), "bad"]);
+      const g = await agentGather(app, t.deps, t.ctx, "m", budgets);
+      expect(g.sources.length).toBe(1);
+      expect(g.warnings.some((w) => w.includes("stopped early"))).toBe(true);
+    });
+    it("still throws when it keeps failing and found nothing", async () => {
+      const t = setup(["bad"]);
+      await expect(agentGather(app, t.deps, t.ctx, "m", budgets)).rejects.toBeInstanceOf(AgentFailure);
+    });
+    it("an unreadable reply does not use up an action from the budget", async () => {
+      const t = setup(["bad", "bad", read(DOCS), read(FORUM, ["community_reports"]), finish]);
+      const g = await agentGather(app, t.deps, t.ctx, "m", { maxActions: 4, maxPageReads: 6, maxSeconds: 75 });
+      expect(g.sources.length).toBe(2);
+    });
   });
 });
