@@ -9,7 +9,7 @@
   "modelUsed": "anthropic/claude-sonnet-5.5",
   "complete": true,
   "attemptLevel": "L2",
-  "attemptLevelReason": "Gate probed: 6 page(s) requested read-only on 2026-10-29; public path followed for 2 page(s) (dead end). No account was used.",
+  "attemptLevelReason": "Gate probed: 6 page(s) requested read-only on 2026-10-29; public path followed for 2 page(s) (dead end). No account was used. No signed-in walkthrough was run: LinkedIn's User Agreement bans bots and other automated methods of accessing its services, and its developer portal is not clearly exempt, so the guide stays at L2 (decision D-017).",
   "probe": [
     {
       "url": "https://developer.linkedin.com",
@@ -1037,5 +1037,8 @@
     "Skipped off-topic page: https://www.linkedin.com/help/linkedin/answer/a1340522",
     "Self-check downgraded a claim to unverified: \"Create the developer app in the Developer Portal. Click Create app and enter the app name,\" (s5 is an unrelated Composio page. s2 does not describe the Create app form fields such as name, Page URL and logo.)",
     "Self-check: 1 claim(s) downgraded, 8 flagged as weak"
+  ],
+  "changelog": [
+    "2026-10-29: no walkthrough was run for LinkedIn because its User Agreement bans automated access; level stays L2."
   ]
 }
