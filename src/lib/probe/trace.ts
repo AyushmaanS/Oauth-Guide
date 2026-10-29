@@ -123,8 +123,8 @@ export async function traceFlow(o: TraceOptions): Promise<FlowTrace> {
     const facts = o.reader && !r.blocked ? buildFacts(base, r, classification, signals) : undefined;
     if (o.reader && facts && shouldRead(classification, facts.text.length) && Date.now() - t0 <= maxMs) {
       const links = scored.map((x, index) => ({ index, text: x.l.text.slice(0, 80), path: pathOf(x.l.url), hint: x.s }));
-      read = await o.reader({ facts, hop: n, ...(links.length ? { links } : {}) }).catch(() => null);
-      if (read) hop.reading = read.reading;
+      read = await o.reader({ facts, hop: n, history: hops.map((h) => `${pathOf(h.url) || h.url} (${h.reading ? CATEGORY_TEXT[h.reading.category] : h.classification})`), ...(links.length ? { links } : {}) }).catch(() => null);
+      if (read?.reading) hop.reading = read.reading;
     }
     // A hop must be on the allow-list to be recorded as a trace hop (policy blocks are recorded with the requested URL).
     hops.push(hop);
