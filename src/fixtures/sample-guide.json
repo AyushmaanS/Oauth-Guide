@@ -86,6 +86,7 @@
   },
   "verdict": {
     "difficulty": "moderate",
+    "useCase": "FAKE: an agent acting for your customers on ExampleApp",
     "difficultyReason": "FAKE FIXTURE: account needed, manual review for public use, a few special requirements, wait measured in days.",
     "timeToCredentials": {
       "minHours": 0.25,
@@ -113,6 +114,8 @@
       "reviewDepth": "manual",
       "docsQuality": "clear",
       "waitBasis": "documented",
+      "waitMagnitude": "days",
+      "businessEntityRequired": "no",
       "specialRequirements": ["privacy policy URL", "demo video"]
     }
   },
