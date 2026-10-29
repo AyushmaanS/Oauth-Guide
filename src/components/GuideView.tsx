@@ -91,7 +91,7 @@ export function GuideView({ guide }: { guide: Guide }) {
         <div className="flex min-w-0 items-start gap-4">
           <AppTile name={guide.appName} tone={guide.verdict.difficulty} size="h-14 w-14 text-3xl" />
           <div className="min-w-0">
-            <h1 className="display text-5xl leading-none sm:text-6xl">{guide.appName}</h1>
+            <h1 className="display text-3xl sm:text-4xl">{guide.appName}</h1>
             <p className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted">
               <span className="chip tone-ink">{guide.mode === "library" ? "Library · deep research" : "Live-generated"}</span>
               <span className="inline-flex items-center gap-1"><Icon name="globe" className="h-3.5 w-3.5" />{guide.providerSite}</span>

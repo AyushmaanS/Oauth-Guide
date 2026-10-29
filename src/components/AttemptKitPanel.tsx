@@ -18,7 +18,7 @@ export function AttemptKitPanel({ kit, appName }: { kit: string; appName: string
       <summary className="flex cursor-pointer items-center gap-4 p-5">
         <span className="tone-accent grid h-11 w-11 shrink-0 place-items-center rounded-xl" style={{ background: "color-mix(in srgb, var(--tone) 14%, var(--surface))", color: "var(--tone)" }}><Icon name="sparkles" className="h-5 w-5" /></span>
         <span className="min-w-0 flex-1">
-          <span className="display block text-2xl leading-tight">Upgrade this guide with your own agent</span>
+          <span className="display block text-xl">Upgrade this guide with your own agent</span>
           <span className="mt-0.5 block text-sm text-muted">A copy-paste kit that tries the setup in your own free account and stops whenever a human is needed.</span>
         </span>
         <Icon name="chevron" className="chev h-5 w-5 text-muted" />

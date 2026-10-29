@@ -19,9 +19,9 @@ function formatRangeCore(r: Range): string {
 function Stat({ icon, label, value, basis, evidence, estimate }: { icon: "clock" | "flag" | "user"; label: string; value: string; basis?: string; evidence: Range["evidence"]; estimate?: boolean }) {
   return (
     <div className="rounded-xl border border-line bg-surface-2/50 p-4">
-      <dt className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-muted"><Icon name={icon} className="h-3.5 w-3.5" />{label}</dt>
+      <dt className="flex items-center gap-2 text-xs font-medium text-muted"><Icon name={icon} className="h-3.5 w-3.5" />{label}</dt>
       <dd className="mt-1.5 flex flex-wrap items-baseline gap-x-2">
-        <span className={`display leading-none ${value === "unknown" ? "text-2xl text-muted" : "text-3xl"}`}>{value === "unknown" ? "No figure stated" : value}</span>
+        <span className={`display ${value === "unknown" ? "text-lg text-muted" : "text-2xl"}`}>{value === "unknown" ? "No figure stated" : value}</span>
         {estimate && <span className="chip chip-dashed tone-unverified">Estimate</span>}
       </dd>
       {basis && <p className="mt-2 text-xs leading-relaxed text-ink-2">{basis}</p>}
@@ -42,9 +42,9 @@ export function VerdictCard({ guide }: { guide: Guide }) {
       <div className="grid gap-8 p-5 sm:p-8 lg:grid-cols-12">
         <div className="lg:col-span-7">
           <p className="eyebrow">Verdict · {v.useCase}</p>
-          <p className="display mt-3 text-6xl leading-[0.95] sm:text-7xl tone-text">
+          <p className="display mt-3 text-5xl tone-text sm:text-6xl">
             {word}
-            {v.difficultyConfidence === "estimated" && <span className="ml-3 align-middle text-base font-sans font-semibold not-italic tracking-normal"><span className="chip chip-dashed">Our estimate</span></span>}
+            {v.difficultyConfidence === "estimated" && <span className="ml-3 align-middle text-base font-medium tracking-normal"><span className="chip chip-dashed">Our estimate</span></span>}
           </p>
           <div className="mt-5 max-w-md">
             <DifficultyScale difficulty={v.difficulty} range={v.difficultyRange} large />

@@ -73,7 +73,7 @@ export function LibraryBrowser({ items }: { items: LibraryItem[] }) {
       </ul>
       {shown.length === 0 && (
         <div className="card-flat mt-6 p-8 text-center">
-          <p className="display text-2xl">No library guide matches</p>
+          <p className="display text-xl">No library guide matches</p>
           <p className="mt-1 text-sm text-muted">Nothing in the library fits “{q}”. You can generate a live guide for it above.</p>
         </div>
       )}

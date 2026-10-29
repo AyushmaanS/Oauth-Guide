@@ -80,14 +80,14 @@ export default function About() {
     <main className="mx-auto max-w-5xl px-4 pb-10">
       <section className="contours -mx-4 border-b border-line px-4 pb-14 pt-14 sm:rounded-b-[2rem]">
         <p className="eyebrow">How it works</p>
-        <h1 className="display mt-3 max-w-3xl text-5xl leading-[1.04] sm:text-6xl">Most guides tell you what the docs say. We tell you <em className="text-accent">how we know</em>.</h1>
+        <h1 className="display mt-3 max-w-3xl text-4xl sm:text-5xl">Most guides tell you what the docs say. We tell you <span className="text-accent">how we know</span>.</h1>
         <p className="mt-5 max-w-2xl text-lg leading-relaxed text-ink-2">
           OAuthPath tells you what it really takes to get OAuth credentials for an app: how hard it is, how long it takes, who has to do each step, and what could block you.
           Every claim says how we know it. This page explains the method and, just as important, what we did not do.
         </p>
         <dl className="mt-8 grid max-w-xl grid-cols-3 gap-3">
           {[[guides.length, "library guides"], [walked, "walked through"], [logs.length, "verification logs"]].map(([n, l]) => (
-            <div key={String(l)} className="card-flat p-4"><dd className="display text-4xl">{n}</dd><dt className="text-xs text-muted">{l}</dt></div>
+            <div key={String(l)} className="card-flat p-4"><dd className="display text-3xl">{n}</dd><dt className="text-xs text-muted">{l}</dt></div>
           ))}
         </dl>
       </section>

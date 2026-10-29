@@ -138,7 +138,7 @@ export function SectionHeading({ id, eyebrow, title, children }: { id: string; e
   return (
     <header className="mb-5">
       {eyebrow && <p className="eyebrow mb-1">{eyebrow}</p>}
-      <h2 id={id} className="display text-3xl sm:text-4xl">{title}</h2>
+      <h2 id={id} className="display text-2xl sm:text-3xl">{title}</h2>
       {children && <p className="mt-2 max-w-2xl text-[0.95rem] text-ink-2">{children}</p>}
     </header>
   );

@@ -6,7 +6,7 @@ export default function NotFound() {
     <main className="contours">
       <div className="mx-auto max-w-2xl px-4 py-24">
         <p className="eyebrow flex items-center gap-2"><Icon name="pin" className="h-3.5 w-3.5" /> Off the map</p>
-        <h1 className="display mt-3 text-5xl leading-tight sm:text-6xl">We don&apos;t have that guide yet</h1>
+        <h1 className="display mt-3 text-4xl sm:text-5xl">We don&apos;t have that guide yet</h1>
         <p className="mt-4 text-lg text-ink-2">
           Library guides cover a handful of apps. For any other app you can generate a lighter guide live; it takes about two minutes.
         </p>
