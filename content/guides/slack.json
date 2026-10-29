@@ -8,8 +8,8 @@
   "pipelineVersion": "0.3.0",
   "modelUsed": "anthropic/claude-sonnet-5.5",
   "complete": true,
-  "attemptLevel": "L2",
-  "attemptLevelReason": "Gate probed: 7 page(s) requested read-only on 2026-10-29; public path followed for 2 page(s) (js shell unclear). No account was used.",
+  "attemptLevel": "L3",
+  "attemptLevelReason": "Signed-in walkthrough on 2026-10-29 (free account, separate browser profile) stopped at before adding scopes or installing: guide steps 1, 2 and 4 were read, steps 3 and 5 to 9 were not attempted, because a human is needed for: login_or_account. Slack's terms say nothing explicit about an owner driving their own developer console (ambiguous, allowed-leaning); the walkthrough used a new free workspace created for it and the owner approved it (decision D-018).",
   "probe": [
     {
       "url": "https://docs.slack.dev/tools/developer-sandboxes",
@@ -217,6 +217,91 @@
       "No registration endpoint is listed, so manual console registration is likely still needed."
     ]
   },
+  "attempt": {
+    "performedBy": "owner_with_claude_code",
+    "date": "2026-10-29",
+    "accountType": "free",
+    "browserProfile": "separate",
+    "steps": [
+      {
+        "id": "sl-1",
+        "guideStepOrder": 1,
+        "action": "Opened api.slack.com/apps in the project browser profile",
+        "observation": "The page asked to sign in to Slack. The account only listed two large community workspaces, so the owner created a new free workspace and signed in on the apps page again.",
+        "outcome": "stopped_human_required",
+        "tags": [
+          "login_or_account"
+        ]
+      },
+      {
+        "id": "sl-2",
+        "guideStepOrder": 2,
+        "action": "Clicked Create an App, chose Blank app, named it oauthpath-test-20261029, picked the new workspace and confirmed",
+        "observation": "Templates on offer: AI agent, Starter app, From a manifest, Blank app. Four steps, no terms checkbox. Slack warned the app can't be installed without scopes; Create Anyway made it instantly.",
+        "outcome": "differs_from_docs",
+        "tags": [
+          "config_check"
+        ]
+      },
+      {
+        "id": "sl-3",
+        "guideStepOrder": 2,
+        "action": "Read the OAuth & Permissions page",
+        "observation": "Install is disabled until at least one scope is added. Bot and user token scopes are listed separately. Token rotation (needs a redirect URL) and PKCE are opt-in. No scope or redirect URL was added.",
+        "outcome": "completed",
+        "tags": [
+          "config_check"
+        ]
+      },
+      {
+        "id": "sl-4",
+        "guideStepOrder": 1,
+        "action": "Read the Basic Information page without clicking Show",
+        "observation": "Credentials exist from creation, before any install: the Client ID is visible; the Client Secret and Signing Secret are masked behind Show and Regenerate. No secret was revealed.",
+        "outcome": "completed",
+        "tags": [
+          "config_check"
+        ]
+      },
+      {
+        "id": "sl-5",
+        "guideStepOrder": 4,
+        "action": "Read the Manage Distribution page",
+        "observation": "Activating public distribution first needs four steps: enable features, add OAuth redirect URLs, remove hard-coded information, use HTTPS. Activation was not attempted; no review step was shown there.",
+        "outcome": "completed",
+        "tags": [
+          "config_check"
+        ]
+      },
+      {
+        "id": "sl-6",
+        "action": "Cleanup: the test app and the new workspace were not deleted during the session",
+        "observation": "The owner chose to delete them later. The app and workspace still exist until then; no secret was ever revealed, so none needs removing.",
+        "outcome": "stopped_human_required",
+        "tags": []
+      }
+    ],
+    "stoppedAt": "before adding scopes or installing: guide steps 1, 2 and 4 were read, steps 3 and 5 to 9 were not attempted",
+    "stoppedBecause": [
+      "login_or_account"
+    ],
+    "corrections": [
+      {
+        "docClaim": "A Slack account to create the app and reach the App Management page, where the client ID is found.",
+        "observed": "A Slack account is not enough: creating an app also needs a workspace, and the apps page asks for its own sign-in. A new free workspace worked. The Client ID is visible at once; the secrets stay masked behind Show.",
+        "sourceId": "sl-4"
+      },
+      {
+        "docClaim": "An access token appears under OAuth Tokens after you install the app.",
+        "observed": "Install is disabled until a scope is added, and the Client ID and secrets exist from the moment the app is created, before any install.",
+        "sourceId": "sl-3"
+      }
+    ],
+    "cleanup": {
+      "appsDeleted": false,
+      "secretsRemoved": true
+    }
+  },
   "verdict": {
     "difficulty": "hard",
     "difficultyReason": "Required review takes weeks. This holds whatever the unknown details turn out to be.",
@@ -324,12 +409,14 @@
   },
   "requirements": [
     {
-      "text": "A Slack account to create the app and reach the App Management page, where the client ID is found.",
+      "text": "A Slack account is not enough: creating an app also needs a workspace, and the apps page asks for its own sign-in. A new free workspace worked. The Client ID is visible at once; the secrets stay masked behind Show. (Docs said: A Slack account to create the app and reach the App Management page, where the client ID is found.)",
       "evidence": {
-        "label": "documented",
+        "label": "tested",
         "sourceIds": [
           "s2"
-        ]
+        ],
+        "testNote": "Observed in a signed-in walkthrough on 2026-10-29; this corrects the documentation.",
+        "observationRef": "sl-4"
       }
     },
     {
@@ -374,15 +461,18 @@
       "estimate": "10-30 minutes",
       "detail": "Sign in with a Slack account and open the App Management page, where you create the app and find its client ID.",
       "requires": [
-        "login_or_account"
+        "login_or_account",
+        "config_check"
       ],
       "actor": "you",
-      "observed": false,
+      "observed": true,
       "evidence": {
-        "label": "documented",
+        "label": "tested",
         "sourceIds": [
           "s2"
-        ]
+        ],
+        "testNote": "Observed in a signed-in walkthrough on 2026-10-29: The page asked to sign in to Slack. The account only listed two large community workspaces, so the owner created a new free workspace and signed in on the apps page again.",
+        "observationRef": "sl-1"
       }
     },
     {
@@ -392,8 +482,7 @@
       "detail": "Create the app and choose the minimum scopes it needs, for example channels:history. Bot scopes go in `scope=` and user scopes in `user_scope=`. Repeat installs add scopes to the token and scopes cannot be removed from an existing token.",
       "url": "https://docs.slack.dev/reference/scopes",
       "requires": [
-        "config_check",
-        "docs_reading"
+        "config_check"
       ],
       "actor": "agent",
       "agentPrep": "List the minimum bot and user scopes and a justification for each.",
@@ -405,8 +494,8 @@
           "s2",
           "s10"
         ],
-        "testNote": "Only reachability was observed: a read-only GET of this page on 2026-10-29 was classified \"public\" (host docs.slack.dev).",
-        "observationRef": "https://docs.slack.dev/reference/scopes/"
+        "testNote": "Observed in a signed-in walkthrough on 2026-10-29: Templates on offer: AI agent, Starter app, From a manifest, Blank app. Four steps, no terms checkbox. Slack warned the app can't be installed without scopes; Create Anyway made it instantly.",
+        "observationRef": "sl-2"
       }
     },
     {
@@ -440,12 +529,14 @@
         "config_check"
       ],
       "actor": "agent",
-      "observed": false,
+      "observed": true,
       "evidence": {
-        "label": "reported",
+        "label": "tested",
         "sourceIds": [
           "s11"
-        ]
+        ],
+        "testNote": "Observed in a signed-in walkthrough on 2026-10-29: Activating public distribution first needs four steps: enable features, add OAuth redirect URLs, remove hard-coded information, use HTTPS. Activation was not attempted; no review step was shown there.",
+        "observationRef": "sl-5"
       }
     },
     {
@@ -627,6 +718,15 @@
         "testNote": "The metadata document at https://slack.com/.well-known/openid-configuration was read on 2026-10-29.",
         "observationRef": "https://slack.com/.well-known/openid-configuration"
       }
+    },
+    {
+      "text": "Install is disabled until a scope is added, and the Client ID and secrets exist from the moment the app is created, before any install. (Docs said: An access token appears under OAuth Tokens after you install the app.)",
+      "evidence": {
+        "label": "tested",
+        "sourceIds": [],
+        "testNote": "Observed in a signed-in walkthrough on 2026-10-29; this corrects the documentation.",
+        "observationRef": "sl-3"
+      }
     }
   ],
   "blockers": [
@@ -682,8 +782,8 @@
             "s2",
             "s10"
           ],
-          "testNote": "Only reachability was observed: a read-only GET of this page on 2026-10-29 was classified \"public\" (host docs.slack.dev).",
-          "observationRef": "https://docs.slack.dev/reference/scopes/"
+          "testNote": "Observed in a signed-in walkthrough on 2026-10-29: Templates on offer: AI agent, Starter app, From a manifest, Blank app. Four steps, no terms checkbox. Slack warned the app can't be installed without scopes; Create Anyway made it instantly.",
+          "observationRef": "sl-2"
         }
       },
       {
@@ -700,10 +800,12 @@
       {
         "text": "Step 4: Activate public distribution",
         "evidence": {
-          "label": "reported",
+          "label": "tested",
           "sourceIds": [
             "s11"
-          ]
+          ],
+          "testNote": "Observed in a signed-in walkthrough on 2026-10-29: Activating public distribution first needs four steps: enable features, add OAuth redirect URLs, remove hard-coded information, use HTTPS. Activation was not attempted; no review step was shown there.",
+          "observationRef": "sl-5"
         }
       },
       {
@@ -734,10 +836,12 @@
       {
         "text": "Step 1: Sign in to Slack and open App Management (needs: login_or_account)",
         "evidence": {
-          "label": "documented",
+          "label": "tested",
           "sourceIds": [
             "s2"
-          ]
+          ],
+          "testNote": "Observed in a signed-in walkthrough on 2026-10-29: The page asked to sign in to Slack. The account only listed two large community workspaces, so the owner created a new free workspace and signed in on the apps page again.",
+          "observationRef": "sl-1"
         }
       },
       {
@@ -793,9 +897,16 @@
       "Weakly supported (self-check): Add HTTPS redirect URLs and implement the v2 OAuth flow. Redirect users to https://slack.com/oauth/v2/authorize with client_id and scopes, r",
       "Weakly supported (self-check): A customer's Workspace Owner has app approval enabled and blocks or delays the install. -> Give admins clear information on scopes and data ",
       "Not observed: anything beyond the end of the public path (js shell unclear at https://api.slack.com/apps).",
-      "No account was used: steps after the first sign-in are inferred from documentation, not observed."
+      "Steps 3, 5, 6, 7, 8, 9 were not walked through (the walkthrough stopped at before adding scopes or installing: guide steps 1, 2 and 4 were read, steps 3 and 5 to 9 were not attempted); they stay as documented, not observed.",
+      "Cleanup was incomplete after the walkthrough: a test app may still exist."
     ]
   },
+  "changelog": [
+    "2026-10-29: signed-in walkthrough merged (level L3).",
+    "2026-10-29: corrected \"A Slack account to create the app and reach the App Management page, where the c\" to \"A Slack account is not enough: creating an app also needs a workspace, and the a\" after the walkthrough.",
+    "2026-10-29: corrected \"An access token appears under OAuth Tokens after you install the app.\" to \"Install is disabled until a scope is added, and the Client ID and secrets exist \" after the walkthrough.",
+    "2026-10-29: noted Slack's terms status; the walkthrough used a new throwaway workspace, and the app and workspace still await deletion by the owner."
+  ],
   "sources": [
     {
       "id": "s1",
