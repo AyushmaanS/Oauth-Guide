@@ -113,7 +113,7 @@ On 5 apps (Zoom, Dropbox, HubSpot, Spotify, Atlassian), one run each, same model
 - **Agents are bounded and their output is validated.** The research agent only proposes; our code acts.
 - **Honest scope of "tested".** It means observed, on a date, up to a gate.
 - **Model reads pages, code keeps the safeguards.**
-- **Why an Attempt Kit.** We cannot safely walk through every console ourselves, so visitors can do it privately.
+- **An Attempt Kit.** Guides cannot safely walk through every app's console ourselves, so visitors can do it privately with their own agent.
 
 All decisions with reasons and measured results: [`docs/DECISIONS.md`](docs/DECISIONS.md). Pipeline as built: [`docs/PIPELINE.md`](docs/PIPELINE.md).
 
