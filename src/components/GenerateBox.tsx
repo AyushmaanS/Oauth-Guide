@@ -56,7 +56,7 @@ export function GenerateBox({ initialQuery = "" }: { initialQuery?: string }) {
       throw new Error("stream ended early");
     } catch (e) {
       if ((e as Error).name === "AbortError") return;
-      setProgress((p) => ({ ...p, warnings: [...p.warnings, "The live connection dropped. The guide keeps building on the server, so we are checking for it."] }));
+      setProgress((p) => ({ ...p, warnings: [...p.warnings, "Reconnecting. The guide is still being built, and it will open here when it is ready."] }));
       const slug = await recover(ac.current!.signal);
       if (slug) router.push(`/guide/${slug}`);
       else setError("The connection dropped and the guide did not finish. Please try again.");

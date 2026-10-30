@@ -19,7 +19,7 @@ const FAST_BUDGET_MS = 170_000; // target 120 s; stages after this are skipped, 
 
 const json = (status: number, error: string) => Response.json({ error }, { status });
 const sse = (event: string, data: unknown) => `event: ${event}\ndata: ${JSON.stringify(data)}\n\n`;
-const headers = { "Content-Type": "text/event-stream; charset=utf-8", "Cache-Control": "no-cache, no-transform", Connection: "keep-alive" };
+const headers = { "Content-Type": "text/event-stream; charset=utf-8", "Cache-Control": "no-cache, no-transform", Connection: "keep-alive", "X-Accel-Buffering": "no", "Content-Encoding": "identity" };
 
 function clientIp(req: Request): string {
   const xff = req.headers.get("x-forwarded-for");
@@ -69,7 +69,7 @@ export async function POST(req: Request) {
         } catch {
           /* closed */
         }
-      }, 15_000);
+      }, 5_000);
       try {
         const store = getStore();
         const r = await runPipeline({
