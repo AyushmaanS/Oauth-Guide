@@ -112,8 +112,8 @@ On 5 apps (Zoom, Dropbox, HubSpot, Spotify, Atlassian), one run each, same model
 - **Fast live mode versus deep library mode**, explained rather than hidden.
 - **Agents are bounded and their output is validated.** The research agent only proposes; our code acts.
 - **Honest scope of "tested".** It means observed, on a date, up to a gate.
-- **Model reads pages, code keeps the safeguards.** A gate claim needs a quote that code finds on the page.
-- **The Attempt Kit stays.** We cannot safely automate signed-in walkthroughs, so visitors run one privately with their own agent.
+- **Model reads pages, code keeps the safeguards.**
+- **Why an Attempt Kit.** Guides can only claim what was observed, and we cannot safely walk through every app's console ourselves, so visitors can do it privately with their own agent.
 
 All decisions with reasons and measured results: [`docs/DECISIONS.md`](docs/DECISIONS.md). Pipeline as built: [`docs/PIPELINE.md`](docs/PIPELINE.md).
 
