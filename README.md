@@ -2,7 +2,7 @@
 
 OAuthPath tells a developer what it really takes to get OAuth credentials for an app: how hard it is, how long it takes, who has to do each step (an agent, you, or the provider's review queue), and what could block you. Every claim carries an evidence label, and every guide says how far we actually went.
 
-- **Live site:** _added after deployment_ (see "Deployment" below)
+- **Live site:** https://oauth-guide-tau.vercel.app (deployment notes below)
 - **Source:** https://github.com/AyushmaanS/Oauth-Guide
 - **Credentials:** none are in this repository or its history (`scripts/check-secrets.sh --history` is clean). Keys live only in `.env.local` (git-ignored) and in the hosting dashboard.
 
