@@ -112,8 +112,8 @@ On 5 apps (Zoom, Dropbox, HubSpot, Spotify, Atlassian), one run each, same model
 - **Fast live mode versus deep library mode**, explained rather than hidden.
 - **Agents are bounded and their output is validated.** The research agent only proposes; our code acts.
 - **Honest scope of "tested".** It means observed, on a date, up to a gate.
-- **Model reads pages, code keeps the safeguards.** A model classifies each page and picks the next link, because fixed rules misread real console pages. It cannot declare a sign-in wall on its own word: the claim needs a quote that code finds on the page, and the model never sets labels, difficulty, attempt level or step owners (`docs/DECISIONS.md` D-016).
-- **The Attempt Kit stays, though it is not yet dry-run.** We cannot safely automate signed-in walkthroughs for every app, so the kit lets a visitor run one privately with their own agent, under the same stop rules, and it is the only route to a higher attempt level that the site never takes on itself (D-015).
+- **Model reads pages, code keeps the safeguards.** A gate claim needs a quote that code finds on the page.
+- **The Attempt Kit stays.** We cannot safely automate signed-in walkthroughs, so visitors run one privately with their own agent.
 
 All decisions with reasons and measured results: [`docs/DECISIONS.md`](docs/DECISIONS.md). Pipeline as built: [`docs/PIPELINE.md`](docs/PIPELINE.md).
 
